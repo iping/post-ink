@@ -1,0 +1,297 @@
+.wrap {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.wrap h1 {
+  margin: 0 0 0.25rem;
+  font-size: 1.75rem;
+}
+
+.subtitle {
+  color: var(--muted);
+  margin: 0 0 1.5rem;
+  font-size: 0.95rem;
+}
+
+.error {
+  padding: 0.75rem;
+  background: rgba(232, 93, 93, 0.15);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  margin-bottom: 1rem;
+  color: var(--accent);
+}
+
+.tabs {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.tabs button {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: var(--radius);
+}
+
+.tabs button:hover {
+  background: var(--border);
+}
+
+.tabActive {
+  background: var(--accent) !important;
+  border-color: var(--accent) !important;
+  color: #fff !important;
+}
+
+.section {
+  margin-bottom: 2rem;
+}
+
+.sectionHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.sectionHead h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.addBtn {
+  padding: 0.5rem 1rem;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  font-weight: 500;
+}
+
+.addBtn:hover {
+  background: var(--accent-hover);
+}
+
+.tableWrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.table th {
+  font-size: 0.8rem;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.status_pending { color: #fbbf24; }
+.status_confirmed { color: #60a5fa; }
+.status_completed { color: var(--success); }
+.status_cancelled { color: var(--muted); }
+.status_refunded { color: var(--muted); }
+
+.smBtn,
+.smBtnDanger {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+  margin-right: 0.35rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+}
+
+.smBtn:hover { color: var(--text); }
+.smBtnDanger:hover { color: var(--accent); border-color: var(--accent); }
+
+.remainingDue {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.commissionBadge {
+  font-size: 0.75rem;
+  padding: 0.15rem 0.4rem;
+  background: var(--border);
+  border-radius: 6px;
+  margin-left: 0.25rem;
+}
+
+.bookingSummary {
+  margin: 0 0 1rem;
+  padding: 0.75rem;
+  background: var(--bg);
+  border-radius: 8px;
+}
+
+.bookingSummary p {
+  margin: 0.25rem 0;
+}
+
+.remainingLine {
+  margin: 0.35rem 0 0 !important;
+}
+
+.commissionBreakdown {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.paymentList {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+}
+
+.paymentList li {
+  padding: 0.35rem 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+
+.downPaymentForm label {
+  margin-bottom: 0.5rem;
+}
+
+.downPaymentForm .formActions {
+  margin-top: 0.75rem;
+}
+
+.modalContent h4 {
+  margin: 1rem 0 0.5rem;
+  font-size: 1rem;
+}
+
+.help {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin: 0 0 1rem;
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 1rem;
+}
+
+.modalContent {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  max-width: 420px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modalContent h3 {
+  margin: 0 0 1rem;
+  font-size: 1.2rem;
+}
+
+.modalContent label {
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.modalContent label > *:first-child {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.modalContent input,
+.modalContent select,
+.modalContent textarea {
+  width: 100%;
+  padding: 0.5rem 0.6rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+}
+
+.inlineFieldset {
+  margin: 0.75rem 0;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.inlineFieldset legend {
+  font-size: 0.85rem;
+  color: var(--muted);
+  padding: 0 0.35rem;
+}
+
+.inlineFieldset input {
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.inlineFieldset input:last-of-type {
+  margin-bottom: 0;
+}
+
+.formActions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.formActions button {
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.formActions button[type="submit"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.loading {
+  padding: 3rem;
+  text-align: center;
+  color: var(--muted);
+}
