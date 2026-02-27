@@ -216,3 +216,65 @@ export async function deleteCommission(id) {
   const res = await fetch(`${API}/commissions/${id}`, { method: 'DELETE' });
   if (!res.ok) throw new Error(await res.text());
 }
+
+// ----- Reviews -----
+export async function getReviews(params = {}) {
+  const q = new URLSearchParams(params);
+  const url = `${API}/reviews` + (q.toString() ? `?${q}` : '');
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function getArtistReviewSummary(artistId) {
+  const res = await fetch(`${API}/reviews/artist/${artistId}/summary`);
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function createReview(data) {
+  const res = await fetch(`${API}/reviews`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function deleteReview(id) {
+  const res = await fetch(`${API}/reviews/${id}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error(await res.text());
+}
+
+// ----- Specialities (master list CMS) -----
+export async function getSpecialities() {
+  const res = await fetch(`${API}/specialities`);
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function createSpeciality(data) {
+  const res = await fetch(`${API}/specialities`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function updateSpeciality(id, data) {
+  const res = await fetch(`${API}/specialities/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function deleteSpeciality(id) {
+  const res = await fetch(`${API}/specialities/${id}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error(await res.text());
+}

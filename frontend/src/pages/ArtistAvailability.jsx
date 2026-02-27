@@ -88,7 +88,7 @@ export function ArtistAvailability() {
   return (
     <div className={styles.wrap}>
       <div className={styles.head}>
-        <Link to={`/artists/${id}`}>← {artist.name}</Link>
+        <Link to={`/manage/artists/${id}`}>← {artist.name}</Link>
         <h1>Availability</h1>
       </div>
 

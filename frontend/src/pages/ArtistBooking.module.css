@@ -1,0 +1,584 @@
+.wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem 1.5rem 3rem;
+}
+
+.topBar {
+  margin-bottom: 1rem;
+}
+
+.backBtn {
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+.backBtn:hover {
+  color: var(--accent);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 1.65rem;
+  font-weight: 600;
+  margin: 0 0 0.15rem;
+  letter-spacing: -0.02em;
+}
+
+.timezone {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin: 0 0 1.5rem;
+}
+
+.error {
+  padding: 0.75rem 1rem;
+  background: var(--danger-dim);
+  border: 1px solid var(--danger);
+  border-radius: var(--radius);
+  margin-bottom: 1rem;
+  color: var(--danger);
+  font-size: 0.9rem;
+}
+
+/* 3-column layout matching reference */
+.layout {
+  display: grid;
+  grid-template-columns: 280px 1fr 280px;
+  gap: 2rem;
+  align-items: start;
+}
+
+@media (max-width: 960px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===== Calendar Column ===== */
+.calendarCol {
+  padding: 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.calHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.navBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navBtn:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.monthLabel {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.calGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+}
+
+.dayLabel {
+  text-align: center;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--muted);
+  padding: 4px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.emptyCell {
+  aspect-ratio: 1;
+}
+
+.dayCell {
+  position: relative;
+  aspect-ratio: 1;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: default;
+  transition: all 0.12s;
+}
+
+.dayNum {
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+  margin-top: 2px;
+}
+
+.available {
+  color: var(--text);
+  cursor: pointer;
+}
+
+.available:hover {
+  background: var(--surface-hover);
+  border-color: var(--border);
+}
+
+.past {
+  opacity: 0.25;
+}
+
+.today .dayNum {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.selected {
+  background: var(--text) !important;
+  color: #fff !important;
+  border-radius: 8px;
+}
+
+.selected .dayNum {
+  color: #fff !important;
+  font-weight: 700;
+}
+
+.selected .dot {
+  background: #fff;
+}
+
+.hint {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.82rem;
+  margin-top: 0.75rem;
+}
+
+/* ===== Time Slots Column ===== */
+.timesCol {
+  min-height: 400px;
+}
+
+.timesTitle {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 0 0 1rem;
+  color: var(--text-secondary);
+}
+
+.timesGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+  max-height: 520px;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.timeBtn {
+  padding: 0.65rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+  font-weight: 500;
+  text-align: center;
+  transition: all 0.12s;
+  font-family: var(--font-mono);
+  letter-spacing: 0.02em;
+}
+
+.timeBtn:hover {
+  border-color: var(--text-secondary);
+  color: var(--text);
+  background: var(--surface-hover);
+}
+
+.timeBtnActive {
+  background: var(--text) !important;
+  color: #fff !important;
+  border-color: var(--text) !important;
+  font-weight: 600;
+}
+
+.timesEmpty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+/* ===== Service Details Column ===== */
+.detailsCol {
+  position: sticky;
+  top: 80px;
+}
+
+.detailsTitle {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem;
+}
+
+.detailsCard {
+  padding: 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  margin-bottom: 0.75rem;
+}
+
+.serviceName {
+  margin: 0 0 0.35rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+.servicePrice {
+  margin: 0 0 0.1rem;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.serviceConv {
+  margin: 0 0 0.5rem;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.serviceDate {
+  margin: 0.5rem 0 0.25rem;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+}
+
+.serviceStudio {
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.serviceArtist {
+  margin: 0.1rem 0 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.durationRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.85rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.durationCtrl {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.durationBtn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.durationBtn:hover {
+  background: var(--surface-hover);
+  border-color: var(--border-light);
+}
+
+.durationVal {
+  font-weight: 600;
+  font-size: 0.9rem;
+  min-width: 45px;
+  text-align: center;
+}
+
+.rateInfo {
+  margin: 0.5rem 0 0;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.detailsExpanded {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.detailRow span:first-child {
+  color: var(--muted);
+}
+
+.detailTotal {
+  padding-top: 0.35rem;
+  border-top: 1px solid var(--border);
+  font-weight: 600;
+  color: var(--text) !important;
+}
+
+.detailTotal span {
+  color: var(--text) !important;
+}
+
+.toggleDetails {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.6rem;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--muted);
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.toggleDetails:hover {
+  color: var(--text);
+}
+
+.nextBtn {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: var(--text);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition: all var(--transition);
+}
+
+.nextBtn:hover {
+  opacity: 0.9;
+}
+
+.nextBtn:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+}
+
+/* Confirm step */
+.confirmSection {
+  margin-top: 0.75rem;
+}
+
+.confirmSection h4 {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.input, .textarea {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  margin-bottom: 0.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 0.9rem;
+  font-family: var(--font);
+}
+
+.textarea {
+  resize: vertical;
+}
+
+.confirmActions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.backStepBtn {
+  width: 100%;
+  padding: 0.6rem 1rem;
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+.backStepBtn:hover {
+  color: var(--text);
+  border-color: var(--border-light);
+}
+
+/* Loading */
+.loadingWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5rem 1rem;
+  gap: 0.75rem;
+  color: var(--muted);
+}
+
+.spinner {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Success */
+.successWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: 2rem 1rem;
+}
+
+.successCard {
+  text-align: center;
+  max-width: 440px;
+  padding: 2.5rem 2rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+.successIcon {
+  margin-bottom: 1rem;
+}
+
+.successCard h2 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  margin: 0 0 0.5rem;
+}
+
+.successCard > p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  margin: 0 0 1rem;
+}
+
+.successDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg-warm);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.successHint {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin: 0 0 1.5rem;
+}
+
+.successActions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.backLink, .homeLink {
+  padding: 0.55rem 1.2rem;
+  border-radius: var(--radius);
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+.backLink {
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+.backLink:hover {
+  border-color: var(--border-light);
+  color: var(--text);
+}
+
+.homeLink {
+  background: var(--accent);
+  color: #fff;
+}
+
+.homeLink:hover {
+  background: var(--accent-hover);
+  color: #fff;
+}

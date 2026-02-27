@@ -1,51 +1,61 @@
 .wrap {
-  max-width: 1000px;
+  max-width: 1060px;
   margin: 0 auto;
-  padding: 1.5rem;
+  padding: 2rem 1.5rem 3rem;
 }
 
 .wrap h1 {
   margin: 0 0 0.25rem;
-  font-size: 1.75rem;
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
 }
 
 .subtitle {
   color: var(--muted);
-  margin: 0 0 1.5rem;
+  margin: 0 0 2rem;
   font-size: 0.95rem;
 }
 
 .error {
-  padding: 0.75rem;
-  background: rgba(232, 93, 93, 0.15);
-  border: 1px solid var(--accent);
+  padding: 0.75rem 1rem;
+  background: var(--danger-dim);
+  border: 1px solid var(--danger);
   border-radius: var(--radius);
   margin-bottom: 1rem;
-  color: var(--accent);
+  color: var(--danger);
+  font-size: 0.9rem;
 }
 
 .tabs {
   display: flex;
   gap: 0.25rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0;
 }
 
 .tabs button {
-  padding: 0.5rem 1rem;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--text);
-  border-radius: var(--radius);
+  padding: 0.65rem 1.25rem;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 500;
+  font-size: 0.9rem;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all var(--transition);
+  letter-spacing: 0.01em;
 }
 
 .tabs button:hover {
-  background: var(--border);
+  color: var(--text);
 }
 
 .tabActive {
-  background: var(--accent) !important;
-  border-color: var(--accent) !important;
-  color: #fff !important;
+  color: var(--accent) !important;
+  border-bottom-color: var(--accent) !important;
 }
 
 .section {
@@ -61,27 +71,70 @@
 
 .sectionHead h2 {
   margin: 0;
+  font-family: var(--font-display);
   font-size: 1.2rem;
   font-weight: 600;
 }
 
 .addBtn {
-  padding: 0.5rem 1rem;
+  padding: 0.55rem 1.2rem;
   background: var(--accent);
   color: #fff;
   border: none;
   border-radius: var(--radius);
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 0.85rem;
 }
 
 .addBtn:hover {
   background: var(--accent-hover);
 }
 
+/* Booking filters */
+.filterBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.filterSelect,
+.filterDate {
+  padding: 0.45rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+.filterSelect {
+  min-width: 120px;
+}
+
+.filterDate {
+  min-width: 130px;
+}
+
+.filterReset {
+  padding: 0.45rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.filterReset:hover {
+  color: var(--text);
+  background: var(--surface-hover);
+}
+
 .tableWrap {
   overflow-x: auto;
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
   background: var(--surface);
 }
 
@@ -92,79 +145,90 @@
 
 .table th,
 .table td {
-  padding: 0.6rem 0.75rem;
+  padding: 0.7rem 0.85rem;
   text-align: left;
   border-bottom: 1px solid var(--border);
 }
 
 .table th {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: var(--muted);
   font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .table tbody tr:last-child td {
   border-bottom: none;
 }
 
-.table tbody tr:hover {
-  background: rgba(255, 255, 255, 0.02);
+.table tbody tr {
+  transition: background var(--transition);
 }
 
-.status_pending { color: #fbbf24; }
-.status_confirmed { color: #60a5fa; }
-.status_completed { color: var(--success); }
+.table tbody tr:hover {
+  background: var(--surface-hover);
+}
+
+.status_pending { color: #e8b84d; font-weight: 500; }
+.status_confirmed { color: var(--info); font-weight: 500; }
+.status_completed { color: var(--success); font-weight: 500; }
 .status_cancelled { color: var(--muted); }
 .status_refunded { color: var(--muted); }
 
 .smBtn,
 .smBtnDanger {
-  padding: 0.25rem 0.5rem;
-  font-size: 0.8rem;
-  margin-right: 0.35rem;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.78rem;
+  margin-right: 0.3rem;
   border-radius: 6px;
   border: 1px solid var(--border);
   background: transparent;
   color: var(--muted);
-}
-
-.smBtn:hover { color: var(--text); }
-.smBtnDanger:hover { color: var(--accent); border-color: var(--accent); }
-
-.remainingDue {
-  color: var(--accent);
   font-weight: 500;
 }
 
+.smBtn:hover { color: var(--text); background: var(--surface-hover); }
+.smBtnDanger:hover { color: var(--danger); border-color: var(--danger); background: var(--danger-dim); }
+
+.remainingDue {
+  color: var(--danger);
+  font-weight: 600;
+}
+
 .commissionBadge {
-  font-size: 0.75rem;
-  padding: 0.15rem 0.4rem;
-  background: var(--border);
+  font-size: 0.72rem;
+  padding: 0.15rem 0.45rem;
+  background: var(--accent-dim);
+  color: var(--accent);
   border-radius: 6px;
   margin-left: 0.25rem;
+  font-weight: 600;
 }
 
 .bookingSummary {
   margin: 0 0 1rem;
-  padding: 0.75rem;
-  background: var(--bg);
-  border-radius: 8px;
+  padding: 1rem;
+  background: var(--bg-warm);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
 }
 
 .bookingSummary p {
-  margin: 0.25rem 0;
+  margin: 0.3rem 0;
+  font-size: 0.92rem;
 }
 
 .remainingLine {
-  margin: 0.35rem 0 0 !important;
+  margin: 0.5rem 0 0 !important;
 }
 
 .commissionBreakdown {
-  margin-top: 0.5rem;
-  padding-top: 0.5rem;
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
   border-top: 1px solid var(--border);
-  font-size: 0.9rem;
-  color: var(--muted);
+  font-size: 0.88rem;
+  color: var(--text-secondary);
 }
 
 .paymentList {
@@ -174,9 +238,14 @@
 }
 
 .paymentList li {
-  padding: 0.35rem 0;
+  padding: 0.4rem 0;
   border-bottom: 1px solid var(--border);
-  font-size: 0.9rem;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+}
+
+.paymentList li:last-child {
+  border-bottom: none;
 }
 
 .downPaymentForm label {
@@ -188,8 +257,10 @@
 }
 
 .modalContent h4 {
-  margin: 1rem 0 0.5rem;
+  margin: 1.25rem 0 0.5rem;
   font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-secondary);
 }
 
 .help {
@@ -201,7 +272,8 @@
 .modal {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -212,53 +284,56 @@
 .modalContent {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1.5rem;
-  max-width: 420px;
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+  max-width: 460px;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
+  box-shadow: var(--shadow-lg);
 }
 
 .modalContent h3 {
-  margin: 0 0 1rem;
-  font-size: 1.2rem;
+  margin: 0 0 1.25rem;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
 }
 
 .modalContent label {
   display: block;
-  margin-bottom: 0.75rem;
-}
-
-.modalContent label > *:first-child {
-  display: block;
-  margin-bottom: 0.25rem;
-  font-size: 0.85rem;
-  color: var(--muted);
+  margin-bottom: 0.85rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-secondary);
 }
 
 .modalContent input,
 .modalContent select,
 .modalContent textarea {
   width: 100%;
-  padding: 0.5rem 0.6rem;
+  padding: 0.55rem 0.7rem;
+  margin-top: 0.25rem;
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius);
   color: var(--text);
+  font-size: 0.9rem;
 }
 
 .inlineFieldset {
-  margin: 0.75rem 0;
-  padding: 0.75rem;
+  margin: 0.85rem 0;
+  padding: 1rem;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius);
+  background: var(--bg-warm);
 }
 
 .inlineFieldset legend {
-  font-size: 0.85rem;
-  color: var(--muted);
+  font-size: 0.82rem;
+  color: var(--text-secondary);
   padding: 0 0.35rem;
+  font-weight: 500;
 }
 
 .inlineFieldset input {
@@ -273,15 +348,17 @@
 .formActions {
   display: flex;
   gap: 0.5rem;
-  margin-top: 1rem;
+  margin-top: 1.25rem;
 }
 
 .formActions button {
-  padding: 0.5rem 1rem;
+  padding: 0.55rem 1.1rem;
   border-radius: var(--radius);
   border: 1px solid var(--border);
   background: var(--surface);
   color: var(--text);
+  font-weight: 500;
+  font-size: 0.9rem;
 }
 
 .formActions button[type="submit"] {
@@ -290,8 +367,291 @@
   color: #fff;
 }
 
-.loading {
-  padding: 3rem;
+.formActions button[type="submit"]:hover {
+  background: var(--accent-hover);
+}
+
+/* Inline add form (specialities) */
+.inlineAdd {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.inlineAddInput {
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.88rem;
+  width: 220px;
+}
+
+.inlineEditInput {
+  padding: 0.35rem 0.6rem;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.88rem;
+  width: 100%;
+  box-shadow: 0 0 0 2px var(--accent-dim);
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  margin-top: 1rem;
+  padding: 0.5rem 0;
+}
+
+.pageBtn {
+  min-width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pageBtn:hover:not(:disabled) {
+  background: var(--surface-hover);
+  border-color: var(--border-light);
+  color: var(--text);
+}
+
+.pageBtn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.pageBtnActive {
+  background: var(--accent) !important;
+  border-color: var(--accent) !important;
+  color: #fff !important;
+  font-weight: 600;
+}
+
+.pageEllipsis {
+  width: 28px;
   text-align: center;
   color: var(--muted);
+  font-size: 0.9rem;
+  user-select: none;
+}
+
+.pageInfo {
+  margin-left: 0.65rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.countHint {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-weight: 400;
+  margin-top: 0.15rem;
+}
+
+.loading {
+  padding: 4rem;
+  text-align: center;
+  color: var(--muted);
+}
+
+/* Booking form - wide modal with two-column layout */
+.bookingModalContent {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+  max-width: 840px;
+  width: 100%;
+  max-height: 92vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+}
+
+.bookingModalContent h3 {
+  margin: 0 0 1.25rem;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.bookingModalContent label {
+  display: block;
+  margin-bottom: 0.85rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.bookingModalContent input,
+.bookingModalContent select,
+.bookingModalContent textarea {
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  margin-top: 0.25rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.bookingLayout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+@media (max-width: 700px) {
+  .bookingLayout {
+    grid-template-columns: 1fr;
+  }
+  .bookingModalContent {
+    max-width: 100%;
+  }
+}
+
+.bookingLeft {
+  display: flex;
+  flex-direction: column;
+}
+
+.bookingRight {
+  display: flex;
+  flex-direction: column;
+}
+
+.calendarSection {
+  margin-top: 0.25rem;
+}
+
+.calLabel {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.35rem;
+  font-weight: 500;
+}
+
+.selectedInfo {
+  margin-top: 0.75rem;
+  padding: 0.65rem 0.85rem;
+  background: var(--success-dim);
+  border: 1px solid rgba(109, 190, 130, 0.25);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.88rem;
+  color: var(--success);
+  font-weight: 500;
+}
+
+.formActions button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.convHint {
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-weight: 400;
+  margin-left: 0.25rem;
+}
+
+/* Reviews */
+.reviewBadge {
+  display: inline-block;
+  font-size: 0.72rem;
+  padding: 0.12rem 0.45rem;
+  background: rgba(201, 168, 124, 0.12);
+  color: var(--accent);
+  border-radius: 6px;
+  margin-left: 0.35rem;
+  font-weight: 600;
+}
+
+.reviewForm label {
+  margin-bottom: 0.5rem;
+}
+
+.starRow {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  margin-top: 0.35rem;
+}
+
+.starBtn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--border-light);
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  transition: color 0.15s, transform 0.15s;
+}
+
+.starBtn:hover {
+  transform: scale(1.15);
+}
+
+.starActive {
+  color: var(--accent) !important;
+}
+
+.ratingText {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin-left: 0.5rem;
+  font-weight: 500;
+}
+
+.existingReview {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: var(--bg-warm);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+.existingReview h4 {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.reviewStars {
+  font-size: 1.2rem;
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 0.1rem;
+}
+
+.reviewComment {
+  margin: 0.5rem 0 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  font-style: italic;
 }

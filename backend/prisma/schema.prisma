@@ -15,6 +15,7 @@ model TattooArtist {
   shortDescription String?
   experiences      String?  // years or text description
   speciality       String?  // e.g. "Black & Grey", "Japanese", "Realism"
+  rate             Float?   // hourly rate in IDR
   photos           String   // JSON array of image URLs/paths
   portfolio        String   // JSON array of portfolio image URLs
   createdAt        DateTime @default(now())
@@ -23,6 +24,7 @@ model TattooArtist {
   availability ArtistAvailability[]
   bookings     Booking[]
   commissions  StudioCommission[]
+  reviews      Review[]
 }
 
 // Artist availability slots (date + time range)
@@ -62,6 +64,7 @@ model Customer {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   bookings  Booking[]
+  reviews   Review[]
 }
 
 // ----- Booking (Studio: manage booking process) -----
@@ -82,6 +85,7 @@ model Booking {
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
   payments    Payment[]
+  review      Review?
 
   @@index([artistId])
   @@index([customerId])
@@ -94,7 +98,7 @@ model Payment {
   bookingId          String?
   booking            Booking? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
   amount             Float
-  currency           String   @default("USD")
+  currency           String   @default("IDR")
   status             String   @default("pending") // pending, completed, refunded
   type               String?  // down_payment, final, other
   method             String?  // BCA, Mandiri, BNI, Credit Card, Cash
@@ -119,4 +123,30 @@ model StudioCommission {
   @@unique([studioId, artistId])
   @@index([studioId])
   @@index([artistId])
+}
+
+// ----- Speciality (master list for artist speciality picker) -----
+model Speciality {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ----- Review (customer feedback after completed booking) -----
+model Review {
+  id         String        @id @default(cuid())
+  bookingId  String        @unique
+  booking    Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  artistId   String
+  artist     TattooArtist  @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  customerId String?
+  customer   Customer?     @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  rating     Int           // 1–5 stars
+  comment    String?
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  @@index([artistId])
+  @@index([customerId])
 }

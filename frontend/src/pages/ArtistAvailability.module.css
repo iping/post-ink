@@ -1,22 +1,30 @@
 .wrap {
-  max-width: 640px;
+  max-width: 700px;
   margin: 0 auto;
-  padding: 1.5rem;
+  padding: 2rem 1.5rem 3rem;
 }
 
 .head {
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 .head a {
   display: inline-block;
   margin-bottom: 0.5rem;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+.head a:hover {
+  color: var(--accent);
 }
 
 .head h1 {
   margin: 0;
-  font-size: 1.5rem;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
 }
 
 .form {
@@ -24,51 +32,62 @@
   flex-wrap: wrap;
   gap: 1rem;
   align-items: flex-end;
-  padding: 1rem;
+  padding: 1.25rem;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  margin-bottom: 1.5rem;
+  border-radius: var(--radius-lg);
+  margin-bottom: 2rem;
 }
 
 .form label {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-  font-size: 0.85rem;
-  color: var(--muted);
+  gap: 0.3rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-secondary);
 }
 
 .form input[type="date"],
 .form input[type="time"] {
-  padding: 0.5rem 0.6rem;
+  padding: 0.5rem 0.65rem;
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius);
   color: var(--text);
+  font-size: 0.9rem;
 }
 
 .form .check {
   flex-direction: row;
   align-items: center;
+  gap: 0.4rem;
+  font-size: 0.88rem;
 }
 
 .form button {
-  padding: 0.5rem 1rem;
+  padding: 0.55rem 1.1rem;
   background: var(--accent);
   color: #fff;
   border: none;
   border-radius: var(--radius);
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+
+.form button:hover {
+  background: var(--accent-hover);
 }
 
 .form button:disabled {
-  opacity: 0.7;
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .slots h2 {
   margin: 0 0 1rem;
-  font-size: 1.1rem;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
   font-weight: 600;
 }
 
@@ -79,13 +98,14 @@
 }
 
 .dateGroup {
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
 }
 
 .dateGroup > strong {
   display: block;
   margin-bottom: 0.5rem;
-  font-size: 0.95rem;
+  font-size: 0.92rem;
+  color: var(--text-secondary);
 }
 
 .dateGroup ul {
@@ -98,17 +118,23 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.5rem 0.75rem;
+  padding: 0.6rem 0.85rem;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 8px;
-  margin-bottom: 0.35rem;
+  border-radius: var(--radius);
+  margin-bottom: 0.4rem;
   flex-wrap: wrap;
   gap: 0.5rem;
+  transition: border-color var(--transition);
+}
+
+.slot:hover {
+  border-color: var(--border-light);
 }
 
 .avail {
   color: var(--success);
+  font-weight: 500;
 }
 
 .unavail {
@@ -121,33 +147,37 @@
 }
 
 .toggleBtn, .delBtn {
-  padding: 0.25rem 0.5rem;
-  font-size: 0.8rem;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.78rem;
   border-radius: 6px;
   border: 1px solid var(--border);
   background: transparent;
   color: var(--muted);
+  font-weight: 500;
 }
 
-.toggleBtn:hover, .delBtn:hover {
+.toggleBtn:hover {
   color: var(--text);
+  border-color: var(--border-light);
 }
 
 .delBtn:hover {
-  color: var(--accent);
-  border-color: var(--accent);
+  color: var(--danger);
+  border-color: var(--danger);
+  background: var(--danger-dim);
 }
 
 .empty {
   color: var(--muted);
-  padding: 1rem 0;
+  padding: 1.5rem 0;
+  font-size: 0.95rem;
 }
 
 .loading, .error {
-  padding: 3rem;
+  padding: 4rem;
   text-align: center;
 }
 
 .error {
-  color: var(--accent);
+  color: var(--danger);
 }

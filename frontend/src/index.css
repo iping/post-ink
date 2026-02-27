@@ -1,15 +1,31 @@
 :root {
-  --bg: #0d0d0d;
-  --surface: #1a1a1a;
-  --border: #2d2d2d;
-  --text: #f0f0f0;
-  --muted: #888;
-  --accent: #e85d5d;
-  --accent-hover: #f07a7a;
-  --success: #4ade80;
-  --radius: 12px;
-  --font: 'Outfit', system-ui, sans-serif;
+  --bg: #ffffff;
+  --bg-warm: #fafaf8;
+  --surface: #ffffff;
+  --surface-hover: #f5f3f0;
+  --surface-raised: #f0eeeb;
+  --border: #e8e4df;
+  --border-light: #d5d0ca;
+  --text: #1a1714;
+  --text-secondary: #5c554d;
+  --muted: #9b9388;
+  --accent: #b08d5b;
+  --accent-hover: #97763e;
+  --accent-dim: rgba(176, 141, 91, 0.1);
+  --danger: #c25d5d;
+  --danger-dim: rgba(194, 93, 93, 0.08);
+  --success: #3d9455;
+  --success-dim: rgba(61, 148, 85, 0.08);
+  --info: #4a8cc2;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --font: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-display: 'Inter', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.1);
+  --transition: 0.15s ease;
 }
 
 * {
@@ -19,15 +35,17 @@
 body {
   margin: 0;
   font-family: var(--font);
-  background: var(--bg);
+  background: var(--bg-warm);
   color: var(--text);
-  line-height: 1.5;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 a {
   color: var(--accent);
   text-decoration: none;
+  transition: color var(--transition);
 }
 
 a:hover {
@@ -37,8 +55,38 @@ a:hover {
 button {
   font-family: var(--font);
   cursor: pointer;
+  transition: all var(--transition);
 }
 
 input, textarea, select {
   font-family: var(--font);
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+
+::selection {
+  background: var(--accent);
+  color: #fff;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-warm);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-light);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted);
 }

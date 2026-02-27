@@ -44,7 +44,7 @@ paymentsRouter.post('/', async (req, res) => {
       data: {
         bookingId: bookingId || null,
         amount: Number(amount),
-        currency: currency || 'USD',
+        currency: currency || 'IDR',
         status: status || 'pending',
         method: method || null,
         type: type || null,

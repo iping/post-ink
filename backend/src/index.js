@@ -7,6 +7,8 @@ import { paymentsRouter } from './routes/payments.js';
 import { customersRouter } from './routes/customers.js';
 import { studiosRouter } from './routes/studios.js';
 import { commissionsRouter } from './routes/commissions.js';
+import { reviewsRouter } from './routes/reviews.js';
+import { specialitiesRouter } from './routes/specialities.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -22,6 +24,8 @@ app.use('/api/payments', paymentsRouter);
 app.use('/api/customers', customersRouter);
 app.use('/api/studios', studiosRouter);
 app.use('/api/commissions', commissionsRouter);
+app.use('/api/reviews', reviewsRouter);
+app.use('/api/specialities', specialitiesRouter);
 
 app.get('/api/health', (_, res) => res.json({ ok: true }));
 

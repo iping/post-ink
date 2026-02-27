@@ -31,7 +31,12 @@ artistsRouter.get('/', async (req, res) => {
   try {
     const artists = await prisma.tattooArtist.findMany({
       orderBy: { updatedAt: 'desc' },
-      include: { availability: true },
+      include: {
+        availability: true,
+        reviews: {
+          select: { rating: true },
+        },
+      },
     });
     res.json(artists);
   } catch (e) {
@@ -44,7 +49,16 @@ artistsRouter.get('/:id', async (req, res) => {
   try {
     const artist = await prisma.tattooArtist.findUnique({
       where: { id: req.params.id },
-      include: { availability: { orderBy: [{ date: 'asc' }, { startTime: 'asc' }] } },
+      include: {
+        availability: { orderBy: [{ date: 'asc' }, { startTime: 'asc' }] },
+        reviews: {
+          orderBy: { createdAt: 'desc' },
+          include: {
+            customer: { select: { id: true, name: true } },
+            booking: { select: { date: true, notes: true } },
+          },
+        },
+      },
     });
     if (!artist) return res.status(404).json({ error: 'Artist not found' });
     res.json(artist);
@@ -65,6 +79,7 @@ artistsRouter.post('/', upload.fields([{ name: 'photos', maxCount: 10 }, { name:
       shortDescription: req.body.shortDescription || null,
       experiences: req.body.experiences || null,
       speciality: req.body.speciality || null,
+      rate: req.body.rate != null && req.body.rate !== '' ? Number(req.body.rate) : null,
       photos: JSON.stringify([...existingPhotos, ...photos]),
       portfolio: JSON.stringify([...existingPortfolio, ...portfolio]),
     };
@@ -89,6 +104,7 @@ artistsRouter.patch('/:id', upload.fields([{ name: 'photos', maxCount: 10 }, { n
       ...(req.body.shortDescription !== undefined && { shortDescription: req.body.shortDescription || null }),
       ...(req.body.experiences !== undefined && { experiences: req.body.experiences || null }),
       ...(req.body.speciality !== undefined && { speciality: req.body.speciality || null }),
+      ...(req.body.rate !== undefined && { rate: req.body.rate != null && req.body.rate !== '' ? Number(req.body.rate) : null }),
       photos: JSON.stringify([...existingPhotos, ...photos]),
       portfolio: JSON.stringify([...existingPortfolio, ...portfolio]),
     };

@@ -1,16 +1,26 @@
 .wrap {
-  max-width: 900px;
+  max-width: 960px;
   margin: 0 auto;
-  padding: 1.5rem;
+  padding: 2rem 1.5rem 3rem;
 }
 
 .toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
   flex-wrap: wrap;
   gap: 0.75rem;
+}
+
+.toolbar > a {
+  font-size: 0.9rem;
+  color: var(--muted);
+  transition: color var(--transition);
+}
+
+.toolbar > a:hover {
+  color: var(--accent);
 }
 
 .actions {
@@ -21,15 +31,18 @@
 .availBtn, .editBtn {
   padding: 0.5rem 1rem;
   border-radius: var(--radius);
-  font-size: 0.9rem;
+  font-size: 0.88rem;
+  font-weight: 500;
   border: 1px solid var(--border);
   background: var(--surface);
-  color: var(--text);
+  color: var(--text-secondary);
+  letter-spacing: 0.01em;
 }
 
 .availBtn:hover, .editBtn:hover {
-  background: var(--border);
+  background: var(--surface-hover);
   color: var(--text);
+  border-color: var(--border-light);
 }
 
 .editBtn {
@@ -38,31 +51,39 @@
   color: #fff;
 }
 
+.editBtn:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+  color: #fff;
+}
+
 .delBtn {
   padding: 0.5rem 1rem;
   border-radius: var(--radius);
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   border: 1px solid var(--border);
   background: transparent;
   color: var(--muted);
 }
 
 .delBtn:hover {
-  color: var(--accent);
-  border-color: var(--accent);
+  color: var(--danger);
+  border-color: var(--danger);
+  background: var(--danger-dim);
 }
 
 .hero {
   display: grid;
-  grid-template-columns: 320px 1fr;
-  gap: 2rem;
-  margin-bottom: 2rem;
+  grid-template-columns: 340px 1fr;
+  gap: 2.5rem;
+  margin-bottom: 2.5rem;
   align-items: start;
 }
 
 @media (max-width: 640px) {
   .hero {
     grid-template-columns: 1fr;
+    gap: 1.5rem;
   }
 }
 
@@ -70,13 +91,15 @@
   width: 100%;
   aspect-ratio: 1;
   object-fit: cover;
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
 }
 
 .heroPlaceholder {
   aspect-ratio: 1;
   background: var(--surface);
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -84,37 +107,114 @@
 }
 
 .heroInfo h1 {
-  margin: 0 0 0.25rem;
-  font-size: 1.75rem;
+  margin: 0 0 0.35rem;
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
 }
 
 .speciality {
   display: inline-block;
   color: var(--accent);
-  font-size: 0.95rem;
-  margin-bottom: 0.5rem;
+  font-size: 0.92rem;
+  font-weight: 500;
+  margin-bottom: 0.75rem;
+  letter-spacing: 0.02em;
 }
 
-.experiences, .desc {
-  margin: 0.5rem 0 0;
+.experiences {
+  margin: 0 0 0.5rem;
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+  padding: 0.4rem 0.8rem;
+  background: var(--surface);
+  border-radius: var(--radius);
+  display: inline-block;
+  border: 1px solid var(--border);
+}
+
+.rateCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: 0.85rem 1rem;
+  background: var(--accent-dim);
+  border: 1px solid rgba(201, 168, 124, 0.25);
+  border-radius: var(--radius);
+  margin: 0.75rem 0;
+  max-width: 220px;
+}
+
+.rateLabel {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
   color: var(--muted);
+  font-weight: 600;
+}
+
+.rateAmount {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.ratePer {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.rateConv {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-top: 0.15rem;
+}
+
+.bookBtn {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 0.75rem;
+  padding: 0.7rem 1.5rem;
+  background: var(--accent);
+  color: #fff;
+  border-radius: var(--radius);
+  font-weight: 600;
+  font-size: 0.92rem;
+  letter-spacing: 0.01em;
+  transition: all var(--transition);
+}
+
+.bookBtn:hover {
+  background: var(--accent-hover);
+  color: #fff;
+  box-shadow: var(--shadow-md);
+}
+
+.desc {
+  margin: 0.75rem 0 0;
+  color: var(--text-secondary);
   font-size: 0.95rem;
+  line-height: 1.7;
 }
 
 .section {
-  margin-top: 2rem;
+  margin-top: 2.5rem;
 }
 
 .section h2 {
   margin: 0 0 1rem;
-  font-size: 1.1rem;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
   font-weight: 600;
-  color: var(--muted);
+  color: var(--text);
+  letter-spacing: -0.01em;
 }
 
 .gallery {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 0.75rem;
 }
 
@@ -122,15 +222,147 @@
   width: 100%;
   aspect-ratio: 1;
   object-fit: cover;
-  border-radius: 8px;
+  border-radius: var(--radius);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.gallery img:hover {
+  transform: scale(1.03);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Rating badge in hero */
+.ratingBadge {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+}
+
+.stars {
+  color: var(--accent);
+  letter-spacing: 0.05em;
+}
+
+.ratingValue {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--text);
+}
+
+.ratingCount {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+/* Reviews section */
+.reviewSummary {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1.25rem;
+  padding: 1rem 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.reviewAvg {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+}
+
+.reviewTotal {
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+.reviewsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.reviewCard {
+  padding: 1.15rem 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: border-color var(--transition);
+}
+
+.reviewCard:hover {
+  border-color: var(--border-light);
+}
+
+.reviewHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.reviewerInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.reviewerAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.88rem;
+  flex-shrink: 0;
+}
+
+.reviewerName {
+  display: block;
+  font-weight: 600;
+  font-size: 0.92rem;
+  color: var(--text);
+}
+
+.reviewDate {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.reviewService {
+  display: inline-block;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  background: var(--bg-warm);
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  margin-bottom: 0.4rem;
+}
+
+.reviewText {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
 }
 
 .loading, .error {
-  padding: 3rem;
+  padding: 4rem;
   text-align: center;
   color: var(--muted);
 }
 
 .error {
-  color: var(--accent);
+  color: var(--danger);
 }

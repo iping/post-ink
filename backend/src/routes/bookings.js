@@ -4,22 +4,27 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 export const bookingsRouter = Router();
 
-// GET /api/bookings — list all (with artist, customer)
+// GET /api/bookings — list all (with artist, customer). Default sort: latest first.
 bookingsRouter.get('/', async (req, res) => {
   try {
-    const { status, artistId, from, to } = req.query;
+    const { status, artistId, studioId, customerId, from, to, sort } = req.query;
     const where = {};
     if (status) where.status = status;
     if (artistId) where.artistId = artistId;
+    if (studioId) where.studioId = studioId;
+    if (customerId) where.customerId = customerId;
     if (from || to) {
       where.date = {};
       if (from) where.date.gte = from;
       if (to) where.date.lte = to;
     }
+    const orderLatest = sort === 'oldest'
+      ? [{ date: 'asc' }, { startTime: 'asc' }]
+      : [{ date: 'desc' }, { startTime: 'desc' }];
     const bookings = await prisma.booking.findMany({
       where,
-      include: { artist: true, customer: true, studio: true, payments: true },
-      orderBy: [{ date: 'asc' }, { startTime: 'asc' }],
+      include: { artist: true, customer: true, studio: true, payments: true, review: true },
+      orderBy: orderLatest,
     });
     const withTotals = bookings.map((b) => {
       const paidTotal = (b.payments || []).filter((p) => p.status === 'completed').reduce((s, p) => s + p.amount, 0);
@@ -38,7 +43,7 @@ bookingsRouter.get('/:id', async (req, res) => {
   try {
     const booking = await prisma.booking.findUnique({
       where: { id: req.params.id },
-      include: { artist: true, customer: true, studio: true, payments: true },
+      include: { artist: true, customer: true, studio: true, payments: true, review: true },
     });
     if (!booking) return res.status(404).json({ error: 'Booking not found' });
     const paidTotal = (booking.payments || []).filter((p) => p.status === 'completed').reduce((s, p) => s + p.amount, 0);

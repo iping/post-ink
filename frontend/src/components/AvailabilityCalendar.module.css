@@ -1,0 +1,212 @@
+.calWrap {
+  margin: 0.75rem 0;
+}
+
+.calHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.navBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-size: 1.3rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navBtn:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+  border-color: var(--border-light);
+}
+
+.monthLabel {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.hint {
+  text-align: center;
+  color: var(--muted);
+  padding: 1rem 0;
+  font-size: 0.88rem;
+}
+
+.calGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.dayLabel {
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--muted);
+  padding: 4px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.emptyCell {
+  aspect-ratio: 1;
+}
+
+.dayCell {
+  position: relative;
+  aspect-ratio: 1;
+  border: 1.5px solid transparent;
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: default;
+  transition: all 0.15s;
+}
+
+.dayNum {
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+.dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--success);
+  margin-top: 2px;
+}
+
+.available {
+  background: var(--success-dim);
+  border-color: rgba(109, 190, 130, 0.3);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.available:hover {
+  background: rgba(109, 190, 130, 0.2);
+  border-color: var(--success);
+  transform: scale(1.08);
+}
+
+.unavailable {
+  background: var(--danger-dim);
+  border-color: rgba(194, 93, 93, 0.15);
+  color: var(--muted);
+}
+
+.past {
+  opacity: 0.3;
+  color: var(--muted);
+}
+
+.today {
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+
+.selected {
+  border-color: var(--success) !important;
+  background: rgba(61, 148, 85, 0.15) !important;
+  color: var(--text) !important;
+  transform: scale(1.08);
+  box-shadow: 0 0 12px rgba(109, 190, 130, 0.25);
+}
+
+.legend {
+  display: flex;
+  gap: 1.25rem;
+  justify-content: center;
+  margin-top: 0.75rem;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.legend span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.legendDot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+}
+
+.legendAvail {
+  background: var(--success);
+  border-color: var(--success);
+}
+
+.legendUnavail {
+  background: var(--danger);
+  border-color: var(--danger);
+}
+
+.legendEmpty {
+  background: var(--surface);
+}
+
+.slotSection {
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--border);
+}
+
+.slotSection h4 {
+  margin: 0 0 0.5rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.noSlots {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.slotGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.slotBtn {
+  padding: 0.45rem 0.95rem;
+  border-radius: var(--radius);
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.88rem;
+  font-weight: 500;
+  transition: all 0.15s;
+}
+
+.slotBtn:hover {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.slotActive {
+  border-color: var(--accent) !important;
+  background: rgba(201, 168, 124, 0.18) !important;
+  color: var(--accent);
+  box-shadow: 0 0 8px rgba(201, 168, 124, 0.2);
+}
