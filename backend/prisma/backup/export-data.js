@@ -9,6 +9,7 @@ const prisma = new PrismaClient();
 async function exportAll() {
   const data = {
     exportedAt: new Date().toISOString(),
+    specialities: await prisma.speciality.findMany({ orderBy: { name: 'asc' } }),
     artists: await prisma.tattooArtist.findMany({ orderBy: { createdAt: 'asc' } }),
     availability: await prisma.artistAvailability.findMany({ orderBy: { createdAt: 'asc' } }),
     studios: await prisma.tattooStudio.findMany({ orderBy: { createdAt: 'asc' } }),
@@ -23,6 +24,7 @@ async function exportAll() {
   writeFileSync(outPath, JSON.stringify(data, null, 2));
 
   console.log(`Exported to ${outPath}`);
+  console.log(`  ${data.specialities.length} specialities`);
   console.log(`  ${data.artists.length} artists`);
   console.log(`  ${data.availability.length} availability slots`);
   console.log(`  ${data.studios.length} studios`);

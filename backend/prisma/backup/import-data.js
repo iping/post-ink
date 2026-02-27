@@ -25,8 +25,16 @@ async function importAll() {
   await prisma.tattooArtist.deleteMany({});
   await prisma.customer.deleteMany({});
   await prisma.tattooStudio.deleteMany({});
+  await prisma.speciality.deleteMany({});
 
   const strip = ({ createdAt, updatedAt, ...rest }) => rest;
+
+  if (data.specialities?.length) {
+    for (const s of data.specialities) {
+      await prisma.speciality.create({ data: strip(s) });
+    }
+    console.log(`  ${data.specialities.length} specialities`);
+  }
 
   for (const a of data.artists) {
     await prisma.tattooArtist.create({ data: strip(a) });
