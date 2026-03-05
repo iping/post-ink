@@ -23,27 +23,27 @@ const MAX_PREFERENCE_IMAGES = 3;
 const MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2MB
 
 const DEPOSIT_METHODS = [
-  { value: 'BCA', label: 'BCA' },
-  { value: 'Mandiri', label: 'Mandiri' },
-  { value: 'BNI', label: 'BNI' },
-  { value: 'Credit Card', label: 'Credit Card' },
-  { value: 'Cash', label: 'Cash' },
+  { value: 'BCA', label: 'BCA - 1234567890' },
+  { value: 'Mandiri', label: 'Mandiri - 0987654321' },
+  { value: 'BNI', label: 'BNI - 1122334455' },
+  { value: 'Credit Card', label: 'Credit Card - 4111 1111 1111 1111' },
+  { value: 'Cash', label: 'Cash - —' },
 ];
 
 const PLACEMENT_OPTIONS = [
-  'Arm',
-  'Forearm',
-  'Upper arm',
-  'Full sleeve',
-  'Back',
-  'Chest',
-  'Ribs',
-  'Leg',
-  'Thigh',
-  'Calf',
-  'Hand',
-  'Neck',
-  'Other',
+  { value: 'Arm', label: 'Arm - Upper limb' },
+  { value: 'Forearm', label: 'Forearm - Lower arm' },
+  { value: 'Upper arm', label: 'Upper arm - Bicep area' },
+  { value: 'Full sleeve', label: 'Full sleeve - Arm sleeve' },
+  { value: 'Back', label: 'Back - Upper or full back' },
+  { value: 'Chest', label: 'Chest - Chest area' },
+  { value: 'Ribs', label: 'Ribs - Side / rib cage' },
+  { value: 'Leg', label: 'Leg - Leg area' },
+  { value: 'Thigh', label: 'Thigh - Upper leg' },
+  { value: 'Calf', label: 'Calf - Lower leg' },
+  { value: 'Hand', label: 'Hand - Hand or fingers' },
+  { value: 'Neck', label: 'Neck - Neck or throat' },
+  { value: 'Other', label: 'Other - Specify below' },
 ];
 
 function safeParseJson(str) {
@@ -111,7 +111,7 @@ export function BookingForm() {
     if (isEdit && id) {
       getBooking(id)
         .then((b) => {
-          const placementInList = b.placement && PLACEMENT_OPTIONS.includes(b.placement);
+          const placementInList = b.placement && PLACEMENT_OPTIONS.some((p) => p.value === b.placement);
           let preferenceText = '';
           let preferenceImages = [];
           if (b.preference) {
@@ -564,7 +564,7 @@ export function BookingForm() {
               >
                 <option value="">— Select placement —</option>
                 {PLACEMENT_OPTIONS.map((p) => (
-                  <option key={p} value={p}>{p}</option>
+                  <option key={p.value} value={p.value}>{p.label}</option>
                 ))}
               </select>
             </label>
