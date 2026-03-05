@@ -84,6 +84,8 @@
   border-radius: var(--radius);
   font-weight: 600;
   font-size: 0.85rem;
+  text-decoration: none;
+  display: inline-block;
 }
 
 .addBtn:hover {
@@ -170,6 +172,7 @@
   background: var(--surface-hover);
 }
 
+.status_draft { color: var(--muted); font-weight: 500; }
 .status_pending { color: #e8b84d; font-weight: 500; }
 .status_confirmed { color: var(--info); font-weight: 500; }
 .status_completed { color: var(--success); font-weight: 500; }
@@ -186,6 +189,9 @@
   background: transparent;
   color: var(--muted);
   font-weight: 500;
+  text-decoration: none;
+  display: inline-block;
+  cursor: pointer;
 }
 
 .smBtn:hover { color: var(--text); background: var(--surface-hover); }

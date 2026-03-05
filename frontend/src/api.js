@@ -116,6 +116,38 @@ export async function deleteBooking(id) {
   if (!res.ok) throw new Error(await res.text());
 }
 
+// POST /api/uploads/preference — max 3 images, 2MB each. Returns { urls: string[] }.
+export async function uploadPreferenceImages(files) {
+  const formData = new FormData();
+  for (let i = 0; i < files.length; i++) {
+    formData.append('images', files[i]);
+  }
+  const res = await fetch(`${API}/uploads/preference`, {
+    method: 'POST',
+    body: formData,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error(err.error || err.message || 'Upload failed');
+  }
+  return res.json();
+}
+
+// POST /api/uploads/payment-evidence — 1 image, max 2MB. Returns { url: string }.
+export async function uploadPaymentEvidence(file) {
+  const formData = new FormData();
+  formData.append('evidence', file);
+  const res = await fetch(`${API}/uploads/payment-evidence`, {
+    method: 'POST',
+    body: formData,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error(err.error || err.message || 'Upload failed');
+  }
+  return res.json();
+}
+
 // ----- Studio: Payments -----
 export async function getPayments(params = {}) {
   const q = new URLSearchParams(params);

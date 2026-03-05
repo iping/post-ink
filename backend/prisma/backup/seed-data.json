@@ -1,5 +1,5 @@
 {
-  "exportedAt": "2026-02-27T19:22:45.804Z",
+  "exportedAt": "2026-03-05T12:16:13.930Z",
   "specialities": [
     {
       "id": "cmm4vmxpq0003d830964w4z8q",
@@ -3491,6 +3491,14 @@
       "phone": "+62 821-5566-7788",
       "createdAt": "2026-02-27T12:37:04.594Z",
       "updatedAt": "2026-02-27T12:37:04.594Z"
+    },
+    {
+      "id": "cmmdegzwu0000xg78ez0swnrk",
+      "name": "AGUS FIRMANSYAH",
+      "email": "IPING.OFFICIAL@GMAIL.COM",
+      "phone": "+6282119348389",
+      "createdAt": "2026-03-05T11:46:29.454Z",
+      "updatedAt": "2026-03-05T11:46:29.454Z"
     }
   ],
   "bookings": [
@@ -4053,6 +4061,20 @@
       "notes": "Mixed media compass with newspaper texture",
       "createdAt": "2026-02-27T12:37:04.670Z",
       "updatedAt": "2026-02-27T12:37:04.670Z"
+    },
+    {
+      "id": "cmmdegzx80002xg78tbztiwfw",
+      "artistId": "cmm4vmxt000dhd830jf9vti6u",
+      "customerId": "cmmdegzwu0000xg78ez0swnrk",
+      "studioId": "cmm4vmxu000i3d830tft4w0bi",
+      "date": "2026-03-19",
+      "startTime": "10:00",
+      "endTime": "13:00",
+      "status": "draft",
+      "totalAmount": 7777000,
+      "notes": "iyrtiyr",
+      "createdAt": "2026-03-05T11:46:29.468Z",
+      "updatedAt": "2026-03-05T11:50:08.929Z"
     }
   ],
   "payments": [

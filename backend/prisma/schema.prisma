@@ -81,6 +81,8 @@ model Booking {
   endTime     String
   status      String        @default("pending") // pending, confirmed, completed, cancelled
   totalAmount Float?        // agreed total price; remaining = totalAmount - sum(payments)
+  placement   String?       // body placement e.g. Arm, Back, Chest
+  preference  String?       // customer reference / preference (style, image ref, etc.)
   notes       String?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
@@ -103,6 +105,7 @@ model Payment {
   type               String?  // down_payment, final, other
   method             String?  // BCA, Mandiri, BNI, Credit Card, Cash
   transferDestination String? // account number or reference (e.g. BCA 1234567890)
+  evidenceUrl        String?  // receipt / payment proof image URL
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 

@@ -1,28 +1,23 @@
 import { useState, useEffect, useMemo } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   getBookings,
-  getBooking,
   getPayments,
   getArtists,
   getCustomers,
   getStudios,
-  createBooking,
-  updateBooking,
   deleteBooking,
   createPayment,
   updatePayment,
-  createCustomer,
   getCommissions,
   createCommission,
   updateCommission,
   deleteCommission,
-  createReview,
   getSpecialities,
   createSpeciality,
   updateSpeciality,
   deleteSpeciality,
 } from '../api';
-import { AvailabilityCalendar } from '../components/AvailabilityCalendar';
 import { formatRupiah, formatWithConversion } from '../currency';
 import styles from './Studio.module.css';
 
@@ -88,7 +83,7 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
   );
 }
 
-const BOOKING_STATUSES = ['pending', 'confirmed', 'completed', 'cancelled'];
+const BOOKING_STATUSES = ['draft', 'pending', 'confirmed', 'completed', 'cancelled'];
 const PAYMENT_STATUSES = ['pending', 'completed', 'refunded'];
 const PAYMENT_TYPES = [
   { value: 'down_payment', label: 'Down payment' },
@@ -104,39 +99,17 @@ const PAYMENT_METHODS = [
 ];
 
 export function Studio() {
-  const [tab, setTab] = useState('bookings');
-  const [bookings, setBookings] = useState([]);
+  const [searchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab') || 'bookings';
+  const [tab, setTab] = useState(tabParam);
   const [payments, setPayments] = useState([]);
   const [commissions, setCommissions] = useState([]);
   const [artists, setArtists] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [studios, setStudios] = useState([]);
+  const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  const [showBookingForm, setShowBookingForm] = useState(false);
-  const [editingBooking, setEditingBooking] = useState(null);
-  const [bookingForm, setBookingForm] = useState({
-    artistId: '',
-    customerId: '',
-    studioId: '',
-    date: '',
-    startTime: '09:00',
-    endTime: '17:00',
-    status: 'pending',
-    totalAmount: '',
-    notes: '',
-  });
-
-  const [showBookingDetail, setShowBookingDetail] = useState(null);
-  const [downPaymentForm, setDownPaymentForm] = useState({
-    amount: '',
-    percent: '',
-    method: 'BCA',
-    transferDestination: '',
-    currency: 'IDR',
-    status: 'completed',
-  });
 
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [editingPayment, setEditingPayment] = useState(null);
@@ -250,163 +223,15 @@ export function Studio() {
     load();
   }, []);
 
-  const openNewBooking = () => {
-    setEditingBooking(null);
-    setBookingForm({
-      artistId: '',
-      customerId: '',
-      studioId: studios[0]?.id || '',
-      date: '',
-      startTime: '',
-      endTime: '',
-      status: 'pending',
-      totalAmount: '',
-      notes: '',
-    });
-    setSelectedSlot(null);
-    setNewCustomer({ name: '', email: '', phone: '' });
-    setShowBookingForm(true);
-  };
-
-  const openEditBooking = (b) => {
-    setEditingBooking(b);
-    setBookingForm({
-      artistId: b.artistId,
-      customerId: b.customerId || '',
-      studioId: b.studioId || '',
-      date: b.date,
-      startTime: b.startTime,
-      endTime: b.endTime,
-      status: b.status,
-      totalAmount: b.totalAmount ?? '',
-      notes: b.notes || '',
-    });
-    setSelectedSlot(null);
-    setShowBookingForm(true);
-  };
-
-  const handleArtistChange = (artistId) => {
-    setBookingForm((f) => ({ ...f, artistId, date: '', startTime: '', endTime: '' }));
-    setSelectedSlot(null);
-  };
-
-  const handleCalendarDateSelect = (dateStr) => {
-    setBookingForm((f) => ({ ...f, date: dateStr, startTime: '', endTime: '' }));
-    setSelectedSlot(null);
-  };
-
-  const handleSlotSelect = (slot) => {
-    setSelectedSlot(slot);
-    setBookingForm((f) => ({ ...f, date: slot.date, startTime: slot.startTime, endTime: slot.endTime }));
-  };
-
-  const openBookingDetail = async (b) => {
-    try {
-      const full = await getBooking(b.id);
-      setShowBookingDetail(full);
-      setDownPaymentForm({
-        amount: '',
-        percent: '',
-        method: 'BCA',
-        transferDestination: '',
-        currency: 'IDR',
-        status: 'completed',
-      });
-    } catch (err) {
-      setError(err.message);
+  useEffect(() => {
+    const t = searchParams.get('tab') || 'bookings';
+    if (['bookings', 'payments', 'commissions', 'specialities'].includes(t)) {
+      setTab(t);
     }
-  };
-
-  const addDownPayment = async (e) => {
-    e.preventDefault();
-    if (!showBookingDetail) return;
-    const total = showBookingDetail.totalAmount ?? 0;
-    let amount = Number(downPaymentForm.amount);
-    if (downPaymentForm.percent && total > 0) {
-      const pct = Number(downPaymentForm.percent);
-      if (pct > 0) amount = (total * pct) / 100;
-    }
-    if (amount <= 0) {
-      setError('Enter amount or percentage (with total amount set on booking).');
-      return;
-    }
-    setError(null);
-    try {
-      await createPayment({
-        bookingId: showBookingDetail.id,
-        amount,
-        currency: downPaymentForm.currency,
-        method: downPaymentForm.method,
-        type: 'down_payment',
-        transferDestination: downPaymentForm.transferDestination || null,
-        status: downPaymentForm.status,
-      });
-      const updated = await getBooking(showBookingDetail.id);
-      setShowBookingDetail(updated);
-      setDownPaymentForm((f) => ({ ...f, amount: '', percent: '' }));
-      load();
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
-  const submitReview = async (e) => {
-    e.preventDefault();
-    if (!showBookingDetail) return;
-    setReviewSubmitting(true);
-    setError(null);
-    try {
-      await createReview({
-        bookingId: showBookingDetail.id,
-        rating: Number(reviewForm.rating),
-        comment: reviewForm.comment || null,
-      });
-      const updated = await getBooking(showBookingDetail.id);
-      setShowBookingDetail(updated);
-      setReviewForm({ rating: 5, comment: '' });
-      load();
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setReviewSubmitting(false);
-    }
-  };
+  }, [searchParams]);
 
   const getCommissionFor = (artistId, studioId) =>
     commissions.find((c) => c.artistId === artistId && c.studioId === studioId);
-
-  const saveBooking = async (e) => {
-    e.preventDefault();
-    setError(null);
-    let customerId = bookingForm.customerId;
-    if (newCustomer.name.trim()) {
-      try {
-        const c = await createCustomer(newCustomer);
-        customerId = c.id;
-        setCustomers((prev) => [...prev, c]);
-      } catch (err) {
-        setError(err.message);
-        return;
-      }
-    }
-    const payload = {
-      ...bookingForm,
-      customerId: customerId || null,
-      studioId: bookingForm.studioId || null,
-      totalAmount: bookingForm.totalAmount === '' ? null : Number(bookingForm.totalAmount),
-    };
-    try {
-      if (editingBooking) {
-        await updateBooking(editingBooking.id, payload);
-      } else {
-        await createBooking(payload);
-      }
-      setShowBookingForm(false);
-      load();
-    } catch (err) {
-      setError(err.message);
-    }
-  };
 
   const removeBooking = async (id) => {
     if (!window.confirm('Delete this booking?')) return;
@@ -463,11 +288,6 @@ export function Studio() {
         await createPayment(payload);
       }
       setShowPaymentForm(false);
-      if (showBookingDetail && paymentForm.bookingId === showBookingDetail.id) {
-        const list = await getBookings();
-        const updated = list.find((x) => x.id === showBookingDetail.id);
-        if (updated) setShowBookingDetail(updated);
-      }
       load();
     } catch (err) {
       setError(err.message);
@@ -608,9 +428,9 @@ export function Studio() {
               <h2>Bookings</h2>
               {bookings.length > 0 && <span className={styles.countHint}>Showing {(bookingPage - 1) * ROWS_PER_PAGE + 1}–{Math.min(bookingPage * ROWS_PER_PAGE, bookings.length)} of {bookings.length}</span>}
             </div>
-            <button type="button" onClick={openNewBooking} className={styles.addBtn}>
+            <Link to="/manage/bookings/new" className={styles.addBtn}>
               + New booking
-            </button>
+            </Link>
           </div>
           <div className={styles.filterBar}>
             <select
@@ -727,8 +547,8 @@ export function Studio() {
                           {b.review && <span className={styles.reviewBadge} title={`Reviewed: ${b.review.rating}/5`}>★ {b.review.rating}</span>}
                         </td>
                         <td>
-                          <button type="button" onClick={() => openBookingDetail(b)} className={styles.smBtn}>Detail</button>
-                          <button type="button" onClick={() => openEditBooking(b)} className={styles.smBtn}>Edit</button>
+                          <Link to={`/manage/bookings/${b.id}`} className={styles.smBtn}>Detail</Link>
+                          <Link to={`/manage/bookings/${b.id}/edit`} className={styles.smBtn}>Edit</Link>
                           <button type="button" onClick={() => removeBooking(b.id)} className={styles.smBtnDanger}>Delete</button>
                           {commission && <span className={styles.commissionBadge} title="Commission set">{commission.commissionPercent}%</span>}
                         </td>
@@ -913,137 +733,6 @@ export function Studio() {
         </section>
       )}
 
-      {showBookingForm && (
-        <div className={styles.modal} role="dialog" aria-modal="true">
-          <div className={styles.bookingModalContent}>
-            <h3>{editingBooking ? 'Edit booking' : 'New booking'}</h3>
-            <form onSubmit={saveBooking}>
-              <div className={styles.bookingLayout}>
-                <div className={styles.bookingLeft}>
-                  <label>
-                    Artist *
-                    <select
-                      value={bookingForm.artistId}
-                      onChange={(e) => handleArtistChange(e.target.value)}
-                      required
-                    >
-                      <option value="">Select artist</option>
-                      {artists.map((a) => (
-                        <option key={a.id} value={a.id}>{a.name}</option>
-                      ))}
-                    </select>
-                  </label>
-
-                  <div className={styles.calendarSection}>
-                    <span className={styles.calLabel}>Pick a date from artist availability</span>
-                    <AvailabilityCalendar
-                      artistId={bookingForm.artistId}
-                      selectedDate={bookingForm.date}
-                      onSelectDate={handleCalendarDateSelect}
-                      onSelectSlot={handleSlotSelect}
-                      selectedSlot={selectedSlot}
-                    />
-                  </div>
-
-                  {bookingForm.date && bookingForm.startTime && (
-                    <div className={styles.selectedInfo}>
-                      <span>Selected: <strong>{bookingForm.date}</strong></span>
-                      <span>Time: <strong>{bookingForm.startTime} – {bookingForm.endTime}</strong></span>
-                    </div>
-                  )}
-                </div>
-
-                <div className={styles.bookingRight}>
-                  <label>
-                    Customer (optional)
-                    <select
-                      value={bookingForm.customerId}
-                      onChange={(e) => setBookingForm((f) => ({ ...f, customerId: e.target.value }))}
-                    >
-                      <option value="">—</option>
-                      {customers.map((c) => (
-                        <option key={c.id} value={c.id}>{c.name}</option>
-                      ))}
-                    </select>
-                  </label>
-                  <fieldset className={styles.inlineFieldset}>
-                    <legend>Or add new customer</legend>
-                    <input
-                      placeholder="Name"
-                      value={newCustomer.name}
-                      onChange={(e) => setNewCustomer((n) => ({ ...n, name: e.target.value }))}
-                    />
-                    <input
-                      placeholder="Email"
-                      type="email"
-                      value={newCustomer.email}
-                      onChange={(e) => setNewCustomer((n) => ({ ...n, email: e.target.value }))}
-                    />
-                    <input
-                      placeholder="Phone"
-                      value={newCustomer.phone}
-                      onChange={(e) => setNewCustomer((n) => ({ ...n, phone: e.target.value }))}
-                    />
-                  </fieldset>
-                  <label>
-                    Studio (optional)
-                    <select
-                      value={bookingForm.studioId}
-                      onChange={(e) => setBookingForm((f) => ({ ...f, studioId: e.target.value }))}
-                    >
-                      <option value="">—</option>
-                      {studios.map((s) => (
-                        <option key={s.id} value={s.id}>{s.name}</option>
-                      ))}
-                    </select>
-                  </label>
-                  <label>
-                    Total amount / IDR (agreed price)
-                    <input
-                      type="number"
-                      step="1000"
-                      min="0"
-                      placeholder="e.g. 5000000"
-                      value={bookingForm.totalAmount}
-                      onChange={(e) => setBookingForm((f) => ({ ...f, totalAmount: e.target.value }))}
-                    />
-                  </label>
-                  <label>
-                    Status
-                    <select
-                      value={bookingForm.status}
-                      onChange={(e) => setBookingForm((f) => ({ ...f, status: e.target.value }))}
-                    >
-                      {BOOKING_STATUSES.map((s) => (
-                        <option key={s} value={s}>{s}</option>
-                      ))}
-                    </select>
-                  </label>
-                  <label>
-                    Notes
-                    <textarea
-                      value={bookingForm.notes}
-                      onChange={(e) => setBookingForm((f) => ({ ...f, notes: e.target.value }))}
-                      rows={2}
-                    />
-                  </label>
-                </div>
-              </div>
-
-              <div className={styles.formActions}>
-                <button
-                  type="submit"
-                  disabled={!bookingForm.artistId || !bookingForm.date || !bookingForm.startTime}
-                >
-                  {editingBooking ? 'Save' : 'Create booking'}
-                </button>
-                <button type="button" onClick={() => setShowBookingForm(false)}>Cancel</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
       {showPaymentForm && (
         <div className={styles.modal} role="dialog" aria-modal="true">
           <div className={styles.modalContent}>
@@ -1124,139 +813,6 @@ export function Studio() {
                 <button type="button" onClick={() => setShowPaymentForm(false)}>Cancel</button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
-
-      {showBookingDetail && (
-        <div className={styles.modal} role="dialog" aria-modal="true">
-          <div className={styles.modalContent}>
-            <h3>Booking: {showBookingDetail.date} {showBookingDetail.startTime} – {showBookingDetail.artist?.name}</h3>
-            <div className={styles.bookingSummary}>
-              <p><strong>Total amount:</strong> {formatRupiah(showBookingDetail.totalAmount)} <span className={styles.convHint}>{formatWithConversion(showBookingDetail.totalAmount).usd}</span></p>
-              <p><strong>Paid:</strong> {formatRupiah(showBookingDetail.paidTotal)}</p>
-              <p className={styles.remainingLine}><strong>Remaining to pay:</strong> <span className={(showBookingDetail.remainingAmount ?? 0) > 0 ? styles.remainingDue : ''}>{formatRupiah(showBookingDetail.remainingAmount)}</span></p>
-              {showBookingDetail.artistId && showBookingDetail.studioId && getCommissionFor(showBookingDetail.artistId, showBookingDetail.studioId) && (() => {
-                const c = getCommissionFor(showBookingDetail.artistId, showBookingDetail.studioId);
-                const total = showBookingDetail.totalAmount ?? 0;
-                const studioCut = (total * c.commissionPercent) / 100;
-                const artistCut = total - studioCut;
-                return (
-                  <div className={styles.commissionBreakdown}>
-                    <strong>Commission (studio {c.commissionPercent}%):</strong> Studio {formatRupiah(studioCut)} | Artist {formatRupiah(artistCut)}
-                  </div>
-                );
-              })()}
-            </div>
-            <h4>Payments (down payment / transfer)</h4>
-            <ul className={styles.paymentList}>
-              {(showBookingDetail.payments || []).map((p) => (
-                <li key={p.id}>
-                  {formatRupiah(p.amount)} – {p.method || '—'} {p.transferDestination ? `(${p.transferDestination})` : ''} – {p.type || 'payment'} – {p.status}
-                </li>
-              ))}
-              {(showBookingDetail.payments || []).length === 0 && <li>No payments yet.</li>}
-            </ul>
-            <h4>Add down payment</h4>
-            <form onSubmit={addDownPayment} className={styles.downPaymentForm}>
-              <label>
-                Amount (fixed)
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  placeholder="Or use % below"
-                  value={downPaymentForm.amount}
-                  onChange={(e) => setDownPaymentForm((f) => ({ ...f, amount: e.target.value }))}
-                />
-              </label>
-              <label>
-                Or % of total
-                <input
-                  type="number"
-                  step="1"
-                  min="0"
-                  max="100"
-                  placeholder="e.g. 30"
-                  value={downPaymentForm.percent}
-                  onChange={(e) => setDownPaymentForm((f) => ({ ...f, percent: e.target.value }))}
-                />
-              </label>
-              <label>
-                Transfer to (method)
-                <select
-                  value={downPaymentForm.method}
-                  onChange={(e) => setDownPaymentForm((f) => ({ ...f, method: e.target.value }))}
-                >
-                  {PAYMENT_METHODS.map((m) => (
-                    <option key={m.value} value={m.value}>{m.label}</option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                Transfer destination (e.g. BCA 1234567890)
-                <input
-                  placeholder="Account number or reference"
-                  value={downPaymentForm.transferDestination}
-                  onChange={(e) => setDownPaymentForm((f) => ({ ...f, transferDestination: e.target.value }))}
-                />
-              </label>
-              <div className={styles.formActions}>
-                <button type="submit">Add down payment</button>
-                <button type="button" onClick={() => setShowBookingDetail(null)}>Close</button>
-              </div>
-            </form>
-
-            {showBookingDetail.status === 'completed' && !showBookingDetail.review && (
-              <>
-                <h4>Leave a Review</h4>
-                <form onSubmit={submitReview} className={styles.reviewForm}>
-                  <label>
-                    Rating
-                    <div className={styles.starRow}>
-                      {[1, 2, 3, 4, 5].map((s) => (
-                        <button
-                          key={s}
-                          type="button"
-                          className={`${styles.starBtn} ${s <= reviewForm.rating ? styles.starActive : ''}`}
-                          onClick={() => setReviewForm((f) => ({ ...f, rating: s }))}
-                        >
-                          ★
-                        </button>
-                      ))}
-                      <span className={styles.ratingText}>{reviewForm.rating}/5</span>
-                    </div>
-                  </label>
-                  <label>
-                    Comment
-                    <textarea
-                      rows={3}
-                      placeholder="How was the experience?"
-                      value={reviewForm.comment}
-                      onChange={(e) => setReviewForm((f) => ({ ...f, comment: e.target.value }))}
-                    />
-                  </label>
-                  <div className={styles.formActions}>
-                    <button type="submit" disabled={reviewSubmitting}>
-                      {reviewSubmitting ? 'Submitting…' : 'Submit Review'}
-                    </button>
-                  </div>
-                </form>
-              </>
-            )}
-
-            {showBookingDetail.review && (
-              <div className={styles.existingReview}>
-                <h4>Review</h4>
-                <div className={styles.reviewStars}>
-                  {'★'.repeat(showBookingDetail.review.rating)}{'☆'.repeat(5 - showBookingDetail.review.rating)}
-                  <span className={styles.ratingText}>{showBookingDetail.review.rating}/5</span>
-                </div>
-                {showBookingDetail.review.comment && (
-                  <p className={styles.reviewComment}>"{showBookingDetail.review.comment}"</p>
-                )}
-              </div>
-            )}
           </div>
         </div>
       )}

@@ -9,6 +9,7 @@ import { studiosRouter } from './routes/studios.js';
 import { commissionsRouter } from './routes/commissions.js';
 import { reviewsRouter } from './routes/reviews.js';
 import { specialitiesRouter } from './routes/specialities.js';
+import { uploadsRouter } from './routes/uploads.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -26,6 +27,7 @@ app.use('/api/studios', studiosRouter);
 app.use('/api/commissions', commissionsRouter);
 app.use('/api/reviews', reviewsRouter);
 app.use('/api/specialities', specialitiesRouter);
+app.use('/api/uploads', uploadsRouter);
 
 app.get('/api/health', (_, res) => res.json({ ok: true }));
 

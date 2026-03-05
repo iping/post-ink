@@ -39,7 +39,7 @@ paymentsRouter.get('/:id', async (req, res) => {
 // POST /api/payments
 paymentsRouter.post('/', async (req, res) => {
   try {
-    const { bookingId, amount, currency, status, method, type, transferDestination } = req.body;
+    const { bookingId, amount, currency, status, method, type, transferDestination, evidenceUrl } = req.body;
     const payment = await prisma.payment.create({
       data: {
         bookingId: bookingId || null,
@@ -49,6 +49,7 @@ paymentsRouter.post('/', async (req, res) => {
         method: method || null,
         type: type || null,
         transferDestination: transferDestination || null,
+        evidenceUrl: evidenceUrl || null,
       },
       include: { booking: { include: { artist: true, customer: true } } },
     });
@@ -70,6 +71,7 @@ paymentsRouter.patch('/:id', async (req, res) => {
     if (body.method !== undefined) data.method = body.method || null;
     if (body.type !== undefined) data.type = body.type || null;
     if (body.transferDestination !== undefined) data.transferDestination = body.transferDestination || null;
+    if (body.evidenceUrl !== undefined) data.evidenceUrl = body.evidenceUrl || null;
     const payment = await prisma.payment.update({
       where: { id: req.params.id },
       data,

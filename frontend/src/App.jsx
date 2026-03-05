@@ -7,6 +7,8 @@ import { ArtistAvailability } from './pages/ArtistAvailability';
 import { Studio } from './pages/Studio';
 import { Discover } from './pages/Discover';
 import { ArtistBooking } from './pages/ArtistBooking';
+import { BookingForm } from './pages/BookingForm';
+import { BookingDetail } from './pages/BookingDetail';
 
 function App() {
   return (
@@ -35,6 +37,9 @@ function App() {
           {/* Management / admin */}
           <Route path="/manage" element={<Studio />} />
           <Route path="/manage/studio" element={<Studio />} />
+          <Route path="/manage/bookings/new" element={<BookingForm />} />
+          <Route path="/manage/bookings/:id" element={<BookingDetail />} />
+          <Route path="/manage/bookings/:id/edit" element={<BookingForm />} />
           <Route path="/manage/artists" element={<ArtistList />} />
           <Route path="/manage/artists/new" element={<ArtistForm />} />
           <Route path="/manage/artists/:id" element={<ArtistDetail />} />

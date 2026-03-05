@@ -58,7 +58,7 @@ bookingsRouter.get('/:id', async (req, res) => {
 // POST /api/bookings
 bookingsRouter.post('/', async (req, res) => {
   try {
-    const { artistId, customerId, studioId, date, startTime, endTime, status, notes, totalAmount } = req.body;
+    const { artistId, customerId, studioId, date, startTime, endTime, status, notes, totalAmount, placement, preference } = req.body;
     const booking = await prisma.booking.create({
       data: {
         artistId,
@@ -70,6 +70,8 @@ bookingsRouter.post('/', async (req, res) => {
         status: status || 'pending',
         notes: notes || null,
         totalAmount: totalAmount != null ? Number(totalAmount) : null,
+        placement: placement || null,
+        preference: preference || null,
       },
       include: { artist: true, customer: true, studio: true, payments: true },
     });
@@ -95,6 +97,8 @@ bookingsRouter.patch('/:id', async (req, res) => {
     if (body.status != null) data.status = body.status;
     if (body.notes !== undefined) data.notes = body.notes || null;
     if (body.totalAmount !== undefined) data.totalAmount = body.totalAmount == null ? null : Number(body.totalAmount);
+    if (body.placement !== undefined) data.placement = body.placement || null;
+    if (body.preference !== undefined) data.preference = body.preference || null;
     const booking = await prisma.booking.update({
       where: { id: req.params.id },
       data,
