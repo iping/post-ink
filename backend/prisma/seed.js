@@ -286,6 +286,24 @@ async function main() {
   const METHODS = ['BCA', 'Mandiri', 'BNI', 'Credit Card', 'Cash'];
   const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
+  const SHORT_CODE_CHARS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const usedShortCodes = new Set();
+  function generateShortCode() {
+    let s = '';
+    for (let i = 0; i < 5; i++) s += SHORT_CODE_CHARS[Math.floor(Math.random() * 36)];
+    return s;
+  }
+  function uniqueShortCode() {
+    for (let attempt = 0; attempt < 50; attempt++) {
+      const code = generateShortCode();
+      if (!usedShortCodes.has(code)) {
+        usedShortCodes.add(code);
+        return code;
+      }
+    }
+    throw new Error('Could not generate unique short code in seed');
+  }
+
   // ─── Active Bookings (pending / confirmed) spread across studios ───
   const activeBookings = [
     { artistIdx: 0, customerIdx: 0, studioIdx: 0, days: 1, start: '10:00', end: '12:00', status: 'confirmed', amount: 5000000, notes: 'Half sleeve botanical — forearm piece with wildflowers' },
@@ -304,6 +322,7 @@ async function main() {
   for (const ab of activeBookings) {
     const booking = await prisma.booking.create({
       data: {
+        shortCode: uniqueShortCode(),
         artistId: createdArtists[ab.artistIdx].id,
         customerId: customers[ab.customerIdx].id,
         studioId: studios[ab.studioIdx].id,
@@ -342,6 +361,7 @@ async function main() {
   for (const cb of cancelledBookings) {
     const booking = await prisma.booking.create({
       data: {
+        shortCode: uniqueShortCode(),
         artistId: createdArtists[cb.artistIdx].id,
         customerId: customers[cb.customerIdx].id,
         studioId: studios[cb.studioIdx].id,
@@ -396,6 +416,7 @@ async function main() {
   for (const cb of completedBookings) {
     const booking = await prisma.booking.create({
       data: {
+        shortCode: uniqueShortCode(),
         artistId: createdArtists[cb.artistIdx].id,
         customerId: customers[cb.customerIdx].id,
         studioId: studios[cb.studioIdx].id,

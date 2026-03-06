@@ -1,5 +1,5 @@
 {
-  "exportedAt": "2026-03-05T12:24:08.599Z",
+  "exportedAt": "2026-03-06T09:15:16.394Z",
   "specialities": [
     {
       "id": "cmm4vmxpq0003d830964w4z8q",
@@ -134,66 +134,18 @@
       "updatedAt": "2026-02-27T12:37:04.434Z"
     }
   ],
-  "artists": [
+  "tattooArtists": [
     {
-      "id": "cmm4vmxpz000md830v78vzgex",
-      "name": "Maya Chen",
-      "shortDescription": "Award-winning artist known for intricate fine-line botanicals and delicate geometric patterns. Her work blends East Asian calligraphy influences with modern minimalism.",
-      "experiences": "8 years",
-      "speciality": "Fine Line, Botanical, Minimalist",
-      "rate": 750000,
-      "photos": "[\"https://images.unsplash.com/photo-1604072366595-e75dc92d6bdc?w=600&h=600&fit=crop&crop=face\",\"https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=600&h=600&fit=crop\"]",
-      "portfolio": "[\"https://images.unsplash.com/photo-1590246815117-0b5fc4e3e5b4?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1568515045052-f9a854d70bfd?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1562962230-16e4623d36e6?w=500&h=500&fit=crop\"]",
-      "createdAt": "2026-02-27T12:37:04.439Z",
-      "updatedAt": "2026-02-27T12:37:04.439Z"
-    },
-    {
-      "id": "cmm4vmxqf0025d830imu6yz6w",
-      "name": "Jake Rivera",
-      "shortDescription": "Old-school meets new-school. Jake brings bold traditional Americana to life with vibrant saturated colors and thick confident lines. Featured in Inked Magazine.",
-      "experiences": "12 years",
-      "speciality": "American Traditional, Neo-Traditional",
-      "rate": 1000000,
-      "photos": "[\"https://images.unsplash.com/photo-1621607512214-68297480165e?w=600&h=600&fit=crop&crop=face\"]",
-      "portfolio": "[\"https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1542556398-95fb5b9f9b48?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1565058379802-bbe93b2f703a?w=500&h=500&fit=crop\"]",
-      "createdAt": "2026-02-27T12:37:04.455Z",
-      "updatedAt": "2026-02-27T12:37:04.455Z"
-    },
-    {
-      "id": "cmm4vmxqz004cd830bp2udw2s",
-      "name": "Luna Park",
-      "shortDescription": "Specializing in large-scale Japanese irezumi and photorealistic black & grey portraits. Every piece is custom-designed through close client collaboration.",
-      "experiences": "6 years",
-      "speciality": "Japanese Irezumi, Black & Grey Realism",
-      "rate": 850000,
-      "photos": "[\"https://images.unsplash.com/photo-1599842057874-37393e9342df?w=600&h=600&fit=crop&crop=face\",\"https://images.unsplash.com/photo-1596704017254-9759879e0dba?w=600&h=600&fit=crop\"]",
-      "portfolio": "[\"https://images.unsplash.com/photo-1475090169767-40ed8d18f67d?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1586953208270-767889fa9b0f?w=500&h=500&fit=crop\"]",
-      "createdAt": "2026-02-27T12:37:04.476Z",
-      "updatedAt": "2026-02-27T12:37:04.476Z"
-    },
-    {
-      "id": "cmm4vmxrc005vd8307idopdvb",
-      "name": "Riko Tanaka",
-      "shortDescription": "Geometric and dotwork specialist from Osaka. Riko creates hypnotic sacred geometry pieces, mandalas, and ornamental designs using precision hand-poke and machine techniques.",
-      "experiences": "10 years",
-      "speciality": "Geometric, Dotwork, Sacred Geometry, Ornamental",
-      "rate": 900000,
-      "photos": "[\"https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&h=600&fit=crop&crop=face\",\"https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=600&fit=crop&crop=face\"]",
-      "portfolio": "[\"https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1565058379802-bbe93b2f703a?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1542556398-95fb5b9f9b48?w=500&h=500&fit=crop\"]",
-      "createdAt": "2026-02-27T12:37:04.489Z",
-      "updatedAt": "2026-02-27T12:37:04.489Z"
-    },
-    {
-      "id": "cmm4vmxrq007kd830rix0732w",
-      "name": "Nina Sari",
-      "shortDescription": "Watercolor and illustrative tattoo artist based in Bali. Nina's signature style combines soft washes of color with bold linework, creating pieces that look like paintings on skin.",
-      "experiences": "5 years",
-      "speciality": "Watercolor, Illustrative, Color Realism",
-      "rate": 650000,
-      "photos": "[\"https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600&h=600&fit=crop&crop=face\"]",
-      "portfolio": "[\"https://images.unsplash.com/photo-1568515045052-f9a854d70bfd?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1562962230-16e4623d36e6?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1590246815117-0b5fc4e3e5b4?w=500&h=500&fit=crop\"]",
-      "createdAt": "2026-02-27T12:37:04.502Z",
-      "updatedAt": "2026-02-27T12:37:04.502Z"
+      "id": "cmm4vmxsn00bsd830le472zod",
+      "name": "Arief Gunawan",
+      "shortDescription": "Photorealistic portrait specialist with a background in fine arts. Arief transforms photographs into breathtaking skin art, from celebrity likenesses to beloved family members and pets.",
+      "experiences": "9 years",
+      "speciality": "Portrait, Realism, Black & Grey, Surrealism",
+      "rate": 1100000,
+      "photos": "[\"https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=600&h=600&fit=crop&crop=face\",\"https://images.unsplash.com/photo-1522556189639-b150ed9c4330?w=600&h=600&fit=crop&crop=face\"]",
+      "portfolio": "[\"https://images.unsplash.com/photo-1590246815117-0b5fc4e3e5b4?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1542556398-95fb5b9f9b48?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=500&h=500&fit=crop\"]",
+      "createdAt": "2026-02-27T12:37:04.535Z",
+      "updatedAt": "2026-02-27T12:37:04.535Z"
     },
     {
       "id": "cmm4vmxs10093d830iqiilc8d",
@@ -208,16 +160,28 @@
       "updatedAt": "2026-02-27T12:37:04.514Z"
     },
     {
-      "id": "cmm4vmxsn00bsd830le472zod",
-      "name": "Arief Gunawan",
-      "shortDescription": "Photorealistic portrait specialist with a background in fine arts. Arief transforms photographs into breathtaking skin art, from celebrity likenesses to beloved family members and pets.",
-      "experiences": "9 years",
-      "speciality": "Portrait, Realism, Black & Grey, Surrealism",
-      "rate": 1100000,
-      "photos": "[\"https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=600&h=600&fit=crop&crop=face\",\"https://images.unsplash.com/photo-1522556189639-b150ed9c4330?w=600&h=600&fit=crop&crop=face\"]",
-      "portfolio": "[\"https://images.unsplash.com/photo-1590246815117-0b5fc4e3e5b4?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1542556398-95fb5b9f9b48?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=500&h=500&fit=crop\"]",
-      "createdAt": "2026-02-27T12:37:04.535Z",
-      "updatedAt": "2026-02-27T12:37:04.535Z"
+      "id": "cmm4vmxtc00f0d8305urz5pau",
+      "name": "Hendra Kusuma",
+      "shortDescription": "Lettering and script master. From elegant calligraphy to street-style graffiti lettering, Hendra crafts custom typography tattoos that tell stories through words and flourishes.",
+      "experiences": "11 years",
+      "speciality": "Lettering, Script, Chicano, Calligraphy",
+      "rate": 700000,
+      "photos": "[\"https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=600&h=600&fit=crop&crop=face\",\"https://images.unsplash.com/photo-1463453091185-61582044d556?w=600&h=600&fit=crop&crop=face\"]",
+      "portfolio": "[\"https://images.unsplash.com/photo-1565058379802-bbe93b2f703a?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1475090169767-40ed8d18f67d?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1590246815117-0b5fc4e3e5b4?w=500&h=500&fit=crop\"]",
+      "createdAt": "2026-02-27T12:37:04.561Z",
+      "updatedAt": "2026-02-27T12:37:04.561Z"
+    },
+    {
+      "id": "cmm4vmxqf0025d830imu6yz6w",
+      "name": "Jake Rivera",
+      "shortDescription": "Old-school meets new-school. Jake brings bold traditional Americana to life with vibrant saturated colors and thick confident lines. Featured in Inked Magazine.",
+      "experiences": "12 years",
+      "speciality": "American Traditional, Neo-Traditional",
+      "rate": 1000000,
+      "photos": "[\"https://images.unsplash.com/photo-1621607512214-68297480165e?w=600&h=600&fit=crop&crop=face\"]",
+      "portfolio": "[\"https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1542556398-95fb5b9f9b48?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1565058379802-bbe93b2f703a?w=500&h=500&fit=crop\"]",
+      "createdAt": "2026-02-27T12:37:04.455Z",
+      "updatedAt": "2026-02-27T12:37:04.455Z"
     },
     {
       "id": "cmm4vmxt000dhd830jf9vti6u",
@@ -232,16 +196,52 @@
       "updatedAt": "2026-02-27T12:37:04.549Z"
     },
     {
-      "id": "cmm4vmxtc00f0d8305urz5pau",
-      "name": "Hendra Kusuma",
-      "shortDescription": "Lettering and script master. From elegant calligraphy to street-style graffiti lettering, Hendra crafts custom typography tattoos that tell stories through words and flourishes.",
-      "experiences": "11 years",
-      "speciality": "Lettering, Script, Chicano, Calligraphy",
-      "rate": 700000,
-      "photos": "[\"https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=600&h=600&fit=crop&crop=face\",\"https://images.unsplash.com/photo-1463453091185-61582044d556?w=600&h=600&fit=crop&crop=face\"]",
-      "portfolio": "[\"https://images.unsplash.com/photo-1565058379802-bbe93b2f703a?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1475090169767-40ed8d18f67d?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1590246815117-0b5fc4e3e5b4?w=500&h=500&fit=crop\"]",
-      "createdAt": "2026-02-27T12:37:04.561Z",
-      "updatedAt": "2026-02-27T12:37:04.561Z"
+      "id": "cmm4vmxqz004cd830bp2udw2s",
+      "name": "Luna Park",
+      "shortDescription": "Specializing in large-scale Japanese irezumi and photorealistic black & grey portraits. Every piece is custom-designed through close client collaboration.",
+      "experiences": "6 years",
+      "speciality": "Japanese Irezumi, Black & Grey Realism",
+      "rate": 850000,
+      "photos": "[\"https://images.unsplash.com/photo-1599842057874-37393e9342df?w=600&h=600&fit=crop&crop=face\",\"https://images.unsplash.com/photo-1596704017254-9759879e0dba?w=600&h=600&fit=crop\"]",
+      "portfolio": "[\"https://images.unsplash.com/photo-1475090169767-40ed8d18f67d?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1586953208270-767889fa9b0f?w=500&h=500&fit=crop\"]",
+      "createdAt": "2026-02-27T12:37:04.476Z",
+      "updatedAt": "2026-02-27T12:37:04.476Z"
+    },
+    {
+      "id": "cmm4vmxpz000md830v78vzgex",
+      "name": "Maya Chen",
+      "shortDescription": "Award-winning artist known for intricate fine-line botanicals and delicate geometric patterns. Her work blends East Asian calligraphy influences with modern minimalism.",
+      "experiences": "8 years",
+      "speciality": "Fine Line, Botanical, Minimalist",
+      "rate": 750000,
+      "photos": "[\"https://images.unsplash.com/photo-1604072366595-e75dc92d6bdc?w=600&h=600&fit=crop&crop=face\",\"https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=600&h=600&fit=crop\"]",
+      "portfolio": "[\"https://images.unsplash.com/photo-1590246815117-0b5fc4e3e5b4?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1568515045052-f9a854d70bfd?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1562962230-16e4623d36e6?w=500&h=500&fit=crop\"]",
+      "createdAt": "2026-02-27T12:37:04.439Z",
+      "updatedAt": "2026-02-27T12:37:04.439Z"
+    },
+    {
+      "id": "cmm4vmxrq007kd830rix0732w",
+      "name": "Nina Sari",
+      "shortDescription": "Watercolor and illustrative tattoo artist based in Bali. Nina's signature style combines soft washes of color with bold linework, creating pieces that look like paintings on skin.",
+      "experiences": "5 years",
+      "speciality": "Watercolor, Illustrative, Color Realism",
+      "rate": 650000,
+      "photos": "[\"https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600&h=600&fit=crop&crop=face\"]",
+      "portfolio": "[\"https://images.unsplash.com/photo-1568515045052-f9a854d70bfd?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1562962230-16e4623d36e6?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1590246815117-0b5fc4e3e5b4?w=500&h=500&fit=crop\"]",
+      "createdAt": "2026-02-27T12:37:04.502Z",
+      "updatedAt": "2026-02-27T12:37:04.502Z"
+    },
+    {
+      "id": "cmm4vmxrc005vd8307idopdvb",
+      "name": "Riko Tanaka",
+      "shortDescription": "Geometric and dotwork specialist from Osaka. Riko creates hypnotic sacred geometry pieces, mandalas, and ornamental designs using precision hand-poke and machine techniques.",
+      "experiences": "10 years",
+      "speciality": "Geometric, Dotwork, Sacred Geometry, Ornamental",
+      "rate": 900000,
+      "photos": "[\"https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&h=600&fit=crop&crop=face\",\"https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=600&fit=crop&crop=face\"]",
+      "portfolio": "[\"https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1565058379802-bbe93b2f703a?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1542556398-95fb5b9f9b48?w=500&h=500&fit=crop\"]",
+      "createdAt": "2026-02-27T12:37:04.489Z",
+      "updatedAt": "2026-02-27T12:37:04.489Z"
     },
     {
       "id": "cmm4vmxto00gjd8303rhxmetx",
@@ -256,7 +256,7 @@
       "updatedAt": "2026-02-27T12:37:04.572Z"
     }
   ],
-  "availability": [
+  "artistAvailability": [
     {
       "id": "cmm4vmxq0000od83097xh22oi",
       "artistId": "cmm4vmxpz000md830v78vzgex",
@@ -3348,18 +3348,18 @@
       "updatedAt": "2026-02-27T12:37:04.584Z"
     }
   ],
-  "studios": [
-    {
-      "id": "cmm4vmxu000i2d830cydp9ej9",
-      "name": "Ink Haven Studio",
-      "address": "Jl. Kemang Raya No. 45, Jakarta Selatan",
-      "createdAt": "2026-02-27T12:37:04.584Z",
-      "updatedAt": "2026-02-27T12:37:04.584Z"
-    },
+  "tattooStudios": [
     {
       "id": "cmm4vmxu000i3d830tft4w0bi",
       "name": "Black Lotus Tattoo",
       "address": "Jl. Petitenget No. 12, Seminyak, Bali",
+      "createdAt": "2026-02-27T12:37:04.584Z",
+      "updatedAt": "2026-02-27T12:37:04.584Z"
+    },
+    {
+      "id": "cmm4vmxu000i2d830cydp9ej9",
+      "name": "Ink Haven Studio",
+      "address": "Jl. Kemang Raya No. 45, Jakarta Selatan",
       "createdAt": "2026-02-27T12:37:04.584Z",
       "updatedAt": "2026-02-27T12:37:04.584Z"
     },
@@ -3373,6 +3373,14 @@
   ],
   "customers": [
     {
+      "id": "cmmdegzwu0000xg78ez0swnrk",
+      "name": "AGUS FIRMANSYAH",
+      "email": "IPING.OFFICIAL@GMAIL.COM",
+      "phone": "+6282119348389",
+      "createdAt": "2026-03-05T11:46:29.454Z",
+      "updatedAt": "2026-03-05T11:46:29.454Z"
+    },
+    {
       "id": "cmm4vmxu500i5d830g8gzjss0",
       "name": "Andi Pratama",
       "email": "andi@example.com",
@@ -3381,36 +3389,20 @@
       "updatedAt": "2026-02-27T12:37:04.589Z"
     },
     {
-      "id": "cmm4vmxu500i6d830yh67gvkq",
-      "name": "Sari Dewi",
-      "email": "sari@example.com",
-      "phone": "+62 813-9876-5432",
-      "createdAt": "2026-02-27T12:37:04.589Z",
-      "updatedAt": "2026-02-27T12:37:04.589Z"
+      "id": "cmm4vmxu600ied8305b91l1lq",
+      "name": "Ayu Puspita",
+      "email": "ayu@example.com",
+      "phone": "+62 822-7788-9900",
+      "createdAt": "2026-02-27T12:37:04.591Z",
+      "updatedAt": "2026-02-27T12:37:04.591Z"
     },
     {
-      "id": "cmm4vmxu500i7d830sf6l7jup",
-      "name": "Rina Wijaya",
-      "email": "rina@example.com",
-      "phone": "+62 856-7788-9900",
-      "createdAt": "2026-02-27T12:37:04.590Z",
-      "updatedAt": "2026-02-27T12:37:04.590Z"
-    },
-    {
-      "id": "cmm4vmxu600idd830j0gcsfop",
-      "name": "Fajar Kurniawan",
-      "email": "fajar@example.com",
-      "phone": "+62 878-1122-3344",
-      "createdAt": "2026-02-27T12:37:04.590Z",
-      "updatedAt": "2026-02-27T12:37:04.590Z"
-    },
-    {
-      "id": "cmm4vmxu600icd830yl06ru44",
-      "name": "Rizky Fadillah",
-      "email": "rizky@example.com",
-      "phone": "+62 857-4455-6677",
-      "createdAt": "2026-02-27T12:37:04.590Z",
-      "updatedAt": "2026-02-27T12:37:04.590Z"
+      "id": "cmm4vmxu900iid830jgsv4ecf",
+      "name": "Budi Santoso",
+      "email": "budi@example.com",
+      "phone": "+62 811-2233-4455",
+      "createdAt": "2026-02-27T12:37:04.593Z",
+      "updatedAt": "2026-02-27T12:37:04.593Z"
     },
     {
       "id": "cmm4vmxu500i9d830yjppy4b0",
@@ -3429,6 +3421,70 @@
       "updatedAt": "2026-02-27T12:37:04.590Z"
     },
     {
+      "id": "cmm4vmxu600idd830j0gcsfop",
+      "name": "Fajar Kurniawan",
+      "email": "fajar@example.com",
+      "phone": "+62 878-1122-3344",
+      "createdAt": "2026-02-27T12:37:04.590Z",
+      "updatedAt": "2026-02-27T12:37:04.590Z"
+    },
+    {
+      "id": "cmm4vmxu700ifd830cl52y2pp",
+      "name": "Kevin Wijaya",
+      "email": "kevin@example.com",
+      "phone": "+62 812-1100-2233",
+      "createdAt": "2026-02-27T12:37:04.591Z",
+      "updatedAt": "2026-02-27T12:37:04.591Z"
+    },
+    {
+      "id": "cmm4vmxu900ijd830yhqersld",
+      "name": "Mela Putri",
+      "email": "mela@example.com",
+      "phone": "+62 821-5566-7788",
+      "createdAt": "2026-02-27T12:37:04.594Z",
+      "updatedAt": "2026-02-27T12:37:04.594Z"
+    },
+    {
+      "id": "cmm4vmxu700igd830utja9m70",
+      "name": "Nadia Rahmawati",
+      "email": "nadia@example.com",
+      "phone": "+62 831-3344-5566",
+      "createdAt": "2026-02-27T12:37:04.591Z",
+      "updatedAt": "2026-02-27T12:37:04.591Z"
+    },
+    {
+      "id": "cmm4vmxu900ihd830knix1x00",
+      "name": "Oscar Setiawan",
+      "email": "oscar@example.com",
+      "phone": "+62 878-6677-8899",
+      "createdAt": "2026-02-27T12:37:04.593Z",
+      "updatedAt": "2026-02-27T12:37:04.593Z"
+    },
+    {
+      "id": "cmm4vmxu500i7d830sf6l7jup",
+      "name": "Rina Wijaya",
+      "email": "rina@example.com",
+      "phone": "+62 856-7788-9900",
+      "createdAt": "2026-02-27T12:37:04.590Z",
+      "updatedAt": "2026-02-27T12:37:04.590Z"
+    },
+    {
+      "id": "cmm4vmxu600icd830yl06ru44",
+      "name": "Rizky Fadillah",
+      "email": "rizky@example.com",
+      "phone": "+62 857-4455-6677",
+      "createdAt": "2026-02-27T12:37:04.590Z",
+      "updatedAt": "2026-02-27T12:37:04.590Z"
+    },
+    {
+      "id": "cmm4vmxu500i6d830yh67gvkq",
+      "name": "Sari Dewi",
+      "email": "sari@example.com",
+      "phone": "+62 813-9876-5432",
+      "createdAt": "2026-02-27T12:37:04.589Z",
+      "updatedAt": "2026-02-27T12:37:04.589Z"
+    },
+    {
       "id": "cmm4vmxu500i8d830g07o38kc",
       "name": "Tommy Adriansyah",
       "email": "tommy@example.com",
@@ -3443,627 +3499,12 @@
       "phone": "+62 819-3344-5566",
       "createdAt": "2026-02-27T12:37:04.590Z",
       "updatedAt": "2026-02-27T12:37:04.590Z"
-    },
-    {
-      "id": "cmm4vmxu600ied8305b91l1lq",
-      "name": "Ayu Puspita",
-      "email": "ayu@example.com",
-      "phone": "+62 822-7788-9900",
-      "createdAt": "2026-02-27T12:37:04.591Z",
-      "updatedAt": "2026-02-27T12:37:04.591Z"
-    },
-    {
-      "id": "cmm4vmxu700igd830utja9m70",
-      "name": "Nadia Rahmawati",
-      "email": "nadia@example.com",
-      "phone": "+62 831-3344-5566",
-      "createdAt": "2026-02-27T12:37:04.591Z",
-      "updatedAt": "2026-02-27T12:37:04.591Z"
-    },
-    {
-      "id": "cmm4vmxu700ifd830cl52y2pp",
-      "name": "Kevin Wijaya",
-      "email": "kevin@example.com",
-      "phone": "+62 812-1100-2233",
-      "createdAt": "2026-02-27T12:37:04.591Z",
-      "updatedAt": "2026-02-27T12:37:04.591Z"
-    },
-    {
-      "id": "cmm4vmxu900iid830jgsv4ecf",
-      "name": "Budi Santoso",
-      "email": "budi@example.com",
-      "phone": "+62 811-2233-4455",
-      "createdAt": "2026-02-27T12:37:04.593Z",
-      "updatedAt": "2026-02-27T12:37:04.593Z"
-    },
-    {
-      "id": "cmm4vmxu900ihd830knix1x00",
-      "name": "Oscar Setiawan",
-      "email": "oscar@example.com",
-      "phone": "+62 878-6677-8899",
-      "createdAt": "2026-02-27T12:37:04.593Z",
-      "updatedAt": "2026-02-27T12:37:04.593Z"
-    },
-    {
-      "id": "cmm4vmxu900ijd830yhqersld",
-      "name": "Mela Putri",
-      "email": "mela@example.com",
-      "phone": "+62 821-5566-7788",
-      "createdAt": "2026-02-27T12:37:04.594Z",
-      "updatedAt": "2026-02-27T12:37:04.594Z"
-    },
-    {
-      "id": "cmmdegzwu0000xg78ez0swnrk",
-      "name": "AGUS FIRMANSYAH",
-      "email": "IPING.OFFICIAL@GMAIL.COM",
-      "phone": "+6282119348389",
-      "createdAt": "2026-03-05T11:46:29.454Z",
-      "updatedAt": "2026-03-05T11:46:29.454Z"
     }
   ],
   "bookings": [
     {
-      "id": "cmm4vmxut00ild830pfgz46fg",
-      "artistId": "cmm4vmxpz000md830v78vzgex",
-      "customerId": "cmm4vmxu500i5d830g8gzjss0",
-      "studioId": "cmm4vmxu000i2d830cydp9ej9",
-      "date": "2026-02-28",
-      "startTime": "10:00",
-      "endTime": "12:00",
-      "status": "confirmed",
-      "totalAmount": 5000000,
-      "notes": "Half sleeve botanical — forearm piece with wildflowers",
-      "createdAt": "2026-02-27T12:37:04.613Z",
-      "updatedAt": "2026-02-27T12:37:04.613Z"
-    },
-    {
-      "id": "cmm4vmxuu00ipd830u5oy3a4u",
-      "artistId": "cmm4vmxqf0025d830imu6yz6w",
-      "customerId": "cmm4vmxu500i6d830yh67gvkq",
-      "studioId": "cmm4vmxu000i2d830cydp9ej9",
-      "date": "2026-02-28",
-      "startTime": "14:00",
-      "endTime": "17:00",
-      "status": "pending",
-      "totalAmount": 3500000,
-      "notes": "Traditional eagle & roses chest piece",
-      "createdAt": "2026-02-27T12:37:04.615Z",
-      "updatedAt": "2026-02-27T12:37:04.615Z"
-    },
-    {
-      "id": "cmm4vmxuv00ird830ynt3vz77",
-      "artistId": "cmm4vmxqz004cd830bp2udw2s",
-      "customerId": "cmm4vmxu500i8d830g07o38kc",
-      "studioId": "cmm4vmxu000i2d830cydp9ej9",
-      "date": "2026-03-01",
-      "startTime": "09:00",
-      "endTime": "12:30",
-      "status": "confirmed",
-      "totalAmount": 4800000,
-      "notes": "Japanese dragon back piece — session 1 of 3",
-      "createdAt": "2026-02-27T12:37:04.615Z",
-      "updatedAt": "2026-02-27T12:37:04.615Z"
-    },
-    {
-      "id": "cmm4vmxuw00ivd8300anpzb6x",
-      "artistId": "cmm4vmxrc005vd8307idopdvb",
-      "customerId": "cmm4vmxu500i9d830yjppy4b0",
-      "studioId": "cmm4vmxu000i4d83000r4ocpa",
-      "date": "2026-03-02",
-      "startTime": "10:00",
-      "endTime": "13:00",
-      "status": "pending",
-      "totalAmount": 3200000,
-      "notes": "Geometric forearm band with fibonacci spiral",
-      "createdAt": "2026-02-27T12:37:04.617Z",
-      "updatedAt": "2026-02-27T12:37:04.617Z"
-    },
-    {
-      "id": "cmm4vmxux00ixd830zhxq24x3",
-      "artistId": "cmm4vmxrq007kd830rix0732w",
-      "customerId": "cmm4vmxu600icd830yl06ru44",
-      "studioId": "cmm4vmxu000i3d830tft4w0bi",
-      "date": "2026-03-01",
-      "startTime": "11:00",
-      "endTime": "14:00",
-      "status": "confirmed",
-      "totalAmount": 2800000,
-      "notes": "Watercolor phoenix on shoulder blade",
-      "createdAt": "2026-02-27T12:37:04.617Z",
-      "updatedAt": "2026-02-27T12:37:04.617Z"
-    },
-    {
-      "id": "cmm4vmxuy00j1d830lf7do7xr",
-      "artistId": "cmm4vmxs10093d830iqiilc8d",
-      "customerId": "cmm4vmxu600ied8305b91l1lq",
-      "studioId": "cmm4vmxu000i2d830cydp9ej9",
-      "date": "2026-03-03",
-      "startTime": "09:00",
-      "endTime": "14:00",
-      "status": "confirmed",
-      "totalAmount": 9500000,
-      "notes": "Full sleeve Polynesian tribal — session 2",
-      "createdAt": "2026-02-27T12:37:04.618Z",
-      "updatedAt": "2026-02-27T12:37:04.618Z"
-    },
-    {
-      "id": "cmm4vmxuz00j5d830hzbswxsx",
-      "artistId": "cmm4vmxsn00bsd830le472zod",
-      "customerId": "cmm4vmxu700ifd830cl52y2pp",
-      "studioId": "cmm4vmxu000i4d83000r4ocpa",
-      "date": "2026-03-02",
-      "startTime": "09:00",
-      "endTime": "13:00",
-      "status": "pending",
-      "totalAmount": 5500000,
-      "notes": "Photorealistic portrait of daughter",
-      "createdAt": "2026-02-27T12:37:04.620Z",
-      "updatedAt": "2026-02-27T12:37:04.620Z"
-    },
-    {
-      "id": "cmm4vmxv000j7d830mdlzplp1",
-      "artistId": "cmm4vmxt000dhd830jf9vti6u",
-      "customerId": "cmm4vmxu700igd830utja9m70",
-      "studioId": "cmm4vmxu000i3d830tft4w0bi",
-      "date": "2026-03-04",
-      "startTime": "10:00",
-      "endTime": "14:00",
-      "status": "confirmed",
-      "totalAmount": 4200000,
-      "notes": "Neo-traditional fox with floral wreath",
-      "createdAt": "2026-02-27T12:37:04.620Z",
-      "updatedAt": "2026-02-27T12:37:04.620Z"
-    },
-    {
-      "id": "cmm4vmxv100jbd830l7tuu641",
-      "artistId": "cmm4vmxtc00f0d8305urz5pau",
-      "customerId": "cmm4vmxu900ihd830knix1x00",
-      "studioId": "cmm4vmxu000i2d830cydp9ej9",
-      "date": "2026-03-03",
-      "startTime": "10:00",
-      "endTime": "13:00",
-      "status": "pending",
-      "totalAmount": 3000000,
-      "notes": "Script lettering \"Strength\" with ornamental frame",
-      "createdAt": "2026-02-27T12:37:04.621Z",
-      "updatedAt": "2026-02-27T12:37:04.621Z"
-    },
-    {
-      "id": "cmm4vmxv100jdd830ky08d010",
-      "artistId": "cmm4vmxto00gjd8303rhxmetx",
-      "customerId": "cmm4vmxu900iid830jgsv4ecf",
-      "studioId": "cmm4vmxu000i4d83000r4ocpa",
-      "date": "2026-03-05",
-      "startTime": "11:00",
-      "endTime": "15:00",
-      "status": "confirmed",
-      "totalAmount": 3800000,
-      "notes": "Trash Polka abstract compass with red splatter",
-      "createdAt": "2026-02-27T12:37:04.622Z",
-      "updatedAt": "2026-02-27T12:37:04.622Z"
-    },
-    {
-      "id": "cmm4vmxv200jhd83006us5klk",
-      "artistId": "cmm4vmxqf0025d830imu6yz6w",
-      "customerId": "cmm4vmxu500i7d830sf6l7jup",
-      "studioId": "cmm4vmxu000i2d830cydp9ej9",
-      "date": "2026-02-22",
-      "startTime": "14:00",
-      "endTime": "17:00",
-      "status": "cancelled",
-      "totalAmount": 4000000,
-      "notes": "Traditional anchor — customer rescheduled",
-      "createdAt": "2026-02-27T12:37:04.623Z",
-      "updatedAt": "2026-02-27T12:37:04.623Z"
-    },
-    {
-      "id": "cmm4vmxv400jld830hzpncccj",
-      "artistId": "cmm4vmxrq007kd830rix0732w",
-      "customerId": "cmm4vmxu600ibd830y0xpn3i0",
-      "studioId": "cmm4vmxu000i3d830tft4w0bi",
-      "date": "2026-02-19",
-      "startTime": "11:00",
-      "endTime": "14:00",
-      "status": "cancelled",
-      "totalAmount": 2500000,
-      "notes": "Watercolor butterfly — cancelled by customer",
-      "createdAt": "2026-02-27T12:37:04.624Z",
-      "updatedAt": "2026-02-27T12:37:04.624Z"
-    },
-    {
-      "id": "cmm4vmxv400jnd830n94zwviy",
-      "artistId": "cmm4vmxtc00f0d8305urz5pau",
-      "customerId": "cmm4vmxu600icd830yl06ru44",
-      "studioId": "cmm4vmxu000i2d830cydp9ej9",
-      "date": "2026-02-15",
-      "startTime": "14:00",
-      "endTime": "17:00",
-      "status": "cancelled",
-      "totalAmount": 2800000,
-      "notes": "Chicano lettering — customer no-show",
-      "createdAt": "2026-02-27T12:37:04.625Z",
-      "updatedAt": "2026-02-27T12:37:04.625Z"
-    },
-    {
-      "id": "cmm4vmxv500jpd830ocondmwc",
-      "artistId": "cmm4vmxpz000md830v78vzgex",
-      "customerId": "cmm4vmxu900iid830jgsv4ecf",
-      "studioId": "cmm4vmxu000i2d830cydp9ej9",
-      "date": "2026-02-13",
-      "startTime": "09:00",
-      "endTime": "12:00",
-      "status": "completed",
-      "totalAmount": 4500000,
-      "notes": "Delicate peony sleeve — inner forearm",
-      "createdAt": "2026-02-27T12:37:04.626Z",
-      "updatedAt": "2026-02-27T12:37:04.626Z"
-    },
-    {
-      "id": "cmm4vmxv800jxd830z60nsuo7",
-      "artistId": "cmm4vmxpz000md830v78vzgex",
-      "customerId": "cmm4vmxu500i7d830sf6l7jup",
-      "studioId": "cmm4vmxu000i2d830cydp9ej9",
-      "date": "2026-01-30",
-      "startTime": "13:00",
-      "endTime": "16:00",
-      "status": "completed",
-      "totalAmount": 3800000,
-      "notes": "Geometric mandala with botanical elements",
-      "createdAt": "2026-02-27T12:37:04.628Z",
-      "updatedAt": "2026-02-27T12:37:04.628Z"
-    },
-    {
-      "id": "cmm4vmxv900k3d830ctp5xbn3",
-      "artistId": "cmm4vmxpz000md830v78vzgex",
-      "customerId": "cmm4vmxu600idd830j0gcsfop",
-      "studioId": "cmm4vmxu000i2d830cydp9ej9",
-      "date": "2026-01-13",
-      "startTime": "10:00",
-      "endTime": "13:00",
-      "status": "completed",
-      "totalAmount": 5200000,
-      "notes": "Minimalist wildflower bouquet — ribcage",
-      "createdAt": "2026-02-27T12:37:04.630Z",
-      "updatedAt": "2026-02-27T12:37:04.630Z"
-    },
-    {
-      "id": "cmm4vmxvb00k9d830uc6zk7d4",
-      "artistId": "cmm4vmxqf0025d830imu6yz6w",
-      "customerId": "cmm4vmxu500i5d830g8gzjss0",
-      "studioId": "cmm4vmxu000i2d830cydp9ej9",
-      "date": "2026-02-20",
-      "startTime": "10:00",
-      "endTime": "14:00",
-      "status": "completed",
-      "totalAmount": 6000000,
-      "notes": "Traditional panther on thigh",
-      "createdAt": "2026-02-27T12:37:04.631Z",
-      "updatedAt": "2026-02-27T12:37:04.631Z"
-    },
-    {
-      "id": "cmm4vmxvd00khd8308e925v1a",
-      "artistId": "cmm4vmxqf0025d830imu6yz6w",
-      "customerId": "cmm4vmxu900ijd830yhqersld",
-      "studioId": "cmm4vmxu000i2d830cydp9ej9",
-      "date": "2026-02-06",
-      "startTime": "14:00",
-      "endTime": "18:00",
-      "status": "completed",
-      "totalAmount": 7500000,
-      "notes": "Neo-traditional rose and dagger — full forearm",
-      "createdAt": "2026-02-27T12:37:04.634Z",
-      "updatedAt": "2026-02-27T12:37:04.634Z"
-    },
-    {
-      "id": "cmm4vmxvf00knd8307wwyuw52",
-      "artistId": "cmm4vmxqf0025d830imu6yz6w",
-      "customerId": "cmm4vmxu600ibd830y0xpn3i0",
-      "studioId": "cmm4vmxu000i2d830cydp9ej9",
-      "date": "2026-01-23",
-      "startTime": "11:00",
-      "endTime": "15:00",
-      "status": "completed",
-      "totalAmount": 5500000,
-      "notes": "American traditional eagle chest piece",
-      "createdAt": "2026-02-27T12:37:04.635Z",
-      "updatedAt": "2026-02-27T12:37:04.635Z"
-    },
-    {
-      "id": "cmm4vmxvg00ktd8308mwyoqfv",
-      "artistId": "cmm4vmxqz004cd830bp2udw2s",
-      "customerId": "cmm4vmxu500i6d830yh67gvkq",
-      "studioId": "cmm4vmxu000i2d830cydp9ej9",
-      "date": "2026-02-17",
-      "startTime": "09:00",
-      "endTime": "12:30",
-      "status": "completed",
-      "totalAmount": 5000000,
-      "notes": "Japanese koi fish half sleeve",
-      "createdAt": "2026-02-27T12:37:04.637Z",
-      "updatedAt": "2026-02-27T12:37:04.637Z"
-    },
-    {
-      "id": "cmm4vmxvj00l1d830d13dghme",
-      "artistId": "cmm4vmxqz004cd830bp2udw2s",
-      "customerId": "cmm4vmxu500iad830lmw5irwy",
-      "studioId": "cmm4vmxu000i2d830cydp9ej9",
-      "date": "2026-01-28",
-      "startTime": "14:00",
-      "endTime": "17:00",
-      "status": "completed",
-      "totalAmount": 4200000,
-      "notes": "Black and grey portrait of my dog",
-      "createdAt": "2026-02-27T12:37:04.639Z",
-      "updatedAt": "2026-02-27T12:37:04.639Z"
-    },
-    {
-      "id": "cmm4vmxvk00l7d830ku0gb28x",
-      "artistId": "cmm4vmxrc005vd8307idopdvb",
-      "customerId": "cmm4vmxu500i7d830sf6l7jup",
-      "studioId": "cmm4vmxu000i4d83000r4ocpa",
-      "date": "2026-02-22",
-      "startTime": "10:00",
-      "endTime": "13:00",
-      "status": "completed",
-      "totalAmount": 4000000,
-      "notes": "Sacred geometry sleeve — upper arm",
-      "createdAt": "2026-02-27T12:37:04.641Z",
-      "updatedAt": "2026-02-27T12:37:04.641Z"
-    },
-    {
-      "id": "cmm4vmxvm00ldd830c78fh5l6",
-      "artistId": "cmm4vmxrc005vd8307idopdvb",
-      "customerId": "cmm4vmxu600ibd830y0xpn3i0",
-      "studioId": "cmm4vmxu000i4d83000r4ocpa",
-      "date": "2026-02-09",
-      "startTime": "14:00",
-      "endTime": "17:00",
-      "status": "completed",
-      "totalAmount": 3500000,
-      "notes": "Dotwork mandala on back",
-      "createdAt": "2026-02-27T12:37:04.642Z",
-      "updatedAt": "2026-02-27T12:37:04.642Z"
-    },
-    {
-      "id": "cmm4vmxvn00lld830yc4xjo96",
-      "artistId": "cmm4vmxrq007kd830rix0732w",
-      "customerId": "cmm4vmxu500i5d830g8gzjss0",
-      "studioId": "cmm4vmxu000i3d830tft4w0bi",
-      "date": "2026-02-15",
-      "startTime": "11:00",
-      "endTime": "14:00",
-      "status": "completed",
-      "totalAmount": 3200000,
-      "notes": "Watercolor hummingbird on shoulder",
-      "createdAt": "2026-02-27T12:37:04.644Z",
-      "updatedAt": "2026-02-27T12:37:04.644Z"
-    },
-    {
-      "id": "cmm4vmxvp00lrd8308sk16x1h",
-      "artistId": "cmm4vmxrq007kd830rix0732w",
-      "customerId": "cmm4vmxu500iad830lmw5irwy",
-      "studioId": "cmm4vmxu000i3d830tft4w0bi",
-      "date": "2026-02-02",
-      "startTime": "15:00",
-      "endTime": "18:00",
-      "status": "completed",
-      "totalAmount": 2800000,
-      "notes": "Illustrative cat portrait with flowers",
-      "createdAt": "2026-02-27T12:37:04.645Z",
-      "updatedAt": "2026-02-27T12:37:04.645Z"
-    },
-    {
-      "id": "cmm4vmxvq00lxd830qcv8qe6k",
-      "artistId": "cmm4vmxs10093d830iqiilc8d",
-      "customerId": "cmm4vmxu900iid830jgsv4ecf",
-      "studioId": "cmm4vmxu000i2d830cydp9ej9",
-      "date": "2026-02-24",
-      "startTime": "09:00",
-      "endTime": "14:00",
-      "status": "completed",
-      "totalAmount": 8500000,
-      "notes": "Polynesian tribal half sleeve with Dayak motifs",
-      "createdAt": "2026-02-27T12:37:04.647Z",
-      "updatedAt": "2026-02-27T12:37:04.647Z"
-    },
-    {
-      "id": "cmm4vmxvs00m5d830fysdnnmv",
-      "artistId": "cmm4vmxs10093d830iqiilc8d",
-      "customerId": "cmm4vmxu600idd830j0gcsfop",
-      "studioId": "cmm4vmxu000i2d830cydp9ej9",
-      "date": "2026-02-12",
-      "startTime": "13:00",
-      "endTime": "17:00",
-      "status": "completed",
-      "totalAmount": 6000000,
-      "notes": "Blackwork cover-up — old tattoo on forearm",
-      "createdAt": "2026-02-27T12:37:04.649Z",
-      "updatedAt": "2026-02-27T12:37:04.649Z"
-    },
-    {
-      "id": "cmm4vmxvu00mbd830q0axw8fu",
-      "artistId": "cmm4vmxs10093d830iqiilc8d",
-      "customerId": "cmm4vmxu900ijd830yhqersld",
-      "studioId": "cmm4vmxu000i2d830cydp9ej9",
-      "date": "2026-01-18",
-      "startTime": "10:00",
-      "endTime": "15:00",
-      "status": "completed",
-      "totalAmount": 7200000,
-      "notes": "Full back Mentawai tribal pattern",
-      "createdAt": "2026-02-27T12:37:04.650Z",
-      "updatedAt": "2026-02-27T12:37:04.650Z"
-    },
-    {
-      "id": "cmm4vmxvv00mhd8300q0x5vk6",
-      "artistId": "cmm4vmxsn00bsd830le472zod",
-      "customerId": "cmm4vmxu500i8d830g07o38kc",
-      "studioId": "cmm4vmxu000i4d83000r4ocpa",
-      "date": "2026-02-21",
-      "startTime": "09:00",
-      "endTime": "13:00",
-      "status": "completed",
-      "totalAmount": 6500000,
-      "notes": "Photorealistic portrait of grandmother",
-      "createdAt": "2026-02-27T12:37:04.652Z",
-      "updatedAt": "2026-02-27T12:37:04.652Z"
-    },
-    {
-      "id": "cmm4vmxvx00mpd830ea290n7c",
-      "artistId": "cmm4vmxsn00bsd830le472zod",
-      "customerId": "cmm4vmxu500i9d830yjppy4b0",
-      "studioId": "cmm4vmxu000i4d83000r4ocpa",
-      "date": "2026-02-07",
-      "startTime": "13:00",
-      "endTime": "17:00",
-      "status": "completed",
-      "totalAmount": 5800000,
-      "notes": "Surrealist melting clock with eye",
-      "createdAt": "2026-02-27T12:37:04.654Z",
-      "updatedAt": "2026-02-27T12:37:04.654Z"
-    },
-    {
-      "id": "cmm4vmxvz00mvd830f4yesh5r",
-      "artistId": "cmm4vmxsn00bsd830le472zod",
-      "customerId": "cmm4vmxu900ihd830knix1x00",
-      "studioId": "cmm4vmxu000i4d83000r4ocpa",
-      "date": "2026-01-16",
-      "startTime": "10:00",
-      "endTime": "14:00",
-      "status": "completed",
-      "totalAmount": 7000000,
-      "notes": "Black & grey lion portrait on chest",
-      "createdAt": "2026-02-27T12:37:04.655Z",
-      "updatedAt": "2026-02-27T12:37:04.655Z"
-    },
-    {
-      "id": "cmm4vmxw000n1d830vwp2mmx5",
-      "artistId": "cmm4vmxt000dhd830jf9vti6u",
-      "customerId": "cmm4vmxu600icd830yl06ru44",
-      "studioId": "cmm4vmxu000i3d830tft4w0bi",
-      "date": "2026-02-19",
-      "startTime": "10:00",
-      "endTime": "14:00",
-      "status": "completed",
-      "totalAmount": 4500000,
-      "notes": "Neo-traditional wolf with wildflower crown",
-      "createdAt": "2026-02-27T12:37:04.657Z",
-      "updatedAt": "2026-02-27T12:37:04.657Z"
-    },
-    {
-      "id": "cmm4vmxw200n9d830dl4ap2u4",
-      "artistId": "cmm4vmxt000dhd830jf9vti6u",
-      "customerId": "cmm4vmxu600ied8305b91l1lq",
-      "studioId": "cmm4vmxu000i3d830tft4w0bi",
-      "date": "2026-02-05",
-      "startTime": "14:00",
-      "endTime": "18:00",
-      "status": "completed",
-      "totalAmount": 5000000,
-      "notes": "Illustrative bird of paradise full sleeve",
-      "createdAt": "2026-02-27T12:37:04.658Z",
-      "updatedAt": "2026-02-27T12:37:04.658Z"
-    },
-    {
-      "id": "cmm4vmxw300nfd830s0ovsn95",
-      "artistId": "cmm4vmxt000dhd830jf9vti6u",
-      "customerId": "cmm4vmxu700igd830utja9m70",
-      "studioId": "cmm4vmxu000i3d830tft4w0bi",
-      "date": "2026-01-20",
-      "startTime": "10:00",
-      "endTime": "13:00",
-      "status": "completed",
-      "totalAmount": 3500000,
-      "notes": "Colorful botanical wrist band",
-      "createdAt": "2026-02-27T12:37:04.660Z",
-      "updatedAt": "2026-02-27T12:37:04.660Z"
-    },
-    {
-      "id": "cmm4vmxw500nld830plvwabag",
-      "artistId": "cmm4vmxtc00f0d8305urz5pau",
-      "customerId": "cmm4vmxu700ifd830cl52y2pp",
-      "studioId": "cmm4vmxu000i2d830cydp9ej9",
-      "date": "2026-02-18",
-      "startTime": "10:00",
-      "endTime": "13:00",
-      "status": "completed",
-      "totalAmount": 3000000,
-      "notes": "Arabic calligraphy script on forearm",
-      "createdAt": "2026-02-27T12:37:04.661Z",
-      "updatedAt": "2026-02-27T12:37:04.661Z"
-    },
-    {
-      "id": "cmm4vmxw700ntd830dcxn8ona",
-      "artistId": "cmm4vmxtc00f0d8305urz5pau",
-      "customerId": "cmm4vmxu500i6d830yh67gvkq",
-      "studioId": "cmm4vmxu000i2d830cydp9ej9",
-      "date": "2026-02-03",
-      "startTime": "14:00",
-      "endTime": "18:00",
-      "status": "completed",
-      "totalAmount": 3800000,
-      "notes": "Chicano-style \"Family First\" with roses",
-      "createdAt": "2026-02-27T12:37:04.663Z",
-      "updatedAt": "2026-02-27T12:37:04.663Z"
-    },
-    {
-      "id": "cmm4vmxw800nzd830v91a4x8e",
-      "artistId": "cmm4vmxtc00f0d8305urz5pau",
-      "customerId": "cmm4vmxu600idd830j0gcsfop",
-      "studioId": "cmm4vmxu000i2d830cydp9ej9",
-      "date": "2026-01-08",
-      "startTime": "10:00",
-      "endTime": "14:00",
-      "status": "completed",
-      "totalAmount": 4200000,
-      "notes": "Full chest \"Through Hell and Back\" script",
-      "createdAt": "2026-02-27T12:37:04.665Z",
-      "updatedAt": "2026-02-27T12:37:04.665Z"
-    },
-    {
-      "id": "cmm4vmxwa00o5d830iyg6w85r",
-      "artistId": "cmm4vmxto00gjd8303rhxmetx",
-      "customerId": "cmm4vmxu500i7d830sf6l7jup",
-      "studioId": "cmm4vmxu000i4d83000r4ocpa",
-      "date": "2026-02-23",
-      "startTime": "11:00",
-      "endTime": "15:00",
-      "status": "completed",
-      "totalAmount": 3500000,
-      "notes": "Trash Polka heart with geometric fragments",
-      "createdAt": "2026-02-27T12:37:04.667Z",
-      "updatedAt": "2026-02-27T12:37:04.667Z"
-    },
-    {
-      "id": "cmm4vmxwc00odd830vb0yueqf",
-      "artistId": "cmm4vmxto00gjd8303rhxmetx",
-      "customerId": "cmm4vmxu900ijd830yhqersld",
-      "studioId": "cmm4vmxu000i4d83000r4ocpa",
-      "date": "2026-02-11",
-      "startTime": "15:00",
-      "endTime": "19:00",
-      "status": "completed",
-      "totalAmount": 4000000,
-      "notes": "Abstract expressionist raven full back",
-      "createdAt": "2026-02-27T12:37:04.669Z",
-      "updatedAt": "2026-02-27T12:37:04.669Z"
-    },
-    {
-      "id": "cmm4vmxwe00ojd830q2og5u4o",
-      "artistId": "cmm4vmxto00gjd8303rhxmetx",
-      "customerId": "cmm4vmxu900ihd830knix1x00",
-      "studioId": "cmm4vmxu000i4d83000r4ocpa",
-      "date": "2026-01-26",
-      "startTime": "12:00",
-      "endTime": "16:00",
-      "status": "completed",
-      "totalAmount": 3200000,
-      "notes": "Mixed media compass with newspaper texture",
-      "createdAt": "2026-02-27T12:37:04.670Z",
-      "updatedAt": "2026-02-27T12:37:04.670Z"
-    },
-    {
       "id": "cmmdegzx80002xg78tbztiwfw",
+      "shortCode": null,
       "artistId": "cmm4vmxt000dhd830jf9vti6u",
       "customerId": "cmmdegzwu0000xg78ez0swnrk",
       "studioId": "cmm4vmxu000i3d830tft4w0bi",
@@ -4072,9 +3513,2776 @@
       "endTime": "13:00",
       "status": "draft",
       "totalAmount": 7777000,
+      "placement": null,
+      "preference": null,
       "notes": "iyrtiyr",
       "createdAt": "2026-03-05T11:46:29.468Z",
-      "updatedAt": "2026-03-05T11:50:08.929Z"
+      "updatedAt": "2026-03-06T06:06:28.458Z",
+      "artist": {
+        "id": "cmm4vmxt000dhd830jf9vti6u",
+        "name": "Karin Wolff",
+        "shortDescription": "Berlin-trained artist who merges European illustration with Southeast Asian motifs. Known for intricate floral sleeves, whimsical animal pieces, and bold color palettes that pop.",
+        "experiences": "7 years",
+        "speciality": "Illustrative, Floral, Color Realism, Neo-Traditional",
+        "rate": 800000,
+        "photos": "[\"https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&h=600&fit=crop&crop=face\"]",
+        "portfolio": "[\"https://images.unsplash.com/photo-1562962230-16e4623d36e6?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1586953208270-767889fa9b0f?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1568515045052-f9a854d70bfd?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?w=500&h=500&fit=crop\"]",
+        "createdAt": "2026-02-27T12:37:04.549Z",
+        "updatedAt": "2026-02-27T12:37:04.549Z"
+      },
+      "customer": {
+        "id": "cmmdegzwu0000xg78ez0swnrk",
+        "name": "AGUS FIRMANSYAH",
+        "email": "IPING.OFFICIAL@GMAIL.COM",
+        "phone": "+6282119348389",
+        "createdAt": "2026-03-05T11:46:29.454Z",
+        "updatedAt": "2026-03-05T11:46:29.454Z"
+      },
+      "studio": {
+        "id": "cmm4vmxu000i3d830tft4w0bi",
+        "name": "Black Lotus Tattoo",
+        "address": "Jl. Petitenget No. 12, Seminyak, Bali",
+        "createdAt": "2026-02-27T12:37:04.584Z",
+        "updatedAt": "2026-02-27T12:37:04.584Z"
+      },
+      "payments": [],
+      "review": null
+    },
+    {
+      "id": "cmmehnfdj0001g026wj1wi19a",
+      "shortCode": null,
+      "artistId": "cmm4vmxt000dhd830jf9vti6u",
+      "customerId": "cmm4vmxu600ied8305b91l1lq",
+      "studioId": "cmm4vmxu000i4d83000r4ocpa",
+      "date": "2026-03-10",
+      "startTime": "14:00",
+      "endTime": "18:00",
+      "status": "draft",
+      "totalAmount": null,
+      "placement": "Full sleeve",
+      "preference": "{\"text\":\"oihoh\",\"images\":[\"/uploads/pref-1772776843594-Screenshot-2026-03-05-at-17.07.19.png\"]}",
+      "notes": "8888888",
+      "createdAt": "2026-03-06T06:03:14.454Z",
+      "updatedAt": "2026-03-06T06:03:14.454Z",
+      "artist": {
+        "id": "cmm4vmxt000dhd830jf9vti6u",
+        "name": "Karin Wolff",
+        "shortDescription": "Berlin-trained artist who merges European illustration with Southeast Asian motifs. Known for intricate floral sleeves, whimsical animal pieces, and bold color palettes that pop.",
+        "experiences": "7 years",
+        "speciality": "Illustrative, Floral, Color Realism, Neo-Traditional",
+        "rate": 800000,
+        "photos": "[\"https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&h=600&fit=crop&crop=face\"]",
+        "portfolio": "[\"https://images.unsplash.com/photo-1562962230-16e4623d36e6?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1586953208270-767889fa9b0f?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1568515045052-f9a854d70bfd?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?w=500&h=500&fit=crop\"]",
+        "createdAt": "2026-02-27T12:37:04.549Z",
+        "updatedAt": "2026-02-27T12:37:04.549Z"
+      },
+      "customer": {
+        "id": "cmm4vmxu600ied8305b91l1lq",
+        "name": "Ayu Puspita",
+        "email": "ayu@example.com",
+        "phone": "+62 822-7788-9900",
+        "createdAt": "2026-02-27T12:37:04.591Z",
+        "updatedAt": "2026-02-27T12:37:04.591Z"
+      },
+      "studio": {
+        "id": "cmm4vmxu000i4d83000r4ocpa",
+        "name": "Sacred Skin Collective",
+        "address": "Jl. Braga No. 88, Bandung",
+        "createdAt": "2026-02-27T12:37:04.584Z",
+        "updatedAt": "2026-02-27T12:37:04.584Z"
+      },
+      "payments": [
+        {
+          "id": "cmmehnfdy0003g026odo68ddf",
+          "bookingId": "cmmehnfdj0001g026wj1wi19a",
+          "amount": 808098,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "down_payment",
+          "method": "BCA",
+          "transferDestination": "978798008",
+          "evidenceUrl": "/uploads/pay-1772776893302-Screenshot-2026-03-05-at-17.07.19.png",
+          "createdAt": "2026-03-06T06:03:14.470Z",
+          "updatedAt": "2026-03-06T06:03:14.470Z"
+        }
+      ],
+      "review": null
+    },
+    {
+      "id": "cmm4vmxv100jdd830ky08d010",
+      "shortCode": null,
+      "artistId": "cmm4vmxto00gjd8303rhxmetx",
+      "customerId": "cmm4vmxu900iid830jgsv4ecf",
+      "studioId": "cmm4vmxu000i4d83000r4ocpa",
+      "date": "2026-03-05",
+      "startTime": "11:00",
+      "endTime": "15:00",
+      "status": "confirmed",
+      "totalAmount": 3800000,
+      "placement": null,
+      "preference": null,
+      "notes": "Trash Polka abstract compass with red splatter",
+      "createdAt": "2026-02-27T12:37:04.622Z",
+      "updatedAt": "2026-02-27T12:37:04.622Z",
+      "artist": {
+        "id": "cmm4vmxto00gjd8303rhxmetx",
+        "name": "Siska Maharani",
+        "shortDescription": "Trash Polka and abstract expressionist. Siska combines chaotic brushstrokes, newspaper clippings, and photorealism into raw, emotional compositions that defy convention.",
+        "experiences": "4 years",
+        "speciality": "Trash Polka, Abstract, Surrealism, Mixed Media",
+        "rate": 600000,
+        "photos": "[\"https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=600&h=600&fit=crop&crop=face\",\"https://images.unsplash.com/photo-1517841905240-472988babdf9?w=600&h=600&fit=crop&crop=face\"]",
+        "portfolio": "[\"https://images.unsplash.com/photo-1542556398-95fb5b9f9b48?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1562962230-16e4623d36e6?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1568515045052-f9a854d70bfd?w=500&h=500&fit=crop\"]",
+        "createdAt": "2026-02-27T12:37:04.572Z",
+        "updatedAt": "2026-02-27T12:37:04.572Z"
+      },
+      "customer": {
+        "id": "cmm4vmxu900iid830jgsv4ecf",
+        "name": "Budi Santoso",
+        "email": "budi@example.com",
+        "phone": "+62 811-2233-4455",
+        "createdAt": "2026-02-27T12:37:04.593Z",
+        "updatedAt": "2026-02-27T12:37:04.593Z"
+      },
+      "studio": {
+        "id": "cmm4vmxu000i4d83000r4ocpa",
+        "name": "Sacred Skin Collective",
+        "address": "Jl. Braga No. 88, Bandung",
+        "createdAt": "2026-02-27T12:37:04.584Z",
+        "updatedAt": "2026-02-27T12:37:04.584Z"
+      },
+      "payments": [
+        {
+          "id": "cmm4vmxv200jfd830nrbklr31",
+          "bookingId": "cmm4vmxv100jdd830ky08d010",
+          "amount": 1140000,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "down_payment",
+          "method": "Credit Card",
+          "transferDestination": "BNI 5566778899",
+          "evidenceUrl": null,
+          "createdAt": "2026-02-27T12:37:04.622Z",
+          "updatedAt": "2026-02-27T12:37:04.622Z"
+        }
+      ],
+      "review": null
+    },
+    {
+      "id": "cmm4vmxv000j7d830mdlzplp1",
+      "shortCode": null,
+      "artistId": "cmm4vmxt000dhd830jf9vti6u",
+      "customerId": "cmm4vmxu700igd830utja9m70",
+      "studioId": "cmm4vmxu000i3d830tft4w0bi",
+      "date": "2026-03-04",
+      "startTime": "10:00",
+      "endTime": "14:00",
+      "status": "confirmed",
+      "totalAmount": 4200000,
+      "placement": null,
+      "preference": null,
+      "notes": "Neo-traditional fox with floral wreath",
+      "createdAt": "2026-02-27T12:37:04.620Z",
+      "updatedAt": "2026-02-27T12:37:04.620Z",
+      "artist": {
+        "id": "cmm4vmxt000dhd830jf9vti6u",
+        "name": "Karin Wolff",
+        "shortDescription": "Berlin-trained artist who merges European illustration with Southeast Asian motifs. Known for intricate floral sleeves, whimsical animal pieces, and bold color palettes that pop.",
+        "experiences": "7 years",
+        "speciality": "Illustrative, Floral, Color Realism, Neo-Traditional",
+        "rate": 800000,
+        "photos": "[\"https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&h=600&fit=crop&crop=face\"]",
+        "portfolio": "[\"https://images.unsplash.com/photo-1562962230-16e4623d36e6?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1586953208270-767889fa9b0f?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1568515045052-f9a854d70bfd?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?w=500&h=500&fit=crop\"]",
+        "createdAt": "2026-02-27T12:37:04.549Z",
+        "updatedAt": "2026-02-27T12:37:04.549Z"
+      },
+      "customer": {
+        "id": "cmm4vmxu700igd830utja9m70",
+        "name": "Nadia Rahmawati",
+        "email": "nadia@example.com",
+        "phone": "+62 831-3344-5566",
+        "createdAt": "2026-02-27T12:37:04.591Z",
+        "updatedAt": "2026-02-27T12:37:04.591Z"
+      },
+      "studio": {
+        "id": "cmm4vmxu000i3d830tft4w0bi",
+        "name": "Black Lotus Tattoo",
+        "address": "Jl. Petitenget No. 12, Seminyak, Bali",
+        "createdAt": "2026-02-27T12:37:04.584Z",
+        "updatedAt": "2026-02-27T12:37:04.584Z"
+      },
+      "payments": [
+        {
+          "id": "cmm4vmxv000j9d8303ut2q6es",
+          "bookingId": "cmm4vmxv000j7d830mdlzplp1",
+          "amount": 1260000,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "down_payment",
+          "method": "Mandiri",
+          "transferDestination": "Mandiri 0987654321",
+          "evidenceUrl": null,
+          "createdAt": "2026-02-27T12:37:04.621Z",
+          "updatedAt": "2026-02-27T12:37:04.621Z"
+        }
+      ],
+      "review": null
+    },
+    {
+      "id": "cmm4vmxv100jbd830l7tuu641",
+      "shortCode": null,
+      "artistId": "cmm4vmxtc00f0d8305urz5pau",
+      "customerId": "cmm4vmxu900ihd830knix1x00",
+      "studioId": "cmm4vmxu000i2d830cydp9ej9",
+      "date": "2026-03-03",
+      "startTime": "10:00",
+      "endTime": "13:00",
+      "status": "pending",
+      "totalAmount": 3000000,
+      "placement": null,
+      "preference": null,
+      "notes": "Script lettering \"Strength\" with ornamental frame",
+      "createdAt": "2026-02-27T12:37:04.621Z",
+      "updatedAt": "2026-02-27T12:37:04.621Z",
+      "artist": {
+        "id": "cmm4vmxtc00f0d8305urz5pau",
+        "name": "Hendra Kusuma",
+        "shortDescription": "Lettering and script master. From elegant calligraphy to street-style graffiti lettering, Hendra crafts custom typography tattoos that tell stories through words and flourishes.",
+        "experiences": "11 years",
+        "speciality": "Lettering, Script, Chicano, Calligraphy",
+        "rate": 700000,
+        "photos": "[\"https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=600&h=600&fit=crop&crop=face\",\"https://images.unsplash.com/photo-1463453091185-61582044d556?w=600&h=600&fit=crop&crop=face\"]",
+        "portfolio": "[\"https://images.unsplash.com/photo-1565058379802-bbe93b2f703a?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1475090169767-40ed8d18f67d?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1590246815117-0b5fc4e3e5b4?w=500&h=500&fit=crop\"]",
+        "createdAt": "2026-02-27T12:37:04.561Z",
+        "updatedAt": "2026-02-27T12:37:04.561Z"
+      },
+      "customer": {
+        "id": "cmm4vmxu900ihd830knix1x00",
+        "name": "Oscar Setiawan",
+        "email": "oscar@example.com",
+        "phone": "+62 878-6677-8899",
+        "createdAt": "2026-02-27T12:37:04.593Z",
+        "updatedAt": "2026-02-27T12:37:04.593Z"
+      },
+      "studio": {
+        "id": "cmm4vmxu000i2d830cydp9ej9",
+        "name": "Ink Haven Studio",
+        "address": "Jl. Kemang Raya No. 45, Jakarta Selatan",
+        "createdAt": "2026-02-27T12:37:04.584Z",
+        "updatedAt": "2026-02-27T12:37:04.584Z"
+      },
+      "payments": [],
+      "review": null
+    },
+    {
+      "id": "cmm4vmxuy00j1d830lf7do7xr",
+      "shortCode": null,
+      "artistId": "cmm4vmxs10093d830iqiilc8d",
+      "customerId": "cmm4vmxu600ied8305b91l1lq",
+      "studioId": "cmm4vmxu000i2d830cydp9ej9",
+      "date": "2026-03-03",
+      "startTime": "09:00",
+      "endTime": "14:00",
+      "status": "confirmed",
+      "totalAmount": 9500000,
+      "placement": null,
+      "preference": null,
+      "notes": "Full sleeve Polynesian tribal — session 2",
+      "createdAt": "2026-02-27T12:37:04.618Z",
+      "updatedAt": "2026-02-27T12:37:04.618Z",
+      "artist": {
+        "id": "cmm4vmxs10093d830iqiilc8d",
+        "name": "Dimas Prasetyo",
+        "shortDescription": "Blackwork and tribal fusion artist. Dimas draws from Polynesian, Dayak, and Mentawai tribal traditions to create bold contemporary pieces rooted in Indonesian heritage.",
+        "experiences": "15 years",
+        "speciality": "Blackwork, Tribal, Polynesian, Cover-up",
+        "rate": 1200000,
+        "photos": "[\"https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&h=600&fit=crop&crop=face\",\"https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=600&h=600&fit=crop&crop=face\"]",
+        "portfolio": "[\"https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1475090169767-40ed8d18f67d?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1586953208270-767889fa9b0f?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1565058379802-bbe93b2f703a?w=500&h=500&fit=crop\"]",
+        "createdAt": "2026-02-27T12:37:04.514Z",
+        "updatedAt": "2026-02-27T12:37:04.514Z"
+      },
+      "customer": {
+        "id": "cmm4vmxu600ied8305b91l1lq",
+        "name": "Ayu Puspita",
+        "email": "ayu@example.com",
+        "phone": "+62 822-7788-9900",
+        "createdAt": "2026-02-27T12:37:04.591Z",
+        "updatedAt": "2026-02-27T12:37:04.591Z"
+      },
+      "studio": {
+        "id": "cmm4vmxu000i2d830cydp9ej9",
+        "name": "Ink Haven Studio",
+        "address": "Jl. Kemang Raya No. 45, Jakarta Selatan",
+        "createdAt": "2026-02-27T12:37:04.584Z",
+        "updatedAt": "2026-02-27T12:37:04.584Z"
+      },
+      "payments": [
+        {
+          "id": "cmm4vmxuy00j3d830vwz408ca",
+          "bookingId": "cmm4vmxuy00j1d830lf7do7xr",
+          "amount": 2850000,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "down_payment",
+          "method": "BNI",
+          "transferDestination": null,
+          "evidenceUrl": null,
+          "createdAt": "2026-02-27T12:37:04.619Z",
+          "updatedAt": "2026-02-27T12:37:04.619Z"
+        }
+      ],
+      "review": null
+    },
+    {
+      "id": "cmm4vmxuw00ivd8300anpzb6x",
+      "shortCode": null,
+      "artistId": "cmm4vmxrc005vd8307idopdvb",
+      "customerId": "cmm4vmxu500i9d830yjppy4b0",
+      "studioId": "cmm4vmxu000i4d83000r4ocpa",
+      "date": "2026-03-02",
+      "startTime": "10:00",
+      "endTime": "13:00",
+      "status": "pending",
+      "totalAmount": 3200000,
+      "placement": null,
+      "preference": null,
+      "notes": "Geometric forearm band with fibonacci spiral",
+      "createdAt": "2026-02-27T12:37:04.617Z",
+      "updatedAt": "2026-02-27T12:37:04.617Z",
+      "artist": {
+        "id": "cmm4vmxrc005vd8307idopdvb",
+        "name": "Riko Tanaka",
+        "shortDescription": "Geometric and dotwork specialist from Osaka. Riko creates hypnotic sacred geometry pieces, mandalas, and ornamental designs using precision hand-poke and machine techniques.",
+        "experiences": "10 years",
+        "speciality": "Geometric, Dotwork, Sacred Geometry, Ornamental",
+        "rate": 900000,
+        "photos": "[\"https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&h=600&fit=crop&crop=face\",\"https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=600&fit=crop&crop=face\"]",
+        "portfolio": "[\"https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1565058379802-bbe93b2f703a?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1542556398-95fb5b9f9b48?w=500&h=500&fit=crop\"]",
+        "createdAt": "2026-02-27T12:37:04.489Z",
+        "updatedAt": "2026-02-27T12:37:04.489Z"
+      },
+      "customer": {
+        "id": "cmm4vmxu500i9d830yjppy4b0",
+        "name": "Dewi Anggraini",
+        "email": "dewi.a@example.com",
+        "phone": "+62 838-0011-2233",
+        "createdAt": "2026-02-27T12:37:04.590Z",
+        "updatedAt": "2026-02-27T12:37:04.590Z"
+      },
+      "studio": {
+        "id": "cmm4vmxu000i4d83000r4ocpa",
+        "name": "Sacred Skin Collective",
+        "address": "Jl. Braga No. 88, Bandung",
+        "createdAt": "2026-02-27T12:37:04.584Z",
+        "updatedAt": "2026-02-27T12:37:04.584Z"
+      },
+      "payments": [],
+      "review": null
+    },
+    {
+      "id": "cmm4vmxuz00j5d830hzbswxsx",
+      "shortCode": null,
+      "artistId": "cmm4vmxsn00bsd830le472zod",
+      "customerId": "cmm4vmxu700ifd830cl52y2pp",
+      "studioId": "cmm4vmxu000i4d83000r4ocpa",
+      "date": "2026-03-02",
+      "startTime": "09:00",
+      "endTime": "13:00",
+      "status": "pending",
+      "totalAmount": 5500000,
+      "placement": null,
+      "preference": null,
+      "notes": "Photorealistic portrait of daughter",
+      "createdAt": "2026-02-27T12:37:04.620Z",
+      "updatedAt": "2026-02-27T12:37:04.620Z",
+      "artist": {
+        "id": "cmm4vmxsn00bsd830le472zod",
+        "name": "Arief Gunawan",
+        "shortDescription": "Photorealistic portrait specialist with a background in fine arts. Arief transforms photographs into breathtaking skin art, from celebrity likenesses to beloved family members and pets.",
+        "experiences": "9 years",
+        "speciality": "Portrait, Realism, Black & Grey, Surrealism",
+        "rate": 1100000,
+        "photos": "[\"https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=600&h=600&fit=crop&crop=face\",\"https://images.unsplash.com/photo-1522556189639-b150ed9c4330?w=600&h=600&fit=crop&crop=face\"]",
+        "portfolio": "[\"https://images.unsplash.com/photo-1590246815117-0b5fc4e3e5b4?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1542556398-95fb5b9f9b48?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=500&h=500&fit=crop\"]",
+        "createdAt": "2026-02-27T12:37:04.535Z",
+        "updatedAt": "2026-02-27T12:37:04.535Z"
+      },
+      "customer": {
+        "id": "cmm4vmxu700ifd830cl52y2pp",
+        "name": "Kevin Wijaya",
+        "email": "kevin@example.com",
+        "phone": "+62 812-1100-2233",
+        "createdAt": "2026-02-27T12:37:04.591Z",
+        "updatedAt": "2026-02-27T12:37:04.591Z"
+      },
+      "studio": {
+        "id": "cmm4vmxu000i4d83000r4ocpa",
+        "name": "Sacred Skin Collective",
+        "address": "Jl. Braga No. 88, Bandung",
+        "createdAt": "2026-02-27T12:37:04.584Z",
+        "updatedAt": "2026-02-27T12:37:04.584Z"
+      },
+      "payments": [],
+      "review": null
+    },
+    {
+      "id": "cmm4vmxux00ixd830zhxq24x3",
+      "shortCode": null,
+      "artistId": "cmm4vmxrq007kd830rix0732w",
+      "customerId": "cmm4vmxu600icd830yl06ru44",
+      "studioId": "cmm4vmxu000i3d830tft4w0bi",
+      "date": "2026-03-01",
+      "startTime": "11:00",
+      "endTime": "14:00",
+      "status": "confirmed",
+      "totalAmount": 2800000,
+      "placement": null,
+      "preference": null,
+      "notes": "Watercolor phoenix on shoulder blade",
+      "createdAt": "2026-02-27T12:37:04.617Z",
+      "updatedAt": "2026-02-27T12:37:04.617Z",
+      "artist": {
+        "id": "cmm4vmxrq007kd830rix0732w",
+        "name": "Nina Sari",
+        "shortDescription": "Watercolor and illustrative tattoo artist based in Bali. Nina's signature style combines soft washes of color with bold linework, creating pieces that look like paintings on skin.",
+        "experiences": "5 years",
+        "speciality": "Watercolor, Illustrative, Color Realism",
+        "rate": 650000,
+        "photos": "[\"https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600&h=600&fit=crop&crop=face\"]",
+        "portfolio": "[\"https://images.unsplash.com/photo-1568515045052-f9a854d70bfd?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1562962230-16e4623d36e6?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1590246815117-0b5fc4e3e5b4?w=500&h=500&fit=crop\"]",
+        "createdAt": "2026-02-27T12:37:04.502Z",
+        "updatedAt": "2026-02-27T12:37:04.502Z"
+      },
+      "customer": {
+        "id": "cmm4vmxu600icd830yl06ru44",
+        "name": "Rizky Fadillah",
+        "email": "rizky@example.com",
+        "phone": "+62 857-4455-6677",
+        "createdAt": "2026-02-27T12:37:04.590Z",
+        "updatedAt": "2026-02-27T12:37:04.590Z"
+      },
+      "studio": {
+        "id": "cmm4vmxu000i3d830tft4w0bi",
+        "name": "Black Lotus Tattoo",
+        "address": "Jl. Petitenget No. 12, Seminyak, Bali",
+        "createdAt": "2026-02-27T12:37:04.584Z",
+        "updatedAt": "2026-02-27T12:37:04.584Z"
+      },
+      "payments": [
+        {
+          "id": "cmm4vmxux00izd8305tt1q3a2",
+          "bookingId": "cmm4vmxux00ixd830zhxq24x3",
+          "amount": 840000,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "down_payment",
+          "method": "Credit Card",
+          "transferDestination": null,
+          "evidenceUrl": null,
+          "createdAt": "2026-02-27T12:37:04.618Z",
+          "updatedAt": "2026-02-27T12:37:04.618Z"
+        }
+      ],
+      "review": null
+    },
+    {
+      "id": "cmm4vmxuv00ird830ynt3vz77",
+      "shortCode": null,
+      "artistId": "cmm4vmxqz004cd830bp2udw2s",
+      "customerId": "cmm4vmxu500i8d830g07o38kc",
+      "studioId": "cmm4vmxu000i2d830cydp9ej9",
+      "date": "2026-03-01",
+      "startTime": "09:00",
+      "endTime": "12:30",
+      "status": "confirmed",
+      "totalAmount": 4800000,
+      "placement": null,
+      "preference": null,
+      "notes": "Japanese dragon back piece — session 1 of 3",
+      "createdAt": "2026-02-27T12:37:04.615Z",
+      "updatedAt": "2026-02-27T12:37:04.615Z",
+      "artist": {
+        "id": "cmm4vmxqz004cd830bp2udw2s",
+        "name": "Luna Park",
+        "shortDescription": "Specializing in large-scale Japanese irezumi and photorealistic black & grey portraits. Every piece is custom-designed through close client collaboration.",
+        "experiences": "6 years",
+        "speciality": "Japanese Irezumi, Black & Grey Realism",
+        "rate": 850000,
+        "photos": "[\"https://images.unsplash.com/photo-1599842057874-37393e9342df?w=600&h=600&fit=crop&crop=face\",\"https://images.unsplash.com/photo-1596704017254-9759879e0dba?w=600&h=600&fit=crop\"]",
+        "portfolio": "[\"https://images.unsplash.com/photo-1475090169767-40ed8d18f67d?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1586953208270-767889fa9b0f?w=500&h=500&fit=crop\"]",
+        "createdAt": "2026-02-27T12:37:04.476Z",
+        "updatedAt": "2026-02-27T12:37:04.476Z"
+      },
+      "customer": {
+        "id": "cmm4vmxu500i8d830g07o38kc",
+        "name": "Tommy Adriansyah",
+        "email": "tommy@example.com",
+        "phone": "+62 815-6677-8899",
+        "createdAt": "2026-02-27T12:37:04.590Z",
+        "updatedAt": "2026-02-27T12:37:04.590Z"
+      },
+      "studio": {
+        "id": "cmm4vmxu000i2d830cydp9ej9",
+        "name": "Ink Haven Studio",
+        "address": "Jl. Kemang Raya No. 45, Jakarta Selatan",
+        "createdAt": "2026-02-27T12:37:04.584Z",
+        "updatedAt": "2026-02-27T12:37:04.584Z"
+      },
+      "payments": [
+        {
+          "id": "cmm4vmxuv00itd83019a7ka55",
+          "bookingId": "cmm4vmxuv00ird830ynt3vz77",
+          "amount": 1440000,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "down_payment",
+          "method": "Cash",
+          "transferDestination": "BCA 1234567890",
+          "evidenceUrl": null,
+          "createdAt": "2026-02-27T12:37:04.616Z",
+          "updatedAt": "2026-02-27T12:37:04.616Z"
+        }
+      ],
+      "review": null
+    },
+    {
+      "id": "cmm4vmxuu00ipd830u5oy3a4u",
+      "shortCode": null,
+      "artistId": "cmm4vmxqf0025d830imu6yz6w",
+      "customerId": "cmm4vmxu500i6d830yh67gvkq",
+      "studioId": "cmm4vmxu000i2d830cydp9ej9",
+      "date": "2026-02-28",
+      "startTime": "14:00",
+      "endTime": "17:00",
+      "status": "pending",
+      "totalAmount": 3500000,
+      "placement": null,
+      "preference": null,
+      "notes": "Traditional eagle & roses chest piece",
+      "createdAt": "2026-02-27T12:37:04.615Z",
+      "updatedAt": "2026-02-27T12:37:04.615Z",
+      "artist": {
+        "id": "cmm4vmxqf0025d830imu6yz6w",
+        "name": "Jake Rivera",
+        "shortDescription": "Old-school meets new-school. Jake brings bold traditional Americana to life with vibrant saturated colors and thick confident lines. Featured in Inked Magazine.",
+        "experiences": "12 years",
+        "speciality": "American Traditional, Neo-Traditional",
+        "rate": 1000000,
+        "photos": "[\"https://images.unsplash.com/photo-1621607512214-68297480165e?w=600&h=600&fit=crop&crop=face\"]",
+        "portfolio": "[\"https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1542556398-95fb5b9f9b48?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1565058379802-bbe93b2f703a?w=500&h=500&fit=crop\"]",
+        "createdAt": "2026-02-27T12:37:04.455Z",
+        "updatedAt": "2026-02-27T12:37:04.455Z"
+      },
+      "customer": {
+        "id": "cmm4vmxu500i6d830yh67gvkq",
+        "name": "Sari Dewi",
+        "email": "sari@example.com",
+        "phone": "+62 813-9876-5432",
+        "createdAt": "2026-02-27T12:37:04.589Z",
+        "updatedAt": "2026-02-27T12:37:04.589Z"
+      },
+      "studio": {
+        "id": "cmm4vmxu000i2d830cydp9ej9",
+        "name": "Ink Haven Studio",
+        "address": "Jl. Kemang Raya No. 45, Jakarta Selatan",
+        "createdAt": "2026-02-27T12:37:04.584Z",
+        "updatedAt": "2026-02-27T12:37:04.584Z"
+      },
+      "payments": [],
+      "review": null
+    },
+    {
+      "id": "cmm4vmxut00ild830pfgz46fg",
+      "shortCode": null,
+      "artistId": "cmm4vmxpz000md830v78vzgex",
+      "customerId": "cmm4vmxu500i5d830g8gzjss0",
+      "studioId": "cmm4vmxu000i2d830cydp9ej9",
+      "date": "2026-02-28",
+      "startTime": "10:00",
+      "endTime": "12:00",
+      "status": "confirmed",
+      "totalAmount": 5000000,
+      "placement": null,
+      "preference": null,
+      "notes": "Half sleeve botanical — forearm piece with wildflowers",
+      "createdAt": "2026-02-27T12:37:04.613Z",
+      "updatedAt": "2026-02-27T12:37:04.613Z",
+      "artist": {
+        "id": "cmm4vmxpz000md830v78vzgex",
+        "name": "Maya Chen",
+        "shortDescription": "Award-winning artist known for intricate fine-line botanicals and delicate geometric patterns. Her work blends East Asian calligraphy influences with modern minimalism.",
+        "experiences": "8 years",
+        "speciality": "Fine Line, Botanical, Minimalist",
+        "rate": 750000,
+        "photos": "[\"https://images.unsplash.com/photo-1604072366595-e75dc92d6bdc?w=600&h=600&fit=crop&crop=face\",\"https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=600&h=600&fit=crop\"]",
+        "portfolio": "[\"https://images.unsplash.com/photo-1590246815117-0b5fc4e3e5b4?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1568515045052-f9a854d70bfd?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1562962230-16e4623d36e6?w=500&h=500&fit=crop\"]",
+        "createdAt": "2026-02-27T12:37:04.439Z",
+        "updatedAt": "2026-02-27T12:37:04.439Z"
+      },
+      "customer": {
+        "id": "cmm4vmxu500i5d830g8gzjss0",
+        "name": "Andi Pratama",
+        "email": "andi@example.com",
+        "phone": "+62 812-3456-7890",
+        "createdAt": "2026-02-27T12:37:04.589Z",
+        "updatedAt": "2026-02-27T12:37:04.589Z"
+      },
+      "studio": {
+        "id": "cmm4vmxu000i2d830cydp9ej9",
+        "name": "Ink Haven Studio",
+        "address": "Jl. Kemang Raya No. 45, Jakarta Selatan",
+        "createdAt": "2026-02-27T12:37:04.584Z",
+        "updatedAt": "2026-02-27T12:37:04.584Z"
+      },
+      "payments": [
+        {
+          "id": "cmm4vmxut00ind830zwwtn3jb",
+          "bookingId": "cmm4vmxut00ild830pfgz46fg",
+          "amount": 1500000,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "down_payment",
+          "method": "Credit Card",
+          "transferDestination": null,
+          "evidenceUrl": null,
+          "createdAt": "2026-02-27T12:37:04.614Z",
+          "updatedAt": "2026-02-27T12:37:04.614Z"
+        }
+      ],
+      "review": null
+    },
+    {
+      "id": "cmm4vmxvq00lxd830qcv8qe6k",
+      "shortCode": null,
+      "artistId": "cmm4vmxs10093d830iqiilc8d",
+      "customerId": "cmm4vmxu900iid830jgsv4ecf",
+      "studioId": "cmm4vmxu000i2d830cydp9ej9",
+      "date": "2026-02-24",
+      "startTime": "09:00",
+      "endTime": "14:00",
+      "status": "completed",
+      "totalAmount": 8500000,
+      "placement": null,
+      "preference": null,
+      "notes": "Polynesian tribal half sleeve with Dayak motifs",
+      "createdAt": "2026-02-27T12:37:04.647Z",
+      "updatedAt": "2026-02-27T12:37:04.647Z",
+      "artist": {
+        "id": "cmm4vmxs10093d830iqiilc8d",
+        "name": "Dimas Prasetyo",
+        "shortDescription": "Blackwork and tribal fusion artist. Dimas draws from Polynesian, Dayak, and Mentawai tribal traditions to create bold contemporary pieces rooted in Indonesian heritage.",
+        "experiences": "15 years",
+        "speciality": "Blackwork, Tribal, Polynesian, Cover-up",
+        "rate": 1200000,
+        "photos": "[\"https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&h=600&fit=crop&crop=face\",\"https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=600&h=600&fit=crop&crop=face\"]",
+        "portfolio": "[\"https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1475090169767-40ed8d18f67d?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1586953208270-767889fa9b0f?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1565058379802-bbe93b2f703a?w=500&h=500&fit=crop\"]",
+        "createdAt": "2026-02-27T12:37:04.514Z",
+        "updatedAt": "2026-02-27T12:37:04.514Z"
+      },
+      "customer": {
+        "id": "cmm4vmxu900iid830jgsv4ecf",
+        "name": "Budi Santoso",
+        "email": "budi@example.com",
+        "phone": "+62 811-2233-4455",
+        "createdAt": "2026-02-27T12:37:04.593Z",
+        "updatedAt": "2026-02-27T12:37:04.593Z"
+      },
+      "studio": {
+        "id": "cmm4vmxu000i2d830cydp9ej9",
+        "name": "Ink Haven Studio",
+        "address": "Jl. Kemang Raya No. 45, Jakarta Selatan",
+        "createdAt": "2026-02-27T12:37:04.584Z",
+        "updatedAt": "2026-02-27T12:37:04.584Z"
+      },
+      "payments": [
+        {
+          "id": "cmm4vmxvr00lzd830en8elv8c",
+          "bookingId": "cmm4vmxvq00lxd830qcv8qe6k",
+          "amount": 2550000,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "down_payment",
+          "method": "Mandiri",
+          "transferDestination": "BCA 1234567890",
+          "evidenceUrl": null,
+          "createdAt": "2026-02-27T12:37:04.647Z",
+          "updatedAt": "2026-02-27T12:37:04.647Z"
+        },
+        {
+          "id": "cmm4vmxvr00m1d830j437dxyd",
+          "bookingId": "cmm4vmxvq00lxd830qcv8qe6k",
+          "amount": 5950000,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "final",
+          "method": "Cash",
+          "transferDestination": null,
+          "evidenceUrl": null,
+          "createdAt": "2026-02-27T12:37:04.648Z",
+          "updatedAt": "2026-02-27T12:37:04.648Z"
+        }
+      ],
+      "review": {
+        "id": "cmm4vmxvs00m3d8309fuq0s2t",
+        "bookingId": "cmm4vmxvq00lxd830qcv8qe6k",
+        "artistId": "cmm4vmxs10093d830iqiilc8d",
+        "customerId": "cmm4vmxu900iid830jgsv4ecf",
+        "rating": 5,
+        "comment": "Dimas is a master of tribal work. He incorporated both Polynesian and Dayak elements seamlessly.",
+        "createdAt": "2026-02-27T12:37:04.648Z",
+        "updatedAt": "2026-02-27T12:37:04.648Z"
+      }
+    },
+    {
+      "id": "cmm4vmxwa00o5d830iyg6w85r",
+      "shortCode": null,
+      "artistId": "cmm4vmxto00gjd8303rhxmetx",
+      "customerId": "cmm4vmxu500i7d830sf6l7jup",
+      "studioId": "cmm4vmxu000i4d83000r4ocpa",
+      "date": "2026-02-23",
+      "startTime": "11:00",
+      "endTime": "15:00",
+      "status": "completed",
+      "totalAmount": 3500000,
+      "placement": null,
+      "preference": null,
+      "notes": "Trash Polka heart with geometric fragments",
+      "createdAt": "2026-02-27T12:37:04.667Z",
+      "updatedAt": "2026-02-27T12:37:04.667Z",
+      "artist": {
+        "id": "cmm4vmxto00gjd8303rhxmetx",
+        "name": "Siska Maharani",
+        "shortDescription": "Trash Polka and abstract expressionist. Siska combines chaotic brushstrokes, newspaper clippings, and photorealism into raw, emotional compositions that defy convention.",
+        "experiences": "4 years",
+        "speciality": "Trash Polka, Abstract, Surrealism, Mixed Media",
+        "rate": 600000,
+        "photos": "[\"https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=600&h=600&fit=crop&crop=face\",\"https://images.unsplash.com/photo-1517841905240-472988babdf9?w=600&h=600&fit=crop&crop=face\"]",
+        "portfolio": "[\"https://images.unsplash.com/photo-1542556398-95fb5b9f9b48?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1562962230-16e4623d36e6?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1568515045052-f9a854d70bfd?w=500&h=500&fit=crop\"]",
+        "createdAt": "2026-02-27T12:37:04.572Z",
+        "updatedAt": "2026-02-27T12:37:04.572Z"
+      },
+      "customer": {
+        "id": "cmm4vmxu500i7d830sf6l7jup",
+        "name": "Rina Wijaya",
+        "email": "rina@example.com",
+        "phone": "+62 856-7788-9900",
+        "createdAt": "2026-02-27T12:37:04.590Z",
+        "updatedAt": "2026-02-27T12:37:04.590Z"
+      },
+      "studio": {
+        "id": "cmm4vmxu000i4d83000r4ocpa",
+        "name": "Sacred Skin Collective",
+        "address": "Jl. Braga No. 88, Bandung",
+        "createdAt": "2026-02-27T12:37:04.584Z",
+        "updatedAt": "2026-02-27T12:37:04.584Z"
+      },
+      "payments": [
+        {
+          "id": "cmm4vmxwb00o7d8304yzlvw06",
+          "bookingId": "cmm4vmxwa00o5d830iyg6w85r",
+          "amount": 1050000,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "down_payment",
+          "method": "BNI",
+          "transferDestination": "BCA 1234567890",
+          "evidenceUrl": null,
+          "createdAt": "2026-02-27T12:37:04.667Z",
+          "updatedAt": "2026-02-27T12:37:04.667Z"
+        },
+        {
+          "id": "cmm4vmxwb00o9d8302by7w9gx",
+          "bookingId": "cmm4vmxwa00o5d830iyg6w85r",
+          "amount": 2450000,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "final",
+          "method": "Cash",
+          "transferDestination": null,
+          "evidenceUrl": null,
+          "createdAt": "2026-02-27T12:37:04.668Z",
+          "updatedAt": "2026-02-27T12:37:04.668Z"
+        }
+      ],
+      "review": {
+        "id": "cmm4vmxwc00obd8303xoayxsa",
+        "bookingId": "cmm4vmxwa00o5d830iyg6w85r",
+        "artistId": "cmm4vmxto00gjd8303rhxmetx",
+        "customerId": "cmm4vmxu500i7d830sf6l7jup",
+        "rating": 5,
+        "comment": "Siska's Trash Polka is raw and emotional. The contrast between the realistic heart and the abstract splatter is powerful.",
+        "createdAt": "2026-02-27T12:37:04.668Z",
+        "updatedAt": "2026-02-27T12:37:04.668Z"
+      }
+    },
+    {
+      "id": "cmm4vmxv200jhd83006us5klk",
+      "shortCode": null,
+      "artistId": "cmm4vmxqf0025d830imu6yz6w",
+      "customerId": "cmm4vmxu500i7d830sf6l7jup",
+      "studioId": "cmm4vmxu000i2d830cydp9ej9",
+      "date": "2026-02-22",
+      "startTime": "14:00",
+      "endTime": "17:00",
+      "status": "cancelled",
+      "totalAmount": 4000000,
+      "placement": null,
+      "preference": null,
+      "notes": "Traditional anchor — customer rescheduled",
+      "createdAt": "2026-02-27T12:37:04.623Z",
+      "updatedAt": "2026-02-27T12:37:04.623Z",
+      "artist": {
+        "id": "cmm4vmxqf0025d830imu6yz6w",
+        "name": "Jake Rivera",
+        "shortDescription": "Old-school meets new-school. Jake brings bold traditional Americana to life with vibrant saturated colors and thick confident lines. Featured in Inked Magazine.",
+        "experiences": "12 years",
+        "speciality": "American Traditional, Neo-Traditional",
+        "rate": 1000000,
+        "photos": "[\"https://images.unsplash.com/photo-1621607512214-68297480165e?w=600&h=600&fit=crop&crop=face\"]",
+        "portfolio": "[\"https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1542556398-95fb5b9f9b48?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1565058379802-bbe93b2f703a?w=500&h=500&fit=crop\"]",
+        "createdAt": "2026-02-27T12:37:04.455Z",
+        "updatedAt": "2026-02-27T12:37:04.455Z"
+      },
+      "customer": {
+        "id": "cmm4vmxu500i7d830sf6l7jup",
+        "name": "Rina Wijaya",
+        "email": "rina@example.com",
+        "phone": "+62 856-7788-9900",
+        "createdAt": "2026-02-27T12:37:04.590Z",
+        "updatedAt": "2026-02-27T12:37:04.590Z"
+      },
+      "studio": {
+        "id": "cmm4vmxu000i2d830cydp9ej9",
+        "name": "Ink Haven Studio",
+        "address": "Jl. Kemang Raya No. 45, Jakarta Selatan",
+        "createdAt": "2026-02-27T12:37:04.584Z",
+        "updatedAt": "2026-02-27T12:37:04.584Z"
+      },
+      "payments": [
+        {
+          "id": "cmm4vmxv300jjd830lyyn25ci",
+          "bookingId": "cmm4vmxv200jhd83006us5klk",
+          "amount": 1200000,
+          "currency": "IDR",
+          "status": "refunded",
+          "type": "down_payment",
+          "method": "BCA",
+          "transferDestination": null,
+          "evidenceUrl": null,
+          "createdAt": "2026-02-27T12:37:04.624Z",
+          "updatedAt": "2026-02-27T12:37:04.624Z"
+        }
+      ],
+      "review": null
+    },
+    {
+      "id": "cmm4vmxvk00l7d830ku0gb28x",
+      "shortCode": null,
+      "artistId": "cmm4vmxrc005vd8307idopdvb",
+      "customerId": "cmm4vmxu500i7d830sf6l7jup",
+      "studioId": "cmm4vmxu000i4d83000r4ocpa",
+      "date": "2026-02-22",
+      "startTime": "10:00",
+      "endTime": "13:00",
+      "status": "completed",
+      "totalAmount": 4000000,
+      "placement": null,
+      "preference": null,
+      "notes": "Sacred geometry sleeve — upper arm",
+      "createdAt": "2026-02-27T12:37:04.641Z",
+      "updatedAt": "2026-02-27T12:37:04.641Z",
+      "artist": {
+        "id": "cmm4vmxrc005vd8307idopdvb",
+        "name": "Riko Tanaka",
+        "shortDescription": "Geometric and dotwork specialist from Osaka. Riko creates hypnotic sacred geometry pieces, mandalas, and ornamental designs using precision hand-poke and machine techniques.",
+        "experiences": "10 years",
+        "speciality": "Geometric, Dotwork, Sacred Geometry, Ornamental",
+        "rate": 900000,
+        "photos": "[\"https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&h=600&fit=crop&crop=face\",\"https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=600&fit=crop&crop=face\"]",
+        "portfolio": "[\"https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1565058379802-bbe93b2f703a?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1542556398-95fb5b9f9b48?w=500&h=500&fit=crop\"]",
+        "createdAt": "2026-02-27T12:37:04.489Z",
+        "updatedAt": "2026-02-27T12:37:04.489Z"
+      },
+      "customer": {
+        "id": "cmm4vmxu500i7d830sf6l7jup",
+        "name": "Rina Wijaya",
+        "email": "rina@example.com",
+        "phone": "+62 856-7788-9900",
+        "createdAt": "2026-02-27T12:37:04.590Z",
+        "updatedAt": "2026-02-27T12:37:04.590Z"
+      },
+      "studio": {
+        "id": "cmm4vmxu000i4d83000r4ocpa",
+        "name": "Sacred Skin Collective",
+        "address": "Jl. Braga No. 88, Bandung",
+        "createdAt": "2026-02-27T12:37:04.584Z",
+        "updatedAt": "2026-02-27T12:37:04.584Z"
+      },
+      "payments": [
+        {
+          "id": "cmm4vmxvl00l9d8307l2i9qw1",
+          "bookingId": "cmm4vmxvk00l7d830ku0gb28x",
+          "amount": 4000000,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "final",
+          "method": "Mandiri",
+          "transferDestination": null,
+          "evidenceUrl": null,
+          "createdAt": "2026-02-27T12:37:04.641Z",
+          "updatedAt": "2026-02-27T12:37:04.641Z"
+        }
+      ],
+      "review": {
+        "id": "cmm4vmxvl00lbd8305oj5fy7n",
+        "bookingId": "cmm4vmxvk00l7d830ku0gb28x",
+        "artistId": "cmm4vmxrc005vd8307idopdvb",
+        "customerId": "cmm4vmxu500i7d830sf6l7jup",
+        "rating": 5,
+        "comment": "Riko's precision is mind-blowing. Every line is perfectly straight, every dot perfectly placed.",
+        "createdAt": "2026-02-27T12:37:04.642Z",
+        "updatedAt": "2026-02-27T12:37:04.642Z"
+      }
+    },
+    {
+      "id": "cmm4vmxvv00mhd8300q0x5vk6",
+      "shortCode": null,
+      "artistId": "cmm4vmxsn00bsd830le472zod",
+      "customerId": "cmm4vmxu500i8d830g07o38kc",
+      "studioId": "cmm4vmxu000i4d83000r4ocpa",
+      "date": "2026-02-21",
+      "startTime": "09:00",
+      "endTime": "13:00",
+      "status": "completed",
+      "totalAmount": 6500000,
+      "placement": null,
+      "preference": null,
+      "notes": "Photorealistic portrait of grandmother",
+      "createdAt": "2026-02-27T12:37:04.652Z",
+      "updatedAt": "2026-02-27T12:37:04.652Z",
+      "artist": {
+        "id": "cmm4vmxsn00bsd830le472zod",
+        "name": "Arief Gunawan",
+        "shortDescription": "Photorealistic portrait specialist with a background in fine arts. Arief transforms photographs into breathtaking skin art, from celebrity likenesses to beloved family members and pets.",
+        "experiences": "9 years",
+        "speciality": "Portrait, Realism, Black & Grey, Surrealism",
+        "rate": 1100000,
+        "photos": "[\"https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=600&h=600&fit=crop&crop=face\",\"https://images.unsplash.com/photo-1522556189639-b150ed9c4330?w=600&h=600&fit=crop&crop=face\"]",
+        "portfolio": "[\"https://images.unsplash.com/photo-1590246815117-0b5fc4e3e5b4?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1542556398-95fb5b9f9b48?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=500&h=500&fit=crop\"]",
+        "createdAt": "2026-02-27T12:37:04.535Z",
+        "updatedAt": "2026-02-27T12:37:04.535Z"
+      },
+      "customer": {
+        "id": "cmm4vmxu500i8d830g07o38kc",
+        "name": "Tommy Adriansyah",
+        "email": "tommy@example.com",
+        "phone": "+62 815-6677-8899",
+        "createdAt": "2026-02-27T12:37:04.590Z",
+        "updatedAt": "2026-02-27T12:37:04.590Z"
+      },
+      "studio": {
+        "id": "cmm4vmxu000i4d83000r4ocpa",
+        "name": "Sacred Skin Collective",
+        "address": "Jl. Braga No. 88, Bandung",
+        "createdAt": "2026-02-27T12:37:04.584Z",
+        "updatedAt": "2026-02-27T12:37:04.584Z"
+      },
+      "payments": [
+        {
+          "id": "cmm4vmxvw00mjd830sxj26tj6",
+          "bookingId": "cmm4vmxvv00mhd8300q0x5vk6",
+          "amount": 1950000,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "down_payment",
+          "method": "Cash",
+          "transferDestination": "Mandiri 0987654321",
+          "evidenceUrl": null,
+          "createdAt": "2026-02-27T12:37:04.652Z",
+          "updatedAt": "2026-02-27T12:37:04.652Z"
+        },
+        {
+          "id": "cmm4vmxvw00mld830bw0495oi",
+          "bookingId": "cmm4vmxvv00mhd8300q0x5vk6",
+          "amount": 4550000,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "final",
+          "method": "Cash",
+          "transferDestination": null,
+          "evidenceUrl": null,
+          "createdAt": "2026-02-27T12:37:04.653Z",
+          "updatedAt": "2026-02-27T12:37:04.653Z"
+        }
+      ],
+      "review": {
+        "id": "cmm4vmxvx00mnd830c94v2gm3",
+        "bookingId": "cmm4vmxvv00mhd8300q0x5vk6",
+        "artistId": "cmm4vmxsn00bsd830le472zod",
+        "customerId": "cmm4vmxu500i8d830g07o38kc",
+        "rating": 5,
+        "comment": "Arief captured my grandmother's smile perfectly. The detail in the eyes is extraordinary. I cried when I saw the result. A true master of realism.",
+        "createdAt": "2026-02-27T12:37:04.653Z",
+        "updatedAt": "2026-02-27T12:37:04.653Z"
+      }
+    },
+    {
+      "id": "cmm4vmxvb00k9d830uc6zk7d4",
+      "shortCode": null,
+      "artistId": "cmm4vmxqf0025d830imu6yz6w",
+      "customerId": "cmm4vmxu500i5d830g8gzjss0",
+      "studioId": "cmm4vmxu000i2d830cydp9ej9",
+      "date": "2026-02-20",
+      "startTime": "10:00",
+      "endTime": "14:00",
+      "status": "completed",
+      "totalAmount": 6000000,
+      "placement": null,
+      "preference": null,
+      "notes": "Traditional panther on thigh",
+      "createdAt": "2026-02-27T12:37:04.631Z",
+      "updatedAt": "2026-02-27T12:37:04.631Z",
+      "artist": {
+        "id": "cmm4vmxqf0025d830imu6yz6w",
+        "name": "Jake Rivera",
+        "shortDescription": "Old-school meets new-school. Jake brings bold traditional Americana to life with vibrant saturated colors and thick confident lines. Featured in Inked Magazine.",
+        "experiences": "12 years",
+        "speciality": "American Traditional, Neo-Traditional",
+        "rate": 1000000,
+        "photos": "[\"https://images.unsplash.com/photo-1621607512214-68297480165e?w=600&h=600&fit=crop&crop=face\"]",
+        "portfolio": "[\"https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1542556398-95fb5b9f9b48?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1565058379802-bbe93b2f703a?w=500&h=500&fit=crop\"]",
+        "createdAt": "2026-02-27T12:37:04.455Z",
+        "updatedAt": "2026-02-27T12:37:04.455Z"
+      },
+      "customer": {
+        "id": "cmm4vmxu500i5d830g8gzjss0",
+        "name": "Andi Pratama",
+        "email": "andi@example.com",
+        "phone": "+62 812-3456-7890",
+        "createdAt": "2026-02-27T12:37:04.589Z",
+        "updatedAt": "2026-02-27T12:37:04.589Z"
+      },
+      "studio": {
+        "id": "cmm4vmxu000i2d830cydp9ej9",
+        "name": "Ink Haven Studio",
+        "address": "Jl. Kemang Raya No. 45, Jakarta Selatan",
+        "createdAt": "2026-02-27T12:37:04.584Z",
+        "updatedAt": "2026-02-27T12:37:04.584Z"
+      },
+      "payments": [
+        {
+          "id": "cmm4vmxvb00kbd8308w16llrd",
+          "bookingId": "cmm4vmxvb00k9d830uc6zk7d4",
+          "amount": 1800000,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "down_payment",
+          "method": "BCA",
+          "transferDestination": "BCA 1234567890",
+          "evidenceUrl": null,
+          "createdAt": "2026-02-27T12:37:04.632Z",
+          "updatedAt": "2026-02-27T12:37:04.632Z"
+        },
+        {
+          "id": "cmm4vmxvc00kdd8307j7m5cah",
+          "bookingId": "cmm4vmxvb00k9d830uc6zk7d4",
+          "amount": 4200000,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "final",
+          "method": "Cash",
+          "transferDestination": null,
+          "evidenceUrl": null,
+          "createdAt": "2026-02-27T12:37:04.633Z",
+          "updatedAt": "2026-02-27T12:37:04.633Z"
+        }
+      ],
+      "review": {
+        "id": "cmm4vmxvd00kfd830ka8946w1",
+        "bookingId": "cmm4vmxvb00k9d830uc6zk7d4",
+        "artistId": "cmm4vmxqf0025d830imu6yz6w",
+        "customerId": "cmm4vmxu500i5d830g8gzjss0",
+        "rating": 5,
+        "comment": "Jake is the GOAT of traditional tattooing. Bold lines, perfect color saturation. The panther looks like it's about to jump off my skin!",
+        "createdAt": "2026-02-27T12:37:04.633Z",
+        "updatedAt": "2026-02-27T12:37:04.633Z"
+      }
+    },
+    {
+      "id": "cmm4vmxv400jld830hzpncccj",
+      "shortCode": null,
+      "artistId": "cmm4vmxrq007kd830rix0732w",
+      "customerId": "cmm4vmxu600ibd830y0xpn3i0",
+      "studioId": "cmm4vmxu000i3d830tft4w0bi",
+      "date": "2026-02-19",
+      "startTime": "11:00",
+      "endTime": "14:00",
+      "status": "cancelled",
+      "totalAmount": 2500000,
+      "placement": null,
+      "preference": null,
+      "notes": "Watercolor butterfly — cancelled by customer",
+      "createdAt": "2026-02-27T12:37:04.624Z",
+      "updatedAt": "2026-02-27T12:37:04.624Z",
+      "artist": {
+        "id": "cmm4vmxrq007kd830rix0732w",
+        "name": "Nina Sari",
+        "shortDescription": "Watercolor and illustrative tattoo artist based in Bali. Nina's signature style combines soft washes of color with bold linework, creating pieces that look like paintings on skin.",
+        "experiences": "5 years",
+        "speciality": "Watercolor, Illustrative, Color Realism",
+        "rate": 650000,
+        "photos": "[\"https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600&h=600&fit=crop&crop=face\"]",
+        "portfolio": "[\"https://images.unsplash.com/photo-1568515045052-f9a854d70bfd?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1562962230-16e4623d36e6?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1590246815117-0b5fc4e3e5b4?w=500&h=500&fit=crop\"]",
+        "createdAt": "2026-02-27T12:37:04.502Z",
+        "updatedAt": "2026-02-27T12:37:04.502Z"
+      },
+      "customer": {
+        "id": "cmm4vmxu600ibd830y0xpn3i0",
+        "name": "Doni Hermawan",
+        "email": "doni@example.com",
+        "phone": "+62 852-9900-1122",
+        "createdAt": "2026-02-27T12:37:04.590Z",
+        "updatedAt": "2026-02-27T12:37:04.590Z"
+      },
+      "studio": {
+        "id": "cmm4vmxu000i3d830tft4w0bi",
+        "name": "Black Lotus Tattoo",
+        "address": "Jl. Petitenget No. 12, Seminyak, Bali",
+        "createdAt": "2026-02-27T12:37:04.584Z",
+        "updatedAt": "2026-02-27T12:37:04.584Z"
+      },
+      "payments": [],
+      "review": null
+    },
+    {
+      "id": "cmm4vmxw000n1d830vwp2mmx5",
+      "shortCode": null,
+      "artistId": "cmm4vmxt000dhd830jf9vti6u",
+      "customerId": "cmm4vmxu600icd830yl06ru44",
+      "studioId": "cmm4vmxu000i3d830tft4w0bi",
+      "date": "2026-02-19",
+      "startTime": "10:00",
+      "endTime": "14:00",
+      "status": "completed",
+      "totalAmount": 4500000,
+      "placement": null,
+      "preference": null,
+      "notes": "Neo-traditional wolf with wildflower crown",
+      "createdAt": "2026-02-27T12:37:04.657Z",
+      "updatedAt": "2026-02-27T12:37:04.657Z",
+      "artist": {
+        "id": "cmm4vmxt000dhd830jf9vti6u",
+        "name": "Karin Wolff",
+        "shortDescription": "Berlin-trained artist who merges European illustration with Southeast Asian motifs. Known for intricate floral sleeves, whimsical animal pieces, and bold color palettes that pop.",
+        "experiences": "7 years",
+        "speciality": "Illustrative, Floral, Color Realism, Neo-Traditional",
+        "rate": 800000,
+        "photos": "[\"https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&h=600&fit=crop&crop=face\"]",
+        "portfolio": "[\"https://images.unsplash.com/photo-1562962230-16e4623d36e6?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1586953208270-767889fa9b0f?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1568515045052-f9a854d70bfd?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?w=500&h=500&fit=crop\"]",
+        "createdAt": "2026-02-27T12:37:04.549Z",
+        "updatedAt": "2026-02-27T12:37:04.549Z"
+      },
+      "customer": {
+        "id": "cmm4vmxu600icd830yl06ru44",
+        "name": "Rizky Fadillah",
+        "email": "rizky@example.com",
+        "phone": "+62 857-4455-6677",
+        "createdAt": "2026-02-27T12:37:04.590Z",
+        "updatedAt": "2026-02-27T12:37:04.590Z"
+      },
+      "studio": {
+        "id": "cmm4vmxu000i3d830tft4w0bi",
+        "name": "Black Lotus Tattoo",
+        "address": "Jl. Petitenget No. 12, Seminyak, Bali",
+        "createdAt": "2026-02-27T12:37:04.584Z",
+        "updatedAt": "2026-02-27T12:37:04.584Z"
+      },
+      "payments": [
+        {
+          "id": "cmm4vmxw100n3d83083bmdces",
+          "bookingId": "cmm4vmxw000n1d830vwp2mmx5",
+          "amount": 1350000,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "down_payment",
+          "method": "BNI",
+          "transferDestination": "BNI 5566778899",
+          "evidenceUrl": null,
+          "createdAt": "2026-02-27T12:37:04.657Z",
+          "updatedAt": "2026-02-27T12:37:04.657Z"
+        },
+        {
+          "id": "cmm4vmxw100n5d830lwodqdal",
+          "bookingId": "cmm4vmxw000n1d830vwp2mmx5",
+          "amount": 3150000,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "final",
+          "method": "Cash",
+          "transferDestination": null,
+          "evidenceUrl": null,
+          "createdAt": "2026-02-27T12:37:04.658Z",
+          "updatedAt": "2026-02-27T12:37:04.658Z"
+        }
+      ],
+      "review": {
+        "id": "cmm4vmxw200n7d830wry6mbjx",
+        "bookingId": "cmm4vmxw000n1d830vwp2mmx5",
+        "artistId": "cmm4vmxt000dhd830jf9vti6u",
+        "customerId": "cmm4vmxu600icd830yl06ru44",
+        "rating": 5,
+        "comment": "Karin's use of color is unlike anything I've seen. The wolf looks majestic with the floral elements. Absolutely breathtaking!",
+        "createdAt": "2026-02-27T12:37:04.658Z",
+        "updatedAt": "2026-02-27T12:37:04.658Z"
+      }
+    },
+    {
+      "id": "cmm4vmxw500nld830plvwabag",
+      "shortCode": null,
+      "artistId": "cmm4vmxtc00f0d8305urz5pau",
+      "customerId": "cmm4vmxu700ifd830cl52y2pp",
+      "studioId": "cmm4vmxu000i2d830cydp9ej9",
+      "date": "2026-02-18",
+      "startTime": "10:00",
+      "endTime": "13:00",
+      "status": "completed",
+      "totalAmount": 3000000,
+      "placement": null,
+      "preference": null,
+      "notes": "Arabic calligraphy script on forearm",
+      "createdAt": "2026-02-27T12:37:04.661Z",
+      "updatedAt": "2026-02-27T12:37:04.661Z",
+      "artist": {
+        "id": "cmm4vmxtc00f0d8305urz5pau",
+        "name": "Hendra Kusuma",
+        "shortDescription": "Lettering and script master. From elegant calligraphy to street-style graffiti lettering, Hendra crafts custom typography tattoos that tell stories through words and flourishes.",
+        "experiences": "11 years",
+        "speciality": "Lettering, Script, Chicano, Calligraphy",
+        "rate": 700000,
+        "photos": "[\"https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=600&h=600&fit=crop&crop=face\",\"https://images.unsplash.com/photo-1463453091185-61582044d556?w=600&h=600&fit=crop&crop=face\"]",
+        "portfolio": "[\"https://images.unsplash.com/photo-1565058379802-bbe93b2f703a?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1475090169767-40ed8d18f67d?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1590246815117-0b5fc4e3e5b4?w=500&h=500&fit=crop\"]",
+        "createdAt": "2026-02-27T12:37:04.561Z",
+        "updatedAt": "2026-02-27T12:37:04.561Z"
+      },
+      "customer": {
+        "id": "cmm4vmxu700ifd830cl52y2pp",
+        "name": "Kevin Wijaya",
+        "email": "kevin@example.com",
+        "phone": "+62 812-1100-2233",
+        "createdAt": "2026-02-27T12:37:04.591Z",
+        "updatedAt": "2026-02-27T12:37:04.591Z"
+      },
+      "studio": {
+        "id": "cmm4vmxu000i2d830cydp9ej9",
+        "name": "Ink Haven Studio",
+        "address": "Jl. Kemang Raya No. 45, Jakarta Selatan",
+        "createdAt": "2026-02-27T12:37:04.584Z",
+        "updatedAt": "2026-02-27T12:37:04.584Z"
+      },
+      "payments": [
+        {
+          "id": "cmm4vmxw500nnd830jinoowfx",
+          "bookingId": "cmm4vmxw500nld830plvwabag",
+          "amount": 900000,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "down_payment",
+          "method": "Mandiri",
+          "transferDestination": "BCA 1234567890",
+          "evidenceUrl": null,
+          "createdAt": "2026-02-27T12:37:04.662Z",
+          "updatedAt": "2026-02-27T12:37:04.662Z"
+        },
+        {
+          "id": "cmm4vmxw600npd830qrjhiu7v",
+          "bookingId": "cmm4vmxw500nld830plvwabag",
+          "amount": 2100000,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "final",
+          "method": "Cash",
+          "transferDestination": null,
+          "evidenceUrl": null,
+          "createdAt": "2026-02-27T12:37:04.662Z",
+          "updatedAt": "2026-02-27T12:37:04.662Z"
+        }
+      ],
+      "review": {
+        "id": "cmm4vmxw600nrd8300e9bo2cz",
+        "bookingId": "cmm4vmxw500nld830plvwabag",
+        "artistId": "cmm4vmxtc00f0d8305urz5pau",
+        "customerId": "cmm4vmxu700ifd830cl52y2pp",
+        "rating": 5,
+        "comment": "Hendra's lettering is flawless. The Arabic script flows beautifully and the line weight variation is masterful.",
+        "createdAt": "2026-02-27T12:37:04.663Z",
+        "updatedAt": "2026-02-27T12:37:04.663Z"
+      }
+    },
+    {
+      "id": "cmm4vmxvg00ktd8308mwyoqfv",
+      "shortCode": null,
+      "artistId": "cmm4vmxqz004cd830bp2udw2s",
+      "customerId": "cmm4vmxu500i6d830yh67gvkq",
+      "studioId": "cmm4vmxu000i2d830cydp9ej9",
+      "date": "2026-02-17",
+      "startTime": "09:00",
+      "endTime": "12:30",
+      "status": "completed",
+      "totalAmount": 5000000,
+      "placement": null,
+      "preference": null,
+      "notes": "Japanese koi fish half sleeve",
+      "createdAt": "2026-02-27T12:37:04.637Z",
+      "updatedAt": "2026-02-27T12:37:04.637Z",
+      "artist": {
+        "id": "cmm4vmxqz004cd830bp2udw2s",
+        "name": "Luna Park",
+        "shortDescription": "Specializing in large-scale Japanese irezumi and photorealistic black & grey portraits. Every piece is custom-designed through close client collaboration.",
+        "experiences": "6 years",
+        "speciality": "Japanese Irezumi, Black & Grey Realism",
+        "rate": 850000,
+        "photos": "[\"https://images.unsplash.com/photo-1599842057874-37393e9342df?w=600&h=600&fit=crop&crop=face\",\"https://images.unsplash.com/photo-1596704017254-9759879e0dba?w=600&h=600&fit=crop\"]",
+        "portfolio": "[\"https://images.unsplash.com/photo-1475090169767-40ed8d18f67d?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1586953208270-767889fa9b0f?w=500&h=500&fit=crop\"]",
+        "createdAt": "2026-02-27T12:37:04.476Z",
+        "updatedAt": "2026-02-27T12:37:04.476Z"
+      },
+      "customer": {
+        "id": "cmm4vmxu500i6d830yh67gvkq",
+        "name": "Sari Dewi",
+        "email": "sari@example.com",
+        "phone": "+62 813-9876-5432",
+        "createdAt": "2026-02-27T12:37:04.589Z",
+        "updatedAt": "2026-02-27T12:37:04.589Z"
+      },
+      "studio": {
+        "id": "cmm4vmxu000i2d830cydp9ej9",
+        "name": "Ink Haven Studio",
+        "address": "Jl. Kemang Raya No. 45, Jakarta Selatan",
+        "createdAt": "2026-02-27T12:37:04.584Z",
+        "updatedAt": "2026-02-27T12:37:04.584Z"
+      },
+      "payments": [
+        {
+          "id": "cmm4vmxvh00kvd830cdzqlgbo",
+          "bookingId": "cmm4vmxvg00ktd8308mwyoqfv",
+          "amount": 1500000,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "down_payment",
+          "method": "Mandiri",
+          "transferDestination": "Mandiri 0987654321",
+          "evidenceUrl": null,
+          "createdAt": "2026-02-27T12:37:04.637Z",
+          "updatedAt": "2026-02-27T12:37:04.637Z"
+        },
+        {
+          "id": "cmm4vmxvi00kxd830g1nhcqbe",
+          "bookingId": "cmm4vmxvg00ktd8308mwyoqfv",
+          "amount": 3500000,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "final",
+          "method": "Cash",
+          "transferDestination": null,
+          "evidenceUrl": null,
+          "createdAt": "2026-02-27T12:37:04.638Z",
+          "updatedAt": "2026-02-27T12:37:04.638Z"
+        }
+      ],
+      "review": {
+        "id": "cmm4vmxvi00kzd830d5x52t4v",
+        "bookingId": "cmm4vmxvg00ktd8308mwyoqfv",
+        "artistId": "cmm4vmxqz004cd830bp2udw2s",
+        "customerId": "cmm4vmxu500i6d830yh67gvkq",
+        "rating": 5,
+        "comment": "Luna's Japanese work is on another level. The flow of the koi with the water and waves is seamless.",
+        "createdAt": "2026-02-27T12:37:04.639Z",
+        "updatedAt": "2026-02-27T12:37:04.639Z"
+      }
+    },
+    {
+      "id": "cmm4vmxv400jnd830n94zwviy",
+      "shortCode": null,
+      "artistId": "cmm4vmxtc00f0d8305urz5pau",
+      "customerId": "cmm4vmxu600icd830yl06ru44",
+      "studioId": "cmm4vmxu000i2d830cydp9ej9",
+      "date": "2026-02-15",
+      "startTime": "14:00",
+      "endTime": "17:00",
+      "status": "cancelled",
+      "totalAmount": 2800000,
+      "placement": null,
+      "preference": null,
+      "notes": "Chicano lettering — customer no-show",
+      "createdAt": "2026-02-27T12:37:04.625Z",
+      "updatedAt": "2026-02-27T12:37:04.625Z",
+      "artist": {
+        "id": "cmm4vmxtc00f0d8305urz5pau",
+        "name": "Hendra Kusuma",
+        "shortDescription": "Lettering and script master. From elegant calligraphy to street-style graffiti lettering, Hendra crafts custom typography tattoos that tell stories through words and flourishes.",
+        "experiences": "11 years",
+        "speciality": "Lettering, Script, Chicano, Calligraphy",
+        "rate": 700000,
+        "photos": "[\"https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=600&h=600&fit=crop&crop=face\",\"https://images.unsplash.com/photo-1463453091185-61582044d556?w=600&h=600&fit=crop&crop=face\"]",
+        "portfolio": "[\"https://images.unsplash.com/photo-1565058379802-bbe93b2f703a?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1475090169767-40ed8d18f67d?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1590246815117-0b5fc4e3e5b4?w=500&h=500&fit=crop\"]",
+        "createdAt": "2026-02-27T12:37:04.561Z",
+        "updatedAt": "2026-02-27T12:37:04.561Z"
+      },
+      "customer": {
+        "id": "cmm4vmxu600icd830yl06ru44",
+        "name": "Rizky Fadillah",
+        "email": "rizky@example.com",
+        "phone": "+62 857-4455-6677",
+        "createdAt": "2026-02-27T12:37:04.590Z",
+        "updatedAt": "2026-02-27T12:37:04.590Z"
+      },
+      "studio": {
+        "id": "cmm4vmxu000i2d830cydp9ej9",
+        "name": "Ink Haven Studio",
+        "address": "Jl. Kemang Raya No. 45, Jakarta Selatan",
+        "createdAt": "2026-02-27T12:37:04.584Z",
+        "updatedAt": "2026-02-27T12:37:04.584Z"
+      },
+      "payments": [],
+      "review": null
+    },
+    {
+      "id": "cmm4vmxvn00lld830yc4xjo96",
+      "shortCode": null,
+      "artistId": "cmm4vmxrq007kd830rix0732w",
+      "customerId": "cmm4vmxu500i5d830g8gzjss0",
+      "studioId": "cmm4vmxu000i3d830tft4w0bi",
+      "date": "2026-02-15",
+      "startTime": "11:00",
+      "endTime": "14:00",
+      "status": "completed",
+      "totalAmount": 3200000,
+      "placement": null,
+      "preference": null,
+      "notes": "Watercolor hummingbird on shoulder",
+      "createdAt": "2026-02-27T12:37:04.644Z",
+      "updatedAt": "2026-02-27T12:37:04.644Z",
+      "artist": {
+        "id": "cmm4vmxrq007kd830rix0732w",
+        "name": "Nina Sari",
+        "shortDescription": "Watercolor and illustrative tattoo artist based in Bali. Nina's signature style combines soft washes of color with bold linework, creating pieces that look like paintings on skin.",
+        "experiences": "5 years",
+        "speciality": "Watercolor, Illustrative, Color Realism",
+        "rate": 650000,
+        "photos": "[\"https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600&h=600&fit=crop&crop=face\"]",
+        "portfolio": "[\"https://images.unsplash.com/photo-1568515045052-f9a854d70bfd?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1562962230-16e4623d36e6?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1590246815117-0b5fc4e3e5b4?w=500&h=500&fit=crop\"]",
+        "createdAt": "2026-02-27T12:37:04.502Z",
+        "updatedAt": "2026-02-27T12:37:04.502Z"
+      },
+      "customer": {
+        "id": "cmm4vmxu500i5d830g8gzjss0",
+        "name": "Andi Pratama",
+        "email": "andi@example.com",
+        "phone": "+62 812-3456-7890",
+        "createdAt": "2026-02-27T12:37:04.589Z",
+        "updatedAt": "2026-02-27T12:37:04.589Z"
+      },
+      "studio": {
+        "id": "cmm4vmxu000i3d830tft4w0bi",
+        "name": "Black Lotus Tattoo",
+        "address": "Jl. Petitenget No. 12, Seminyak, Bali",
+        "createdAt": "2026-02-27T12:37:04.584Z",
+        "updatedAt": "2026-02-27T12:37:04.584Z"
+      },
+      "payments": [
+        {
+          "id": "cmm4vmxvo00lnd830gngc820u",
+          "bookingId": "cmm4vmxvn00lld830yc4xjo96",
+          "amount": 3200000,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "final",
+          "method": "Mandiri",
+          "transferDestination": null,
+          "evidenceUrl": null,
+          "createdAt": "2026-02-27T12:37:04.644Z",
+          "updatedAt": "2026-02-27T12:37:04.644Z"
+        }
+      ],
+      "review": {
+        "id": "cmm4vmxvp00lpd830k0n5x7nt",
+        "bookingId": "cmm4vmxvn00lld830yc4xjo96",
+        "artistId": "cmm4vmxrq007kd830rix0732w",
+        "customerId": "cmm4vmxu500i5d830g8gzjss0",
+        "rating": 4,
+        "comment": "Nina's watercolor technique is beautiful. The colors blend so naturally.",
+        "createdAt": "2026-02-27T12:37:04.645Z",
+        "updatedAt": "2026-02-27T12:37:04.645Z"
+      }
+    },
+    {
+      "id": "cmm4vmxv500jpd830ocondmwc",
+      "shortCode": null,
+      "artistId": "cmm4vmxpz000md830v78vzgex",
+      "customerId": "cmm4vmxu900iid830jgsv4ecf",
+      "studioId": "cmm4vmxu000i2d830cydp9ej9",
+      "date": "2026-02-13",
+      "startTime": "09:00",
+      "endTime": "12:00",
+      "status": "completed",
+      "totalAmount": 4500000,
+      "placement": null,
+      "preference": null,
+      "notes": "Delicate peony sleeve — inner forearm",
+      "createdAt": "2026-02-27T12:37:04.626Z",
+      "updatedAt": "2026-02-27T12:37:04.626Z",
+      "artist": {
+        "id": "cmm4vmxpz000md830v78vzgex",
+        "name": "Maya Chen",
+        "shortDescription": "Award-winning artist known for intricate fine-line botanicals and delicate geometric patterns. Her work blends East Asian calligraphy influences with modern minimalism.",
+        "experiences": "8 years",
+        "speciality": "Fine Line, Botanical, Minimalist",
+        "rate": 750000,
+        "photos": "[\"https://images.unsplash.com/photo-1604072366595-e75dc92d6bdc?w=600&h=600&fit=crop&crop=face\",\"https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=600&h=600&fit=crop\"]",
+        "portfolio": "[\"https://images.unsplash.com/photo-1590246815117-0b5fc4e3e5b4?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1568515045052-f9a854d70bfd?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1562962230-16e4623d36e6?w=500&h=500&fit=crop\"]",
+        "createdAt": "2026-02-27T12:37:04.439Z",
+        "updatedAt": "2026-02-27T12:37:04.439Z"
+      },
+      "customer": {
+        "id": "cmm4vmxu900iid830jgsv4ecf",
+        "name": "Budi Santoso",
+        "email": "budi@example.com",
+        "phone": "+62 811-2233-4455",
+        "createdAt": "2026-02-27T12:37:04.593Z",
+        "updatedAt": "2026-02-27T12:37:04.593Z"
+      },
+      "studio": {
+        "id": "cmm4vmxu000i2d830cydp9ej9",
+        "name": "Ink Haven Studio",
+        "address": "Jl. Kemang Raya No. 45, Jakarta Selatan",
+        "createdAt": "2026-02-27T12:37:04.584Z",
+        "updatedAt": "2026-02-27T12:37:04.584Z"
+      },
+      "payments": [
+        {
+          "id": "cmm4vmxv600jrd8305xfh1vu3",
+          "bookingId": "cmm4vmxv500jpd830ocondmwc",
+          "amount": 1350000,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "down_payment",
+          "method": "Credit Card",
+          "transferDestination": "BNI 5566778899",
+          "evidenceUrl": null,
+          "createdAt": "2026-02-27T12:37:04.626Z",
+          "updatedAt": "2026-02-27T12:37:04.626Z"
+        },
+        {
+          "id": "cmm4vmxv700jtd830boqumaer",
+          "bookingId": "cmm4vmxv500jpd830ocondmwc",
+          "amount": 3150000,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "final",
+          "method": "Cash",
+          "transferDestination": null,
+          "evidenceUrl": null,
+          "createdAt": "2026-02-27T12:37:04.627Z",
+          "updatedAt": "2026-02-27T12:37:04.627Z"
+        }
+      ],
+      "review": {
+        "id": "cmm4vmxv700jvd830o2c37z3a",
+        "bookingId": "cmm4vmxv500jpd830ocondmwc",
+        "artistId": "cmm4vmxpz000md830v78vzgex",
+        "customerId": "cmm4vmxu900iid830jgsv4ecf",
+        "rating": 5,
+        "comment": "Maya is incredibly talented! The fine-line work is so precise and beautiful. She took the time to understand exactly what I wanted and the result exceeded my expectations.",
+        "createdAt": "2026-02-27T12:37:04.628Z",
+        "updatedAt": "2026-02-27T12:37:04.628Z"
+      }
+    },
+    {
+      "id": "cmm4vmxvs00m5d830fysdnnmv",
+      "shortCode": null,
+      "artistId": "cmm4vmxs10093d830iqiilc8d",
+      "customerId": "cmm4vmxu600idd830j0gcsfop",
+      "studioId": "cmm4vmxu000i2d830cydp9ej9",
+      "date": "2026-02-12",
+      "startTime": "13:00",
+      "endTime": "17:00",
+      "status": "completed",
+      "totalAmount": 6000000,
+      "placement": null,
+      "preference": null,
+      "notes": "Blackwork cover-up — old tattoo on forearm",
+      "createdAt": "2026-02-27T12:37:04.649Z",
+      "updatedAt": "2026-02-27T12:37:04.649Z",
+      "artist": {
+        "id": "cmm4vmxs10093d830iqiilc8d",
+        "name": "Dimas Prasetyo",
+        "shortDescription": "Blackwork and tribal fusion artist. Dimas draws from Polynesian, Dayak, and Mentawai tribal traditions to create bold contemporary pieces rooted in Indonesian heritage.",
+        "experiences": "15 years",
+        "speciality": "Blackwork, Tribal, Polynesian, Cover-up",
+        "rate": 1200000,
+        "photos": "[\"https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&h=600&fit=crop&crop=face\",\"https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=600&h=600&fit=crop&crop=face\"]",
+        "portfolio": "[\"https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1475090169767-40ed8d18f67d?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1586953208270-767889fa9b0f?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1565058379802-bbe93b2f703a?w=500&h=500&fit=crop\"]",
+        "createdAt": "2026-02-27T12:37:04.514Z",
+        "updatedAt": "2026-02-27T12:37:04.514Z"
+      },
+      "customer": {
+        "id": "cmm4vmxu600idd830j0gcsfop",
+        "name": "Fajar Kurniawan",
+        "email": "fajar@example.com",
+        "phone": "+62 878-1122-3344",
+        "createdAt": "2026-02-27T12:37:04.590Z",
+        "updatedAt": "2026-02-27T12:37:04.590Z"
+      },
+      "studio": {
+        "id": "cmm4vmxu000i2d830cydp9ej9",
+        "name": "Ink Haven Studio",
+        "address": "Jl. Kemang Raya No. 45, Jakarta Selatan",
+        "createdAt": "2026-02-27T12:37:04.584Z",
+        "updatedAt": "2026-02-27T12:37:04.584Z"
+      },
+      "payments": [
+        {
+          "id": "cmm4vmxvt00m7d830n6axw96f",
+          "bookingId": "cmm4vmxvs00m5d830fysdnnmv",
+          "amount": 6000000,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "final",
+          "method": "BCA",
+          "transferDestination": null,
+          "evidenceUrl": null,
+          "createdAt": "2026-02-27T12:37:04.649Z",
+          "updatedAt": "2026-02-27T12:37:04.649Z"
+        }
+      ],
+      "review": {
+        "id": "cmm4vmxvt00m9d830vytvw228",
+        "bookingId": "cmm4vmxvs00m5d830fysdnnmv",
+        "artistId": "cmm4vmxs10093d830iqiilc8d",
+        "customerId": "cmm4vmxu600idd830j0gcsfop",
+        "rating": 5,
+        "comment": "Dimas transformed my terrible old tattoo into something incredible. His cover-up skills are legendary.",
+        "createdAt": "2026-02-27T12:37:04.650Z",
+        "updatedAt": "2026-02-27T12:37:04.650Z"
+      }
+    },
+    {
+      "id": "cmm4vmxwc00odd830vb0yueqf",
+      "shortCode": null,
+      "artistId": "cmm4vmxto00gjd8303rhxmetx",
+      "customerId": "cmm4vmxu900ijd830yhqersld",
+      "studioId": "cmm4vmxu000i4d83000r4ocpa",
+      "date": "2026-02-11",
+      "startTime": "15:00",
+      "endTime": "19:00",
+      "status": "completed",
+      "totalAmount": 4000000,
+      "placement": null,
+      "preference": null,
+      "notes": "Abstract expressionist raven full back",
+      "createdAt": "2026-02-27T12:37:04.669Z",
+      "updatedAt": "2026-02-27T12:37:04.669Z",
+      "artist": {
+        "id": "cmm4vmxto00gjd8303rhxmetx",
+        "name": "Siska Maharani",
+        "shortDescription": "Trash Polka and abstract expressionist. Siska combines chaotic brushstrokes, newspaper clippings, and photorealism into raw, emotional compositions that defy convention.",
+        "experiences": "4 years",
+        "speciality": "Trash Polka, Abstract, Surrealism, Mixed Media",
+        "rate": 600000,
+        "photos": "[\"https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=600&h=600&fit=crop&crop=face\",\"https://images.unsplash.com/photo-1517841905240-472988babdf9?w=600&h=600&fit=crop&crop=face\"]",
+        "portfolio": "[\"https://images.unsplash.com/photo-1542556398-95fb5b9f9b48?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1562962230-16e4623d36e6?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1568515045052-f9a854d70bfd?w=500&h=500&fit=crop\"]",
+        "createdAt": "2026-02-27T12:37:04.572Z",
+        "updatedAt": "2026-02-27T12:37:04.572Z"
+      },
+      "customer": {
+        "id": "cmm4vmxu900ijd830yhqersld",
+        "name": "Mela Putri",
+        "email": "mela@example.com",
+        "phone": "+62 821-5566-7788",
+        "createdAt": "2026-02-27T12:37:04.594Z",
+        "updatedAt": "2026-02-27T12:37:04.594Z"
+      },
+      "studio": {
+        "id": "cmm4vmxu000i4d83000r4ocpa",
+        "name": "Sacred Skin Collective",
+        "address": "Jl. Braga No. 88, Bandung",
+        "createdAt": "2026-02-27T12:37:04.584Z",
+        "updatedAt": "2026-02-27T12:37:04.584Z"
+      },
+      "payments": [
+        {
+          "id": "cmm4vmxwd00ofd8305bk8t9r0",
+          "bookingId": "cmm4vmxwc00odd830vb0yueqf",
+          "amount": 4000000,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "final",
+          "method": "Cash",
+          "transferDestination": null,
+          "evidenceUrl": null,
+          "createdAt": "2026-02-27T12:37:04.669Z",
+          "updatedAt": "2026-02-27T12:37:04.669Z"
+        }
+      ],
+      "review": {
+        "id": "cmm4vmxwd00ohd830mqlirnjl",
+        "bookingId": "cmm4vmxwc00odd830vb0yueqf",
+        "artistId": "cmm4vmxto00gjd8303rhxmetx",
+        "customerId": "cmm4vmxu900ijd830yhqersld",
+        "rating": 4,
+        "comment": "The raven looks both beautiful and chaotic — exactly what I wanted. Siska has a unique vision that stands out.",
+        "createdAt": "2026-02-27T12:37:04.670Z",
+        "updatedAt": "2026-02-27T12:37:04.670Z"
+      }
+    },
+    {
+      "id": "cmm4vmxvm00ldd830c78fh5l6",
+      "shortCode": null,
+      "artistId": "cmm4vmxrc005vd8307idopdvb",
+      "customerId": "cmm4vmxu600ibd830y0xpn3i0",
+      "studioId": "cmm4vmxu000i4d83000r4ocpa",
+      "date": "2026-02-09",
+      "startTime": "14:00",
+      "endTime": "17:00",
+      "status": "completed",
+      "totalAmount": 3500000,
+      "placement": null,
+      "preference": null,
+      "notes": "Dotwork mandala on back",
+      "createdAt": "2026-02-27T12:37:04.642Z",
+      "updatedAt": "2026-02-27T12:37:04.642Z",
+      "artist": {
+        "id": "cmm4vmxrc005vd8307idopdvb",
+        "name": "Riko Tanaka",
+        "shortDescription": "Geometric and dotwork specialist from Osaka. Riko creates hypnotic sacred geometry pieces, mandalas, and ornamental designs using precision hand-poke and machine techniques.",
+        "experiences": "10 years",
+        "speciality": "Geometric, Dotwork, Sacred Geometry, Ornamental",
+        "rate": 900000,
+        "photos": "[\"https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&h=600&fit=crop&crop=face\",\"https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=600&fit=crop&crop=face\"]",
+        "portfolio": "[\"https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1565058379802-bbe93b2f703a?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1542556398-95fb5b9f9b48?w=500&h=500&fit=crop\"]",
+        "createdAt": "2026-02-27T12:37:04.489Z",
+        "updatedAt": "2026-02-27T12:37:04.489Z"
+      },
+      "customer": {
+        "id": "cmm4vmxu600ibd830y0xpn3i0",
+        "name": "Doni Hermawan",
+        "email": "doni@example.com",
+        "phone": "+62 852-9900-1122",
+        "createdAt": "2026-02-27T12:37:04.590Z",
+        "updatedAt": "2026-02-27T12:37:04.590Z"
+      },
+      "studio": {
+        "id": "cmm4vmxu000i4d83000r4ocpa",
+        "name": "Sacred Skin Collective",
+        "address": "Jl. Braga No. 88, Bandung",
+        "createdAt": "2026-02-27T12:37:04.584Z",
+        "updatedAt": "2026-02-27T12:37:04.584Z"
+      },
+      "payments": [
+        {
+          "id": "cmm4vmxvm00lfd830wxev4lac",
+          "bookingId": "cmm4vmxvm00ldd830c78fh5l6",
+          "amount": 1050000,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "down_payment",
+          "method": "BCA",
+          "transferDestination": "Mandiri 0987654321",
+          "evidenceUrl": null,
+          "createdAt": "2026-02-27T12:37:04.642Z",
+          "updatedAt": "2026-02-27T12:37:04.642Z"
+        },
+        {
+          "id": "cmm4vmxvn00lhd830p6863bne",
+          "bookingId": "cmm4vmxvm00ldd830c78fh5l6",
+          "amount": 2450000,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "final",
+          "method": "Cash",
+          "transferDestination": null,
+          "evidenceUrl": null,
+          "createdAt": "2026-02-27T12:37:04.643Z",
+          "updatedAt": "2026-02-27T12:37:04.643Z"
+        }
+      ],
+      "review": {
+        "id": "cmm4vmxvn00ljd830jptamus5",
+        "bookingId": "cmm4vmxvm00ldd830c78fh5l6",
+        "artistId": "cmm4vmxrc005vd8307idopdvb",
+        "customerId": "cmm4vmxu600ibd830y0xpn3i0",
+        "rating": 5,
+        "comment": "The mandala is absolutely perfect. Riko spent hours getting every single dot just right.",
+        "createdAt": "2026-02-27T12:37:04.644Z",
+        "updatedAt": "2026-02-27T12:37:04.644Z"
+      }
+    },
+    {
+      "id": "cmm4vmxvx00mpd830ea290n7c",
+      "shortCode": null,
+      "artistId": "cmm4vmxsn00bsd830le472zod",
+      "customerId": "cmm4vmxu500i9d830yjppy4b0",
+      "studioId": "cmm4vmxu000i4d83000r4ocpa",
+      "date": "2026-02-07",
+      "startTime": "13:00",
+      "endTime": "17:00",
+      "status": "completed",
+      "totalAmount": 5800000,
+      "placement": null,
+      "preference": null,
+      "notes": "Surrealist melting clock with eye",
+      "createdAt": "2026-02-27T12:37:04.654Z",
+      "updatedAt": "2026-02-27T12:37:04.654Z",
+      "artist": {
+        "id": "cmm4vmxsn00bsd830le472zod",
+        "name": "Arief Gunawan",
+        "shortDescription": "Photorealistic portrait specialist with a background in fine arts. Arief transforms photographs into breathtaking skin art, from celebrity likenesses to beloved family members and pets.",
+        "experiences": "9 years",
+        "speciality": "Portrait, Realism, Black & Grey, Surrealism",
+        "rate": 1100000,
+        "photos": "[\"https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=600&h=600&fit=crop&crop=face\",\"https://images.unsplash.com/photo-1522556189639-b150ed9c4330?w=600&h=600&fit=crop&crop=face\"]",
+        "portfolio": "[\"https://images.unsplash.com/photo-1590246815117-0b5fc4e3e5b4?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1542556398-95fb5b9f9b48?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=500&h=500&fit=crop\"]",
+        "createdAt": "2026-02-27T12:37:04.535Z",
+        "updatedAt": "2026-02-27T12:37:04.535Z"
+      },
+      "customer": {
+        "id": "cmm4vmxu500i9d830yjppy4b0",
+        "name": "Dewi Anggraini",
+        "email": "dewi.a@example.com",
+        "phone": "+62 838-0011-2233",
+        "createdAt": "2026-02-27T12:37:04.590Z",
+        "updatedAt": "2026-02-27T12:37:04.590Z"
+      },
+      "studio": {
+        "id": "cmm4vmxu000i4d83000r4ocpa",
+        "name": "Sacred Skin Collective",
+        "address": "Jl. Braga No. 88, Bandung",
+        "createdAt": "2026-02-27T12:37:04.584Z",
+        "updatedAt": "2026-02-27T12:37:04.584Z"
+      },
+      "payments": [
+        {
+          "id": "cmm4vmxvy00mrd8303vco7k5t",
+          "bookingId": "cmm4vmxvx00mpd830ea290n7c",
+          "amount": 5800000,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "final",
+          "method": "Credit Card",
+          "transferDestination": null,
+          "evidenceUrl": null,
+          "createdAt": "2026-02-27T12:37:04.654Z",
+          "updatedAt": "2026-02-27T12:37:04.654Z"
+        }
+      ],
+      "review": {
+        "id": "cmm4vmxvy00mtd830ccmnmyzy",
+        "bookingId": "cmm4vmxvx00mpd830ea290n7c",
+        "artistId": "cmm4vmxsn00bsd830le472zod",
+        "customerId": "cmm4vmxu500i9d830yjppy4b0",
+        "rating": 5,
+        "comment": "Arief turned my Salvador Dali inspiration into something uniquely mine. The depth and shading are insane.",
+        "createdAt": "2026-02-27T12:37:04.655Z",
+        "updatedAt": "2026-02-27T12:37:04.655Z"
+      }
+    },
+    {
+      "id": "cmm4vmxvd00khd8308e925v1a",
+      "shortCode": null,
+      "artistId": "cmm4vmxqf0025d830imu6yz6w",
+      "customerId": "cmm4vmxu900ijd830yhqersld",
+      "studioId": "cmm4vmxu000i2d830cydp9ej9",
+      "date": "2026-02-06",
+      "startTime": "14:00",
+      "endTime": "18:00",
+      "status": "completed",
+      "totalAmount": 7500000,
+      "placement": null,
+      "preference": null,
+      "notes": "Neo-traditional rose and dagger — full forearm",
+      "createdAt": "2026-02-27T12:37:04.634Z",
+      "updatedAt": "2026-02-27T12:37:04.634Z",
+      "artist": {
+        "id": "cmm4vmxqf0025d830imu6yz6w",
+        "name": "Jake Rivera",
+        "shortDescription": "Old-school meets new-school. Jake brings bold traditional Americana to life with vibrant saturated colors and thick confident lines. Featured in Inked Magazine.",
+        "experiences": "12 years",
+        "speciality": "American Traditional, Neo-Traditional",
+        "rate": 1000000,
+        "photos": "[\"https://images.unsplash.com/photo-1621607512214-68297480165e?w=600&h=600&fit=crop&crop=face\"]",
+        "portfolio": "[\"https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1542556398-95fb5b9f9b48?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1565058379802-bbe93b2f703a?w=500&h=500&fit=crop\"]",
+        "createdAt": "2026-02-27T12:37:04.455Z",
+        "updatedAt": "2026-02-27T12:37:04.455Z"
+      },
+      "customer": {
+        "id": "cmm4vmxu900ijd830yhqersld",
+        "name": "Mela Putri",
+        "email": "mela@example.com",
+        "phone": "+62 821-5566-7788",
+        "createdAt": "2026-02-27T12:37:04.594Z",
+        "updatedAt": "2026-02-27T12:37:04.594Z"
+      },
+      "studio": {
+        "id": "cmm4vmxu000i2d830cydp9ej9",
+        "name": "Ink Haven Studio",
+        "address": "Jl. Kemang Raya No. 45, Jakarta Selatan",
+        "createdAt": "2026-02-27T12:37:04.584Z",
+        "updatedAt": "2026-02-27T12:37:04.584Z"
+      },
+      "payments": [
+        {
+          "id": "cmm4vmxve00kjd830zx2dmo2z",
+          "bookingId": "cmm4vmxvd00khd8308e925v1a",
+          "amount": 7500000,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "final",
+          "method": "Credit Card",
+          "transferDestination": null,
+          "evidenceUrl": null,
+          "createdAt": "2026-02-27T12:37:04.634Z",
+          "updatedAt": "2026-02-27T12:37:04.634Z"
+        }
+      ],
+      "review": {
+        "id": "cmm4vmxve00kld830gaiy3yke",
+        "bookingId": "cmm4vmxvd00khd8308e925v1a",
+        "artistId": "cmm4vmxqf0025d830imu6yz6w",
+        "customerId": "cmm4vmxu900ijd830yhqersld",
+        "rating": 4,
+        "comment": "Really solid work. Jake knows his craft and the colors are vibrant.",
+        "createdAt": "2026-02-27T12:37:04.635Z",
+        "updatedAt": "2026-02-27T12:37:04.635Z"
+      }
+    },
+    {
+      "id": "cmm4vmxw200n9d830dl4ap2u4",
+      "shortCode": null,
+      "artistId": "cmm4vmxt000dhd830jf9vti6u",
+      "customerId": "cmm4vmxu600ied8305b91l1lq",
+      "studioId": "cmm4vmxu000i3d830tft4w0bi",
+      "date": "2026-02-05",
+      "startTime": "14:00",
+      "endTime": "18:00",
+      "status": "completed",
+      "totalAmount": 5000000,
+      "placement": null,
+      "preference": null,
+      "notes": "Illustrative bird of paradise full sleeve",
+      "createdAt": "2026-02-27T12:37:04.658Z",
+      "updatedAt": "2026-02-27T12:37:04.658Z",
+      "artist": {
+        "id": "cmm4vmxt000dhd830jf9vti6u",
+        "name": "Karin Wolff",
+        "shortDescription": "Berlin-trained artist who merges European illustration with Southeast Asian motifs. Known for intricate floral sleeves, whimsical animal pieces, and bold color palettes that pop.",
+        "experiences": "7 years",
+        "speciality": "Illustrative, Floral, Color Realism, Neo-Traditional",
+        "rate": 800000,
+        "photos": "[\"https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&h=600&fit=crop&crop=face\"]",
+        "portfolio": "[\"https://images.unsplash.com/photo-1562962230-16e4623d36e6?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1586953208270-767889fa9b0f?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1568515045052-f9a854d70bfd?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?w=500&h=500&fit=crop\"]",
+        "createdAt": "2026-02-27T12:37:04.549Z",
+        "updatedAt": "2026-02-27T12:37:04.549Z"
+      },
+      "customer": {
+        "id": "cmm4vmxu600ied8305b91l1lq",
+        "name": "Ayu Puspita",
+        "email": "ayu@example.com",
+        "phone": "+62 822-7788-9900",
+        "createdAt": "2026-02-27T12:37:04.591Z",
+        "updatedAt": "2026-02-27T12:37:04.591Z"
+      },
+      "studio": {
+        "id": "cmm4vmxu000i3d830tft4w0bi",
+        "name": "Black Lotus Tattoo",
+        "address": "Jl. Petitenget No. 12, Seminyak, Bali",
+        "createdAt": "2026-02-27T12:37:04.584Z",
+        "updatedAt": "2026-02-27T12:37:04.584Z"
+      },
+      "payments": [
+        {
+          "id": "cmm4vmxw200nbd830bujdwvyy",
+          "bookingId": "cmm4vmxw200n9d830dl4ap2u4",
+          "amount": 5000000,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "final",
+          "method": "Mandiri",
+          "transferDestination": null,
+          "evidenceUrl": null,
+          "createdAt": "2026-02-27T12:37:04.659Z",
+          "updatedAt": "2026-02-27T12:37:04.659Z"
+        }
+      ],
+      "review": {
+        "id": "cmm4vmxw300ndd830tyge5ggu",
+        "bookingId": "cmm4vmxw200n9d830dl4ap2u4",
+        "artistId": "cmm4vmxt000dhd830jf9vti6u",
+        "customerId": "cmm4vmxu600ied8305b91l1lq",
+        "rating": 5,
+        "comment": "Karin designed the most beautiful sleeve I could imagine. Every angle reveals new details. Worth flying to Bali for!",
+        "createdAt": "2026-02-27T12:37:04.659Z",
+        "updatedAt": "2026-02-27T12:37:04.659Z"
+      }
+    },
+    {
+      "id": "cmm4vmxw700ntd830dcxn8ona",
+      "shortCode": null,
+      "artistId": "cmm4vmxtc00f0d8305urz5pau",
+      "customerId": "cmm4vmxu500i6d830yh67gvkq",
+      "studioId": "cmm4vmxu000i2d830cydp9ej9",
+      "date": "2026-02-03",
+      "startTime": "14:00",
+      "endTime": "18:00",
+      "status": "completed",
+      "totalAmount": 3800000,
+      "placement": null,
+      "preference": null,
+      "notes": "Chicano-style \"Family First\" with roses",
+      "createdAt": "2026-02-27T12:37:04.663Z",
+      "updatedAt": "2026-02-27T12:37:04.663Z",
+      "artist": {
+        "id": "cmm4vmxtc00f0d8305urz5pau",
+        "name": "Hendra Kusuma",
+        "shortDescription": "Lettering and script master. From elegant calligraphy to street-style graffiti lettering, Hendra crafts custom typography tattoos that tell stories through words and flourishes.",
+        "experiences": "11 years",
+        "speciality": "Lettering, Script, Chicano, Calligraphy",
+        "rate": 700000,
+        "photos": "[\"https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=600&h=600&fit=crop&crop=face\",\"https://images.unsplash.com/photo-1463453091185-61582044d556?w=600&h=600&fit=crop&crop=face\"]",
+        "portfolio": "[\"https://images.unsplash.com/photo-1565058379802-bbe93b2f703a?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1475090169767-40ed8d18f67d?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1590246815117-0b5fc4e3e5b4?w=500&h=500&fit=crop\"]",
+        "createdAt": "2026-02-27T12:37:04.561Z",
+        "updatedAt": "2026-02-27T12:37:04.561Z"
+      },
+      "customer": {
+        "id": "cmm4vmxu500i6d830yh67gvkq",
+        "name": "Sari Dewi",
+        "email": "sari@example.com",
+        "phone": "+62 813-9876-5432",
+        "createdAt": "2026-02-27T12:37:04.589Z",
+        "updatedAt": "2026-02-27T12:37:04.589Z"
+      },
+      "studio": {
+        "id": "cmm4vmxu000i2d830cydp9ej9",
+        "name": "Ink Haven Studio",
+        "address": "Jl. Kemang Raya No. 45, Jakarta Selatan",
+        "createdAt": "2026-02-27T12:37:04.584Z",
+        "updatedAt": "2026-02-27T12:37:04.584Z"
+      },
+      "payments": [
+        {
+          "id": "cmm4vmxw700nvd8305e1cp2xy",
+          "bookingId": "cmm4vmxw700ntd830dcxn8ona",
+          "amount": 3800000,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "final",
+          "method": "BNI",
+          "transferDestination": null,
+          "evidenceUrl": null,
+          "createdAt": "2026-02-27T12:37:04.664Z",
+          "updatedAt": "2026-02-27T12:37:04.664Z"
+        }
+      ],
+      "review": {
+        "id": "cmm4vmxw800nxd830lfs3iimw",
+        "bookingId": "cmm4vmxw700ntd830dcxn8ona",
+        "artistId": "cmm4vmxtc00f0d8305urz5pau",
+        "customerId": "cmm4vmxu500i6d830yh67gvkq",
+        "rating": 5,
+        "comment": "The Chicano style lettering is authentic and clean. Hendra added roses and filigree that tied it all together. True artistry.",
+        "createdAt": "2026-02-27T12:37:04.664Z",
+        "updatedAt": "2026-02-27T12:37:04.664Z"
+      }
+    },
+    {
+      "id": "cmm4vmxvp00lrd8308sk16x1h",
+      "shortCode": null,
+      "artistId": "cmm4vmxrq007kd830rix0732w",
+      "customerId": "cmm4vmxu500iad830lmw5irwy",
+      "studioId": "cmm4vmxu000i3d830tft4w0bi",
+      "date": "2026-02-02",
+      "startTime": "15:00",
+      "endTime": "18:00",
+      "status": "completed",
+      "totalAmount": 2800000,
+      "placement": null,
+      "preference": null,
+      "notes": "Illustrative cat portrait with flowers",
+      "createdAt": "2026-02-27T12:37:04.645Z",
+      "updatedAt": "2026-02-27T12:37:04.645Z",
+      "artist": {
+        "id": "cmm4vmxrq007kd830rix0732w",
+        "name": "Nina Sari",
+        "shortDescription": "Watercolor and illustrative tattoo artist based in Bali. Nina's signature style combines soft washes of color with bold linework, creating pieces that look like paintings on skin.",
+        "experiences": "5 years",
+        "speciality": "Watercolor, Illustrative, Color Realism",
+        "rate": 650000,
+        "photos": "[\"https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600&h=600&fit=crop&crop=face\"]",
+        "portfolio": "[\"https://images.unsplash.com/photo-1568515045052-f9a854d70bfd?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1562962230-16e4623d36e6?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1590246815117-0b5fc4e3e5b4?w=500&h=500&fit=crop\"]",
+        "createdAt": "2026-02-27T12:37:04.502Z",
+        "updatedAt": "2026-02-27T12:37:04.502Z"
+      },
+      "customer": {
+        "id": "cmm4vmxu500iad830lmw5irwy",
+        "name": "Yuni Lestari",
+        "email": "yuni@example.com",
+        "phone": "+62 819-3344-5566",
+        "createdAt": "2026-02-27T12:37:04.590Z",
+        "updatedAt": "2026-02-27T12:37:04.590Z"
+      },
+      "studio": {
+        "id": "cmm4vmxu000i3d830tft4w0bi",
+        "name": "Black Lotus Tattoo",
+        "address": "Jl. Petitenget No. 12, Seminyak, Bali",
+        "createdAt": "2026-02-27T12:37:04.584Z",
+        "updatedAt": "2026-02-27T12:37:04.584Z"
+      },
+      "payments": [
+        {
+          "id": "cmm4vmxvp00ltd830a9xo61bv",
+          "bookingId": "cmm4vmxvp00lrd8308sk16x1h",
+          "amount": 2800000,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "final",
+          "method": "BCA",
+          "transferDestination": null,
+          "evidenceUrl": null,
+          "createdAt": "2026-02-27T12:37:04.646Z",
+          "updatedAt": "2026-02-27T12:37:04.646Z"
+        }
+      ],
+      "review": {
+        "id": "cmm4vmxvq00lvd830z526sjoj",
+        "bookingId": "cmm4vmxvp00lrd8308sk16x1h",
+        "artistId": "cmm4vmxrq007kd830rix0732w",
+        "customerId": "cmm4vmxu500iad830lmw5irwy",
+        "rating": 5,
+        "comment": "I'm in love with this tattoo! Nina perfectly captured my cat's personality with the illustrative style.",
+        "createdAt": "2026-02-27T12:37:04.646Z",
+        "updatedAt": "2026-02-27T12:37:04.646Z"
+      }
+    },
+    {
+      "id": "cmm4vmxv800jxd830z60nsuo7",
+      "shortCode": null,
+      "artistId": "cmm4vmxpz000md830v78vzgex",
+      "customerId": "cmm4vmxu500i7d830sf6l7jup",
+      "studioId": "cmm4vmxu000i2d830cydp9ej9",
+      "date": "2026-01-30",
+      "startTime": "13:00",
+      "endTime": "16:00",
+      "status": "completed",
+      "totalAmount": 3800000,
+      "placement": null,
+      "preference": null,
+      "notes": "Geometric mandala with botanical elements",
+      "createdAt": "2026-02-27T12:37:04.628Z",
+      "updatedAt": "2026-02-27T12:37:04.628Z",
+      "artist": {
+        "id": "cmm4vmxpz000md830v78vzgex",
+        "name": "Maya Chen",
+        "shortDescription": "Award-winning artist known for intricate fine-line botanicals and delicate geometric patterns. Her work blends East Asian calligraphy influences with modern minimalism.",
+        "experiences": "8 years",
+        "speciality": "Fine Line, Botanical, Minimalist",
+        "rate": 750000,
+        "photos": "[\"https://images.unsplash.com/photo-1604072366595-e75dc92d6bdc?w=600&h=600&fit=crop&crop=face\",\"https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=600&h=600&fit=crop\"]",
+        "portfolio": "[\"https://images.unsplash.com/photo-1590246815117-0b5fc4e3e5b4?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1568515045052-f9a854d70bfd?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1562962230-16e4623d36e6?w=500&h=500&fit=crop\"]",
+        "createdAt": "2026-02-27T12:37:04.439Z",
+        "updatedAt": "2026-02-27T12:37:04.439Z"
+      },
+      "customer": {
+        "id": "cmm4vmxu500i7d830sf6l7jup",
+        "name": "Rina Wijaya",
+        "email": "rina@example.com",
+        "phone": "+62 856-7788-9900",
+        "createdAt": "2026-02-27T12:37:04.590Z",
+        "updatedAt": "2026-02-27T12:37:04.590Z"
+      },
+      "studio": {
+        "id": "cmm4vmxu000i2d830cydp9ej9",
+        "name": "Ink Haven Studio",
+        "address": "Jl. Kemang Raya No. 45, Jakarta Selatan",
+        "createdAt": "2026-02-27T12:37:04.584Z",
+        "updatedAt": "2026-02-27T12:37:04.584Z"
+      },
+      "payments": [
+        {
+          "id": "cmm4vmxv800jzd830dv4tpl03",
+          "bookingId": "cmm4vmxv800jxd830z60nsuo7",
+          "amount": 3800000,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "final",
+          "method": "Mandiri",
+          "transferDestination": null,
+          "evidenceUrl": null,
+          "createdAt": "2026-02-27T12:37:04.629Z",
+          "updatedAt": "2026-02-27T12:37:04.629Z"
+        }
+      ],
+      "review": {
+        "id": "cmm4vmxv900k1d83009xuzz9g",
+        "bookingId": "cmm4vmxv800jxd830z60nsuo7",
+        "artistId": "cmm4vmxpz000md830v78vzgex",
+        "customerId": "cmm4vmxu500i7d830sf6l7jup",
+        "rating": 5,
+        "comment": "Absolutely stunning work. Maya has such a steady hand and the level of detail is remarkable.",
+        "createdAt": "2026-02-27T12:37:04.629Z",
+        "updatedAt": "2026-02-27T12:37:04.629Z"
+      }
+    },
+    {
+      "id": "cmm4vmxvj00l1d830d13dghme",
+      "shortCode": null,
+      "artistId": "cmm4vmxqz004cd830bp2udw2s",
+      "customerId": "cmm4vmxu500iad830lmw5irwy",
+      "studioId": "cmm4vmxu000i2d830cydp9ej9",
+      "date": "2026-01-28",
+      "startTime": "14:00",
+      "endTime": "17:00",
+      "status": "completed",
+      "totalAmount": 4200000,
+      "placement": null,
+      "preference": null,
+      "notes": "Black and grey portrait of my dog",
+      "createdAt": "2026-02-27T12:37:04.639Z",
+      "updatedAt": "2026-02-27T12:37:04.639Z",
+      "artist": {
+        "id": "cmm4vmxqz004cd830bp2udw2s",
+        "name": "Luna Park",
+        "shortDescription": "Specializing in large-scale Japanese irezumi and photorealistic black & grey portraits. Every piece is custom-designed through close client collaboration.",
+        "experiences": "6 years",
+        "speciality": "Japanese Irezumi, Black & Grey Realism",
+        "rate": 850000,
+        "photos": "[\"https://images.unsplash.com/photo-1599842057874-37393e9342df?w=600&h=600&fit=crop&crop=face\",\"https://images.unsplash.com/photo-1596704017254-9759879e0dba?w=600&h=600&fit=crop\"]",
+        "portfolio": "[\"https://images.unsplash.com/photo-1475090169767-40ed8d18f67d?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1586953208270-767889fa9b0f?w=500&h=500&fit=crop\"]",
+        "createdAt": "2026-02-27T12:37:04.476Z",
+        "updatedAt": "2026-02-27T12:37:04.476Z"
+      },
+      "customer": {
+        "id": "cmm4vmxu500iad830lmw5irwy",
+        "name": "Yuni Lestari",
+        "email": "yuni@example.com",
+        "phone": "+62 819-3344-5566",
+        "createdAt": "2026-02-27T12:37:04.590Z",
+        "updatedAt": "2026-02-27T12:37:04.590Z"
+      },
+      "studio": {
+        "id": "cmm4vmxu000i2d830cydp9ej9",
+        "name": "Ink Haven Studio",
+        "address": "Jl. Kemang Raya No. 45, Jakarta Selatan",
+        "createdAt": "2026-02-27T12:37:04.584Z",
+        "updatedAt": "2026-02-27T12:37:04.584Z"
+      },
+      "payments": [
+        {
+          "id": "cmm4vmxvj00l3d830arsbdmv2",
+          "bookingId": "cmm4vmxvj00l1d830d13dghme",
+          "amount": 4200000,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "final",
+          "method": "Cash",
+          "transferDestination": null,
+          "evidenceUrl": null,
+          "createdAt": "2026-02-27T12:37:04.640Z",
+          "updatedAt": "2026-02-27T12:37:04.640Z"
+        }
+      ],
+      "review": {
+        "id": "cmm4vmxvk00l5d8307qzcmeis",
+        "bookingId": "cmm4vmxvj00l1d830d13dghme",
+        "artistId": "cmm4vmxqz004cd830bp2udw2s",
+        "customerId": "cmm4vmxu500iad830lmw5irwy",
+        "rating": 4,
+        "comment": "The realism is amazing — it looks exactly like my dog! Luna captured every little detail.",
+        "createdAt": "2026-02-27T12:37:04.640Z",
+        "updatedAt": "2026-02-27T12:37:04.640Z"
+      }
+    },
+    {
+      "id": "cmm4vmxwe00ojd830q2og5u4o",
+      "shortCode": null,
+      "artistId": "cmm4vmxto00gjd8303rhxmetx",
+      "customerId": "cmm4vmxu900ihd830knix1x00",
+      "studioId": "cmm4vmxu000i4d83000r4ocpa",
+      "date": "2026-01-26",
+      "startTime": "12:00",
+      "endTime": "16:00",
+      "status": "completed",
+      "totalAmount": 3200000,
+      "placement": null,
+      "preference": null,
+      "notes": "Mixed media compass with newspaper texture",
+      "createdAt": "2026-02-27T12:37:04.670Z",
+      "updatedAt": "2026-02-27T12:37:04.670Z",
+      "artist": {
+        "id": "cmm4vmxto00gjd8303rhxmetx",
+        "name": "Siska Maharani",
+        "shortDescription": "Trash Polka and abstract expressionist. Siska combines chaotic brushstrokes, newspaper clippings, and photorealism into raw, emotional compositions that defy convention.",
+        "experiences": "4 years",
+        "speciality": "Trash Polka, Abstract, Surrealism, Mixed Media",
+        "rate": 600000,
+        "photos": "[\"https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=600&h=600&fit=crop&crop=face\",\"https://images.unsplash.com/photo-1517841905240-472988babdf9?w=600&h=600&fit=crop&crop=face\"]",
+        "portfolio": "[\"https://images.unsplash.com/photo-1542556398-95fb5b9f9b48?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1562962230-16e4623d36e6?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1568515045052-f9a854d70bfd?w=500&h=500&fit=crop\"]",
+        "createdAt": "2026-02-27T12:37:04.572Z",
+        "updatedAt": "2026-02-27T12:37:04.572Z"
+      },
+      "customer": {
+        "id": "cmm4vmxu900ihd830knix1x00",
+        "name": "Oscar Setiawan",
+        "email": "oscar@example.com",
+        "phone": "+62 878-6677-8899",
+        "createdAt": "2026-02-27T12:37:04.593Z",
+        "updatedAt": "2026-02-27T12:37:04.593Z"
+      },
+      "studio": {
+        "id": "cmm4vmxu000i4d83000r4ocpa",
+        "name": "Sacred Skin Collective",
+        "address": "Jl. Braga No. 88, Bandung",
+        "createdAt": "2026-02-27T12:37:04.584Z",
+        "updatedAt": "2026-02-27T12:37:04.584Z"
+      },
+      "payments": [
+        {
+          "id": "cmm4vmxwe00old83096a1phgd",
+          "bookingId": "cmm4vmxwe00ojd830q2og5u4o",
+          "amount": 3200000,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "final",
+          "method": "Mandiri",
+          "transferDestination": null,
+          "evidenceUrl": null,
+          "createdAt": "2026-02-27T12:37:04.671Z",
+          "updatedAt": "2026-02-27T12:37:04.671Z"
+        }
+      ],
+      "review": {
+        "id": "cmm4vmxwf00ond830ovc2piwa",
+        "bookingId": "cmm4vmxwe00ojd830q2og5u4o",
+        "artistId": "cmm4vmxto00gjd8303rhxmetx",
+        "customerId": "cmm4vmxu900ihd830knix1x00",
+        "rating": 5,
+        "comment": "Unlike any tattoo I've ever seen. The newspaper texture and red accents make it look like a living collage on my arm.",
+        "createdAt": "2026-02-27T12:37:04.671Z",
+        "updatedAt": "2026-02-27T12:37:04.671Z"
+      }
+    },
+    {
+      "id": "cmm4vmxvf00knd8307wwyuw52",
+      "shortCode": null,
+      "artistId": "cmm4vmxqf0025d830imu6yz6w",
+      "customerId": "cmm4vmxu600ibd830y0xpn3i0",
+      "studioId": "cmm4vmxu000i2d830cydp9ej9",
+      "date": "2026-01-23",
+      "startTime": "11:00",
+      "endTime": "15:00",
+      "status": "completed",
+      "totalAmount": 5500000,
+      "placement": null,
+      "preference": null,
+      "notes": "American traditional eagle chest piece",
+      "createdAt": "2026-02-27T12:37:04.635Z",
+      "updatedAt": "2026-02-27T12:37:04.635Z",
+      "artist": {
+        "id": "cmm4vmxqf0025d830imu6yz6w",
+        "name": "Jake Rivera",
+        "shortDescription": "Old-school meets new-school. Jake brings bold traditional Americana to life with vibrant saturated colors and thick confident lines. Featured in Inked Magazine.",
+        "experiences": "12 years",
+        "speciality": "American Traditional, Neo-Traditional",
+        "rate": 1000000,
+        "photos": "[\"https://images.unsplash.com/photo-1621607512214-68297480165e?w=600&h=600&fit=crop&crop=face\"]",
+        "portfolio": "[\"https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1542556398-95fb5b9f9b48?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1565058379802-bbe93b2f703a?w=500&h=500&fit=crop\"]",
+        "createdAt": "2026-02-27T12:37:04.455Z",
+        "updatedAt": "2026-02-27T12:37:04.455Z"
+      },
+      "customer": {
+        "id": "cmm4vmxu600ibd830y0xpn3i0",
+        "name": "Doni Hermawan",
+        "email": "doni@example.com",
+        "phone": "+62 852-9900-1122",
+        "createdAt": "2026-02-27T12:37:04.590Z",
+        "updatedAt": "2026-02-27T12:37:04.590Z"
+      },
+      "studio": {
+        "id": "cmm4vmxu000i2d830cydp9ej9",
+        "name": "Ink Haven Studio",
+        "address": "Jl. Kemang Raya No. 45, Jakarta Selatan",
+        "createdAt": "2026-02-27T12:37:04.584Z",
+        "updatedAt": "2026-02-27T12:37:04.584Z"
+      },
+      "payments": [
+        {
+          "id": "cmm4vmxvf00kpd8303zijxf32",
+          "bookingId": "cmm4vmxvf00knd8307wwyuw52",
+          "amount": 5500000,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "final",
+          "method": "Cash",
+          "transferDestination": null,
+          "evidenceUrl": null,
+          "createdAt": "2026-02-27T12:37:04.636Z",
+          "updatedAt": "2026-02-27T12:37:04.636Z"
+        }
+      ],
+      "review": {
+        "id": "cmm4vmxvg00krd83027yb0ypd",
+        "bookingId": "cmm4vmxvf00knd8307wwyuw52",
+        "artistId": "cmm4vmxqf0025d830imu6yz6w",
+        "customerId": "cmm4vmxu600ibd830y0xpn3i0",
+        "rating": 5,
+        "comment": "Incredible experience from start to finish. Jake's design was even better than what I had in mind.",
+        "createdAt": "2026-02-27T12:37:04.636Z",
+        "updatedAt": "2026-02-27T12:37:04.636Z"
+      }
+    },
+    {
+      "id": "cmm4vmxw300nfd830s0ovsn95",
+      "shortCode": null,
+      "artistId": "cmm4vmxt000dhd830jf9vti6u",
+      "customerId": "cmm4vmxu700igd830utja9m70",
+      "studioId": "cmm4vmxu000i3d830tft4w0bi",
+      "date": "2026-01-20",
+      "startTime": "10:00",
+      "endTime": "13:00",
+      "status": "completed",
+      "totalAmount": 3500000,
+      "placement": null,
+      "preference": null,
+      "notes": "Colorful botanical wrist band",
+      "createdAt": "2026-02-27T12:37:04.660Z",
+      "updatedAt": "2026-02-27T12:37:04.660Z",
+      "artist": {
+        "id": "cmm4vmxt000dhd830jf9vti6u",
+        "name": "Karin Wolff",
+        "shortDescription": "Berlin-trained artist who merges European illustration with Southeast Asian motifs. Known for intricate floral sleeves, whimsical animal pieces, and bold color palettes that pop.",
+        "experiences": "7 years",
+        "speciality": "Illustrative, Floral, Color Realism, Neo-Traditional",
+        "rate": 800000,
+        "photos": "[\"https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&h=600&fit=crop&crop=face\"]",
+        "portfolio": "[\"https://images.unsplash.com/photo-1562962230-16e4623d36e6?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1586953208270-767889fa9b0f?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1568515045052-f9a854d70bfd?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?w=500&h=500&fit=crop\"]",
+        "createdAt": "2026-02-27T12:37:04.549Z",
+        "updatedAt": "2026-02-27T12:37:04.549Z"
+      },
+      "customer": {
+        "id": "cmm4vmxu700igd830utja9m70",
+        "name": "Nadia Rahmawati",
+        "email": "nadia@example.com",
+        "phone": "+62 831-3344-5566",
+        "createdAt": "2026-02-27T12:37:04.591Z",
+        "updatedAt": "2026-02-27T12:37:04.591Z"
+      },
+      "studio": {
+        "id": "cmm4vmxu000i3d830tft4w0bi",
+        "name": "Black Lotus Tattoo",
+        "address": "Jl. Petitenget No. 12, Seminyak, Bali",
+        "createdAt": "2026-02-27T12:37:04.584Z",
+        "updatedAt": "2026-02-27T12:37:04.584Z"
+      },
+      "payments": [
+        {
+          "id": "cmm4vmxw400nhd8307obxt2ap",
+          "bookingId": "cmm4vmxw300nfd830s0ovsn95",
+          "amount": 3500000,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "final",
+          "method": "BCA",
+          "transferDestination": null,
+          "evidenceUrl": null,
+          "createdAt": "2026-02-27T12:37:04.660Z",
+          "updatedAt": "2026-02-27T12:37:04.660Z"
+        }
+      ],
+      "review": {
+        "id": "cmm4vmxw400njd830ocopyqxq",
+        "bookingId": "cmm4vmxw300nfd830s0ovsn95",
+        "artistId": "cmm4vmxt000dhd830jf9vti6u",
+        "customerId": "cmm4vmxu700igd830utja9m70",
+        "rating": 4,
+        "comment": "The colors are vibrant and the design wraps my wrist perfectly. Karin has a great eye for placement.",
+        "createdAt": "2026-02-27T12:37:04.661Z",
+        "updatedAt": "2026-02-27T12:37:04.661Z"
+      }
+    },
+    {
+      "id": "cmm4vmxvu00mbd830q0axw8fu",
+      "shortCode": null,
+      "artistId": "cmm4vmxs10093d830iqiilc8d",
+      "customerId": "cmm4vmxu900ijd830yhqersld",
+      "studioId": "cmm4vmxu000i2d830cydp9ej9",
+      "date": "2026-01-18",
+      "startTime": "10:00",
+      "endTime": "15:00",
+      "status": "completed",
+      "totalAmount": 7200000,
+      "placement": null,
+      "preference": null,
+      "notes": "Full back Mentawai tribal pattern",
+      "createdAt": "2026-02-27T12:37:04.650Z",
+      "updatedAt": "2026-02-27T12:37:04.650Z",
+      "artist": {
+        "id": "cmm4vmxs10093d830iqiilc8d",
+        "name": "Dimas Prasetyo",
+        "shortDescription": "Blackwork and tribal fusion artist. Dimas draws from Polynesian, Dayak, and Mentawai tribal traditions to create bold contemporary pieces rooted in Indonesian heritage.",
+        "experiences": "15 years",
+        "speciality": "Blackwork, Tribal, Polynesian, Cover-up",
+        "rate": 1200000,
+        "photos": "[\"https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&h=600&fit=crop&crop=face\",\"https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=600&h=600&fit=crop&crop=face\"]",
+        "portfolio": "[\"https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1475090169767-40ed8d18f67d?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1586953208270-767889fa9b0f?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1565058379802-bbe93b2f703a?w=500&h=500&fit=crop\"]",
+        "createdAt": "2026-02-27T12:37:04.514Z",
+        "updatedAt": "2026-02-27T12:37:04.514Z"
+      },
+      "customer": {
+        "id": "cmm4vmxu900ijd830yhqersld",
+        "name": "Mela Putri",
+        "email": "mela@example.com",
+        "phone": "+62 821-5566-7788",
+        "createdAt": "2026-02-27T12:37:04.594Z",
+        "updatedAt": "2026-02-27T12:37:04.594Z"
+      },
+      "studio": {
+        "id": "cmm4vmxu000i2d830cydp9ej9",
+        "name": "Ink Haven Studio",
+        "address": "Jl. Kemang Raya No. 45, Jakarta Selatan",
+        "createdAt": "2026-02-27T12:37:04.584Z",
+        "updatedAt": "2026-02-27T12:37:04.584Z"
+      },
+      "payments": [
+        {
+          "id": "cmm4vmxvu00mdd830l5z5n8g8",
+          "bookingId": "cmm4vmxvu00mbd830q0axw8fu",
+          "amount": 7200000,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "final",
+          "method": "Cash",
+          "transferDestination": null,
+          "evidenceUrl": null,
+          "createdAt": "2026-02-27T12:37:04.651Z",
+          "updatedAt": "2026-02-27T12:37:04.651Z"
+        }
+      ],
+      "review": {
+        "id": "cmm4vmxvv00mfd830ryqo94lh",
+        "bookingId": "cmm4vmxvu00mbd830q0axw8fu",
+        "artistId": "cmm4vmxs10093d830iqiilc8d",
+        "customerId": "cmm4vmxu900ijd830yhqersld",
+        "rating": 4,
+        "comment": "Massive piece that took multiple sessions. Dimas was patient and the final result is powerful.",
+        "createdAt": "2026-02-27T12:37:04.651Z",
+        "updatedAt": "2026-02-27T12:37:04.651Z"
+      }
+    },
+    {
+      "id": "cmm4vmxvz00mvd830f4yesh5r",
+      "shortCode": null,
+      "artistId": "cmm4vmxsn00bsd830le472zod",
+      "customerId": "cmm4vmxu900ihd830knix1x00",
+      "studioId": "cmm4vmxu000i4d83000r4ocpa",
+      "date": "2026-01-16",
+      "startTime": "10:00",
+      "endTime": "14:00",
+      "status": "completed",
+      "totalAmount": 7000000,
+      "placement": null,
+      "preference": null,
+      "notes": "Black & grey lion portrait on chest",
+      "createdAt": "2026-02-27T12:37:04.655Z",
+      "updatedAt": "2026-02-27T12:37:04.655Z",
+      "artist": {
+        "id": "cmm4vmxsn00bsd830le472zod",
+        "name": "Arief Gunawan",
+        "shortDescription": "Photorealistic portrait specialist with a background in fine arts. Arief transforms photographs into breathtaking skin art, from celebrity likenesses to beloved family members and pets.",
+        "experiences": "9 years",
+        "speciality": "Portrait, Realism, Black & Grey, Surrealism",
+        "rate": 1100000,
+        "photos": "[\"https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=600&h=600&fit=crop&crop=face\",\"https://images.unsplash.com/photo-1522556189639-b150ed9c4330?w=600&h=600&fit=crop&crop=face\"]",
+        "portfolio": "[\"https://images.unsplash.com/photo-1590246815117-0b5fc4e3e5b4?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1542556398-95fb5b9f9b48?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=500&h=500&fit=crop\"]",
+        "createdAt": "2026-02-27T12:37:04.535Z",
+        "updatedAt": "2026-02-27T12:37:04.535Z"
+      },
+      "customer": {
+        "id": "cmm4vmxu900ihd830knix1x00",
+        "name": "Oscar Setiawan",
+        "email": "oscar@example.com",
+        "phone": "+62 878-6677-8899",
+        "createdAt": "2026-02-27T12:37:04.593Z",
+        "updatedAt": "2026-02-27T12:37:04.593Z"
+      },
+      "studio": {
+        "id": "cmm4vmxu000i4d83000r4ocpa",
+        "name": "Sacred Skin Collective",
+        "address": "Jl. Braga No. 88, Bandung",
+        "createdAt": "2026-02-27T12:37:04.584Z",
+        "updatedAt": "2026-02-27T12:37:04.584Z"
+      },
+      "payments": [
+        {
+          "id": "cmm4vmxvz00mxd830cn2x1tww",
+          "bookingId": "cmm4vmxvz00mvd830f4yesh5r",
+          "amount": 7000000,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "final",
+          "method": "BNI",
+          "transferDestination": null,
+          "evidenceUrl": null,
+          "createdAt": "2026-02-27T12:37:04.656Z",
+          "updatedAt": "2026-02-27T12:37:04.656Z"
+        }
+      ],
+      "review": {
+        "id": "cmm4vmxw000mzd8303g24trth",
+        "bookingId": "cmm4vmxvz00mvd830f4yesh5r",
+        "artistId": "cmm4vmxsn00bsd830le472zod",
+        "customerId": "cmm4vmxu900ihd830knix1x00",
+        "rating": 4,
+        "comment": "The lion looks incredibly lifelike. Arief's shading technique creates amazing depth. Solid work.",
+        "createdAt": "2026-02-27T12:37:04.656Z",
+        "updatedAt": "2026-02-27T12:37:04.656Z"
+      }
+    },
+    {
+      "id": "cmm4vmxv900k3d830ctp5xbn3",
+      "shortCode": null,
+      "artistId": "cmm4vmxpz000md830v78vzgex",
+      "customerId": "cmm4vmxu600idd830j0gcsfop",
+      "studioId": "cmm4vmxu000i2d830cydp9ej9",
+      "date": "2026-01-13",
+      "startTime": "10:00",
+      "endTime": "13:00",
+      "status": "completed",
+      "totalAmount": 5200000,
+      "placement": null,
+      "preference": null,
+      "notes": "Minimalist wildflower bouquet — ribcage",
+      "createdAt": "2026-02-27T12:37:04.630Z",
+      "updatedAt": "2026-02-27T12:37:04.630Z",
+      "artist": {
+        "id": "cmm4vmxpz000md830v78vzgex",
+        "name": "Maya Chen",
+        "shortDescription": "Award-winning artist known for intricate fine-line botanicals and delicate geometric patterns. Her work blends East Asian calligraphy influences with modern minimalism.",
+        "experiences": "8 years",
+        "speciality": "Fine Line, Botanical, Minimalist",
+        "rate": 750000,
+        "photos": "[\"https://images.unsplash.com/photo-1604072366595-e75dc92d6bdc?w=600&h=600&fit=crop&crop=face\",\"https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=600&h=600&fit=crop\"]",
+        "portfolio": "[\"https://images.unsplash.com/photo-1590246815117-0b5fc4e3e5b4?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1568515045052-f9a854d70bfd?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1562962230-16e4623d36e6?w=500&h=500&fit=crop\"]",
+        "createdAt": "2026-02-27T12:37:04.439Z",
+        "updatedAt": "2026-02-27T12:37:04.439Z"
+      },
+      "customer": {
+        "id": "cmm4vmxu600idd830j0gcsfop",
+        "name": "Fajar Kurniawan",
+        "email": "fajar@example.com",
+        "phone": "+62 878-1122-3344",
+        "createdAt": "2026-02-27T12:37:04.590Z",
+        "updatedAt": "2026-02-27T12:37:04.590Z"
+      },
+      "studio": {
+        "id": "cmm4vmxu000i2d830cydp9ej9",
+        "name": "Ink Haven Studio",
+        "address": "Jl. Kemang Raya No. 45, Jakarta Selatan",
+        "createdAt": "2026-02-27T12:37:04.584Z",
+        "updatedAt": "2026-02-27T12:37:04.584Z"
+      },
+      "payments": [
+        {
+          "id": "cmm4vmxva00k5d8304tyfrfim",
+          "bookingId": "cmm4vmxv900k3d830ctp5xbn3",
+          "amount": 5200000,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "final",
+          "method": "Credit Card",
+          "transferDestination": null,
+          "evidenceUrl": null,
+          "createdAt": "2026-02-27T12:37:04.630Z",
+          "updatedAt": "2026-02-27T12:37:04.630Z"
+        }
+      ],
+      "review": {
+        "id": "cmm4vmxva00k7d83076hkf9as",
+        "bookingId": "cmm4vmxv900k3d830ctp5xbn3",
+        "artistId": "cmm4vmxpz000md830v78vzgex",
+        "customerId": "cmm4vmxu600idd830j0gcsfop",
+        "rating": 4,
+        "comment": "Beautiful work, very delicate and exactly the style I was looking for. The end result is perfect.",
+        "createdAt": "2026-02-27T12:37:04.631Z",
+        "updatedAt": "2026-02-27T12:37:04.631Z"
+      }
+    },
+    {
+      "id": "cmm4vmxw800nzd830v91a4x8e",
+      "shortCode": null,
+      "artistId": "cmm4vmxtc00f0d8305urz5pau",
+      "customerId": "cmm4vmxu600idd830j0gcsfop",
+      "studioId": "cmm4vmxu000i2d830cydp9ej9",
+      "date": "2026-01-08",
+      "startTime": "10:00",
+      "endTime": "14:00",
+      "status": "completed",
+      "totalAmount": 4200000,
+      "placement": null,
+      "preference": null,
+      "notes": "Full chest \"Through Hell and Back\" script",
+      "createdAt": "2026-02-27T12:37:04.665Z",
+      "updatedAt": "2026-02-27T12:37:04.665Z",
+      "artist": {
+        "id": "cmm4vmxtc00f0d8305urz5pau",
+        "name": "Hendra Kusuma",
+        "shortDescription": "Lettering and script master. From elegant calligraphy to street-style graffiti lettering, Hendra crafts custom typography tattoos that tell stories through words and flourishes.",
+        "experiences": "11 years",
+        "speciality": "Lettering, Script, Chicano, Calligraphy",
+        "rate": 700000,
+        "photos": "[\"https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=600&h=600&fit=crop&crop=face\",\"https://images.unsplash.com/photo-1463453091185-61582044d556?w=600&h=600&fit=crop&crop=face\"]",
+        "portfolio": "[\"https://images.unsplash.com/photo-1565058379802-bbe93b2f703a?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1475090169767-40ed8d18f67d?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1590246815117-0b5fc4e3e5b4?w=500&h=500&fit=crop\"]",
+        "createdAt": "2026-02-27T12:37:04.561Z",
+        "updatedAt": "2026-02-27T12:37:04.561Z"
+      },
+      "customer": {
+        "id": "cmm4vmxu600idd830j0gcsfop",
+        "name": "Fajar Kurniawan",
+        "email": "fajar@example.com",
+        "phone": "+62 878-1122-3344",
+        "createdAt": "2026-02-27T12:37:04.590Z",
+        "updatedAt": "2026-02-27T12:37:04.590Z"
+      },
+      "studio": {
+        "id": "cmm4vmxu000i2d830cydp9ej9",
+        "name": "Ink Haven Studio",
+        "address": "Jl. Kemang Raya No. 45, Jakarta Selatan",
+        "createdAt": "2026-02-27T12:37:04.584Z",
+        "updatedAt": "2026-02-27T12:37:04.584Z"
+      },
+      "payments": [
+        {
+          "id": "cmm4vmxw900o1d830no7nwum4",
+          "bookingId": "cmm4vmxw800nzd830v91a4x8e",
+          "amount": 4200000,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "final",
+          "method": "Cash",
+          "transferDestination": null,
+          "evidenceUrl": null,
+          "createdAt": "2026-02-27T12:37:04.665Z",
+          "updatedAt": "2026-02-27T12:37:04.665Z"
+        }
+      ],
+      "review": {
+        "id": "cmm4vmxw900o3d830f1of5cv5",
+        "bookingId": "cmm4vmxw800nzd830v91a4x8e",
+        "artistId": "cmm4vmxtc00f0d8305urz5pau",
+        "customerId": "cmm4vmxu600idd830j0gcsfop",
+        "rating": 4,
+        "comment": "Bold lettering that reads perfectly from every angle. Hendra took time to adjust sizing and spacing. Great results.",
+        "createdAt": "2026-02-27T12:37:04.666Z",
+        "updatedAt": "2026-02-27T12:37:04.666Z"
+      }
     }
   ],
   "payments": [
@@ -4087,6 +6295,7 @@
       "type": "down_payment",
       "method": "Credit Card",
       "transferDestination": null,
+      "evidenceUrl": null,
       "createdAt": "2026-02-27T12:37:04.614Z",
       "updatedAt": "2026-02-27T12:37:04.614Z"
     },
@@ -4099,6 +6308,7 @@
       "type": "down_payment",
       "method": "Cash",
       "transferDestination": "BCA 1234567890",
+      "evidenceUrl": null,
       "createdAt": "2026-02-27T12:37:04.616Z",
       "updatedAt": "2026-02-27T12:37:04.616Z"
     },
@@ -4111,6 +6321,7 @@
       "type": "down_payment",
       "method": "Credit Card",
       "transferDestination": null,
+      "evidenceUrl": null,
       "createdAt": "2026-02-27T12:37:04.618Z",
       "updatedAt": "2026-02-27T12:37:04.618Z"
     },
@@ -4123,6 +6334,7 @@
       "type": "down_payment",
       "method": "BNI",
       "transferDestination": null,
+      "evidenceUrl": null,
       "createdAt": "2026-02-27T12:37:04.619Z",
       "updatedAt": "2026-02-27T12:37:04.619Z"
     },
@@ -4135,6 +6347,7 @@
       "type": "down_payment",
       "method": "Mandiri",
       "transferDestination": "Mandiri 0987654321",
+      "evidenceUrl": null,
       "createdAt": "2026-02-27T12:37:04.621Z",
       "updatedAt": "2026-02-27T12:37:04.621Z"
     },
@@ -4147,6 +6360,7 @@
       "type": "down_payment",
       "method": "Credit Card",
       "transferDestination": "BNI 5566778899",
+      "evidenceUrl": null,
       "createdAt": "2026-02-27T12:37:04.622Z",
       "updatedAt": "2026-02-27T12:37:04.622Z"
     },
@@ -4159,6 +6373,7 @@
       "type": "down_payment",
       "method": "BCA",
       "transferDestination": null,
+      "evidenceUrl": null,
       "createdAt": "2026-02-27T12:37:04.624Z",
       "updatedAt": "2026-02-27T12:37:04.624Z"
     },
@@ -4171,6 +6386,7 @@
       "type": "down_payment",
       "method": "Credit Card",
       "transferDestination": "BNI 5566778899",
+      "evidenceUrl": null,
       "createdAt": "2026-02-27T12:37:04.626Z",
       "updatedAt": "2026-02-27T12:37:04.626Z"
     },
@@ -4183,6 +6399,7 @@
       "type": "final",
       "method": "Cash",
       "transferDestination": null,
+      "evidenceUrl": null,
       "createdAt": "2026-02-27T12:37:04.627Z",
       "updatedAt": "2026-02-27T12:37:04.627Z"
     },
@@ -4195,6 +6412,7 @@
       "type": "final",
       "method": "Mandiri",
       "transferDestination": null,
+      "evidenceUrl": null,
       "createdAt": "2026-02-27T12:37:04.629Z",
       "updatedAt": "2026-02-27T12:37:04.629Z"
     },
@@ -4207,6 +6425,7 @@
       "type": "final",
       "method": "Credit Card",
       "transferDestination": null,
+      "evidenceUrl": null,
       "createdAt": "2026-02-27T12:37:04.630Z",
       "updatedAt": "2026-02-27T12:37:04.630Z"
     },
@@ -4219,6 +6438,7 @@
       "type": "down_payment",
       "method": "BCA",
       "transferDestination": "BCA 1234567890",
+      "evidenceUrl": null,
       "createdAt": "2026-02-27T12:37:04.632Z",
       "updatedAt": "2026-02-27T12:37:04.632Z"
     },
@@ -4231,6 +6451,7 @@
       "type": "final",
       "method": "Cash",
       "transferDestination": null,
+      "evidenceUrl": null,
       "createdAt": "2026-02-27T12:37:04.633Z",
       "updatedAt": "2026-02-27T12:37:04.633Z"
     },
@@ -4243,6 +6464,7 @@
       "type": "final",
       "method": "Credit Card",
       "transferDestination": null,
+      "evidenceUrl": null,
       "createdAt": "2026-02-27T12:37:04.634Z",
       "updatedAt": "2026-02-27T12:37:04.634Z"
     },
@@ -4255,6 +6477,7 @@
       "type": "final",
       "method": "Cash",
       "transferDestination": null,
+      "evidenceUrl": null,
       "createdAt": "2026-02-27T12:37:04.636Z",
       "updatedAt": "2026-02-27T12:37:04.636Z"
     },
@@ -4267,6 +6490,7 @@
       "type": "down_payment",
       "method": "Mandiri",
       "transferDestination": "Mandiri 0987654321",
+      "evidenceUrl": null,
       "createdAt": "2026-02-27T12:37:04.637Z",
       "updatedAt": "2026-02-27T12:37:04.637Z"
     },
@@ -4279,6 +6503,7 @@
       "type": "final",
       "method": "Cash",
       "transferDestination": null,
+      "evidenceUrl": null,
       "createdAt": "2026-02-27T12:37:04.638Z",
       "updatedAt": "2026-02-27T12:37:04.638Z"
     },
@@ -4291,6 +6516,7 @@
       "type": "final",
       "method": "Cash",
       "transferDestination": null,
+      "evidenceUrl": null,
       "createdAt": "2026-02-27T12:37:04.640Z",
       "updatedAt": "2026-02-27T12:37:04.640Z"
     },
@@ -4303,6 +6529,7 @@
       "type": "final",
       "method": "Mandiri",
       "transferDestination": null,
+      "evidenceUrl": null,
       "createdAt": "2026-02-27T12:37:04.641Z",
       "updatedAt": "2026-02-27T12:37:04.641Z"
     },
@@ -4315,6 +6542,7 @@
       "type": "down_payment",
       "method": "BCA",
       "transferDestination": "Mandiri 0987654321",
+      "evidenceUrl": null,
       "createdAt": "2026-02-27T12:37:04.642Z",
       "updatedAt": "2026-02-27T12:37:04.642Z"
     },
@@ -4327,6 +6555,7 @@
       "type": "final",
       "method": "Cash",
       "transferDestination": null,
+      "evidenceUrl": null,
       "createdAt": "2026-02-27T12:37:04.643Z",
       "updatedAt": "2026-02-27T12:37:04.643Z"
     },
@@ -4339,6 +6568,7 @@
       "type": "final",
       "method": "Mandiri",
       "transferDestination": null,
+      "evidenceUrl": null,
       "createdAt": "2026-02-27T12:37:04.644Z",
       "updatedAt": "2026-02-27T12:37:04.644Z"
     },
@@ -4351,6 +6581,7 @@
       "type": "final",
       "method": "BCA",
       "transferDestination": null,
+      "evidenceUrl": null,
       "createdAt": "2026-02-27T12:37:04.646Z",
       "updatedAt": "2026-02-27T12:37:04.646Z"
     },
@@ -4363,6 +6594,7 @@
       "type": "down_payment",
       "method": "Mandiri",
       "transferDestination": "BCA 1234567890",
+      "evidenceUrl": null,
       "createdAt": "2026-02-27T12:37:04.647Z",
       "updatedAt": "2026-02-27T12:37:04.647Z"
     },
@@ -4375,6 +6607,7 @@
       "type": "final",
       "method": "Cash",
       "transferDestination": null,
+      "evidenceUrl": null,
       "createdAt": "2026-02-27T12:37:04.648Z",
       "updatedAt": "2026-02-27T12:37:04.648Z"
     },
@@ -4387,6 +6620,7 @@
       "type": "final",
       "method": "BCA",
       "transferDestination": null,
+      "evidenceUrl": null,
       "createdAt": "2026-02-27T12:37:04.649Z",
       "updatedAt": "2026-02-27T12:37:04.649Z"
     },
@@ -4399,6 +6633,7 @@
       "type": "final",
       "method": "Cash",
       "transferDestination": null,
+      "evidenceUrl": null,
       "createdAt": "2026-02-27T12:37:04.651Z",
       "updatedAt": "2026-02-27T12:37:04.651Z"
     },
@@ -4411,6 +6646,7 @@
       "type": "down_payment",
       "method": "Cash",
       "transferDestination": "Mandiri 0987654321",
+      "evidenceUrl": null,
       "createdAt": "2026-02-27T12:37:04.652Z",
       "updatedAt": "2026-02-27T12:37:04.652Z"
     },
@@ -4423,6 +6659,7 @@
       "type": "final",
       "method": "Cash",
       "transferDestination": null,
+      "evidenceUrl": null,
       "createdAt": "2026-02-27T12:37:04.653Z",
       "updatedAt": "2026-02-27T12:37:04.653Z"
     },
@@ -4435,6 +6672,7 @@
       "type": "final",
       "method": "Credit Card",
       "transferDestination": null,
+      "evidenceUrl": null,
       "createdAt": "2026-02-27T12:37:04.654Z",
       "updatedAt": "2026-02-27T12:37:04.654Z"
     },
@@ -4447,6 +6685,7 @@
       "type": "final",
       "method": "BNI",
       "transferDestination": null,
+      "evidenceUrl": null,
       "createdAt": "2026-02-27T12:37:04.656Z",
       "updatedAt": "2026-02-27T12:37:04.656Z"
     },
@@ -4459,6 +6698,7 @@
       "type": "down_payment",
       "method": "BNI",
       "transferDestination": "BNI 5566778899",
+      "evidenceUrl": null,
       "createdAt": "2026-02-27T12:37:04.657Z",
       "updatedAt": "2026-02-27T12:37:04.657Z"
     },
@@ -4471,6 +6711,7 @@
       "type": "final",
       "method": "Cash",
       "transferDestination": null,
+      "evidenceUrl": null,
       "createdAt": "2026-02-27T12:37:04.658Z",
       "updatedAt": "2026-02-27T12:37:04.658Z"
     },
@@ -4483,6 +6724,7 @@
       "type": "final",
       "method": "Mandiri",
       "transferDestination": null,
+      "evidenceUrl": null,
       "createdAt": "2026-02-27T12:37:04.659Z",
       "updatedAt": "2026-02-27T12:37:04.659Z"
     },
@@ -4495,6 +6737,7 @@
       "type": "final",
       "method": "BCA",
       "transferDestination": null,
+      "evidenceUrl": null,
       "createdAt": "2026-02-27T12:37:04.660Z",
       "updatedAt": "2026-02-27T12:37:04.660Z"
     },
@@ -4507,6 +6750,7 @@
       "type": "down_payment",
       "method": "Mandiri",
       "transferDestination": "BCA 1234567890",
+      "evidenceUrl": null,
       "createdAt": "2026-02-27T12:37:04.662Z",
       "updatedAt": "2026-02-27T12:37:04.662Z"
     },
@@ -4519,6 +6763,7 @@
       "type": "final",
       "method": "Cash",
       "transferDestination": null,
+      "evidenceUrl": null,
       "createdAt": "2026-02-27T12:37:04.662Z",
       "updatedAt": "2026-02-27T12:37:04.662Z"
     },
@@ -4531,6 +6776,7 @@
       "type": "final",
       "method": "BNI",
       "transferDestination": null,
+      "evidenceUrl": null,
       "createdAt": "2026-02-27T12:37:04.664Z",
       "updatedAt": "2026-02-27T12:37:04.664Z"
     },
@@ -4543,6 +6789,7 @@
       "type": "final",
       "method": "Cash",
       "transferDestination": null,
+      "evidenceUrl": null,
       "createdAt": "2026-02-27T12:37:04.665Z",
       "updatedAt": "2026-02-27T12:37:04.665Z"
     },
@@ -4555,6 +6802,7 @@
       "type": "down_payment",
       "method": "BNI",
       "transferDestination": "BCA 1234567890",
+      "evidenceUrl": null,
       "createdAt": "2026-02-27T12:37:04.667Z",
       "updatedAt": "2026-02-27T12:37:04.667Z"
     },
@@ -4567,6 +6815,7 @@
       "type": "final",
       "method": "Cash",
       "transferDestination": null,
+      "evidenceUrl": null,
       "createdAt": "2026-02-27T12:37:04.668Z",
       "updatedAt": "2026-02-27T12:37:04.668Z"
     },
@@ -4579,6 +6828,7 @@
       "type": "final",
       "method": "Cash",
       "transferDestination": null,
+      "evidenceUrl": null,
       "createdAt": "2026-02-27T12:37:04.669Z",
       "updatedAt": "2026-02-27T12:37:04.669Z"
     },
@@ -4591,24 +6841,30 @@
       "type": "final",
       "method": "Mandiri",
       "transferDestination": null,
+      "evidenceUrl": null,
       "createdAt": "2026-02-27T12:37:04.671Z",
       "updatedAt": "2026-02-27T12:37:04.671Z"
+    },
+    {
+      "id": "cmmehnfdy0003g026odo68ddf",
+      "bookingId": "cmmehnfdj0001g026wj1wi19a",
+      "amount": 808098,
+      "currency": "IDR",
+      "status": "completed",
+      "type": "down_payment",
+      "method": "BCA",
+      "transferDestination": "978798008",
+      "evidenceUrl": "/uploads/pay-1772776893302-Screenshot-2026-03-05-at-17.07.19.png",
+      "createdAt": "2026-03-06T06:03:14.470Z",
+      "updatedAt": "2026-03-06T06:03:14.470Z"
     }
   ],
-  "commissions": [
+  "studioCommissions": [
     {
       "id": "cmm4vmxwf00opd830u2peaz1t",
       "studioId": "cmm4vmxu000i2d830cydp9ej9",
       "artistId": "cmm4vmxpz000md830v78vzgex",
       "commissionPercent": 20,
-      "createdAt": "2026-02-27T12:37:04.672Z",
-      "updatedAt": "2026-02-27T12:37:04.672Z"
-    },
-    {
-      "id": "cmm4vmxwg00ord8305mc37p1i",
-      "studioId": "cmm4vmxu000i4d83000r4ocpa",
-      "artistId": "cmm4vmxpz000md830v78vzgex",
-      "commissionPercent": 25,
       "createdAt": "2026-02-27T12:37:04.672Z",
       "updatedAt": "2026-02-27T12:37:04.672Z"
     },
@@ -4637,14 +6893,6 @@
       "updatedAt": "2026-02-27T12:37:04.673Z"
     },
     {
-      "id": "cmm4vmxwi00ozd830h0hj5qsi",
-      "studioId": "cmm4vmxu000i4d83000r4ocpa",
-      "artistId": "cmm4vmxrc005vd8307idopdvb",
-      "commissionPercent": 27,
-      "createdAt": "2026-02-27T12:37:04.674Z",
-      "updatedAt": "2026-02-27T12:37:04.674Z"
-    },
-    {
       "id": "cmm4vmxwi00p1d830bnipux72",
       "studioId": "cmm4vmxu000i2d830cydp9ej9",
       "artistId": "cmm4vmxrq007kd830rix0732w",
@@ -4669,18 +6917,34 @@
       "updatedAt": "2026-02-27T12:37:04.675Z"
     },
     {
-      "id": "cmm4vmxwj00p7d830xu7bc7xb",
-      "studioId": "cmm4vmxu000i4d83000r4ocpa",
-      "artistId": "cmm4vmxsn00bsd830le472zod",
-      "commissionPercent": 28,
-      "createdAt": "2026-02-27T12:37:04.676Z",
-      "updatedAt": "2026-02-27T12:37:04.676Z"
-    },
-    {
       "id": "cmm4vmxwj00p9d83004633kvc",
       "studioId": "cmm4vmxu000i3d830tft4w0bi",
       "artistId": "cmm4vmxt000dhd830jf9vti6u",
       "commissionPercent": 20,
+      "createdAt": "2026-02-27T12:37:04.676Z",
+      "updatedAt": "2026-02-27T12:37:04.676Z"
+    },
+    {
+      "id": "cmm4vmxwg00ord8305mc37p1i",
+      "studioId": "cmm4vmxu000i4d83000r4ocpa",
+      "artistId": "cmm4vmxpz000md830v78vzgex",
+      "commissionPercent": 25,
+      "createdAt": "2026-02-27T12:37:04.672Z",
+      "updatedAt": "2026-02-27T12:37:04.672Z"
+    },
+    {
+      "id": "cmm4vmxwi00ozd830h0hj5qsi",
+      "studioId": "cmm4vmxu000i4d83000r4ocpa",
+      "artistId": "cmm4vmxrc005vd8307idopdvb",
+      "commissionPercent": 27,
+      "createdAt": "2026-02-27T12:37:04.674Z",
+      "updatedAt": "2026-02-27T12:37:04.674Z"
+    },
+    {
+      "id": "cmm4vmxwj00p7d830xu7bc7xb",
+      "studioId": "cmm4vmxu000i4d83000r4ocpa",
+      "artistId": "cmm4vmxsn00bsd830le472zod",
+      "commissionPercent": 28,
       "createdAt": "2026-02-27T12:37:04.676Z",
       "updatedAt": "2026-02-27T12:37:04.676Z"
     },
