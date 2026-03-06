@@ -1,131 +1,283 @@
+/* ----- Admin layout: sidebar + main ----- */
 .wrap {
-  max-width: 1060px;
-  margin: 0 auto;
-  padding: 2rem 1.5rem 3rem;
+  display: flex;
+  min-height: 100vh;
 }
 
-.wrap h1 {
-  margin: 0 0 0.25rem;
-  font-family: var(--font-display);
-  font-size: 2rem;
-  font-weight: 600;
-  letter-spacing: -0.02em;
+.sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  min-height: 100vh;
+  height: 100vh;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  overflow-y: auto;
+  transition: width 0.2s ease;
 }
 
-.subtitle {
-  color: var(--muted);
-  margin: 0 0 2rem;
+.sidebarCollapsed {
+  width: 56px;
+}
+
+.sidebarCollapsed .sidebarHeader {
+  padding: 0.75rem;
+  padding-right: 0.75rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.sidebarCollapsed .sideNav {
+  padding: 0.5rem 0;
+}
+
+.sidebarCollapsed .sideNav button {
+  padding: 0.65rem;
+  text-align: center;
+  font-size: 0;
+  justify-content: center;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.sidebarCollapsed .sideNav button::before {
+  content: attr(data-short);
   font-size: 0.95rem;
+  font-weight: 600;
+  color: inherit;
+}
+
+.sidebarHeader {
+  padding: 1.5rem 1.25rem 1.5rem 1.25rem;
+  padding-right: 3rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  position: relative;
+}
+
+.burgerBtn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border-radius: var(--radius);
+  color: var(--text-secondary);
+  transition: background var(--transition), color var(--transition);
+}
+
+.burgerBtn:hover {
+  background: var(--bg-warm);
+  color: var(--text);
+}
+
+.sidebarCollapsed .burgerBtn {
+  position: static;
+  margin: 0 auto;
+}
+
+.burgerLine {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: currentColor;
+  border-radius: 1px;
+}
+
+.sidebarTitle {
+  margin: 0 0 0.2rem;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.sidebarSubtitle {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.sideNav {
+  display: flex;
+  flex-direction: column;
+  padding: 0.75rem 0;
+  flex: 1;
+}
+
+.sideNav button {
+  width: 100%;
+  padding: 0.75rem 1.25rem;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 0.9rem;
+  text-align: left;
+  transition: background var(--transition), color var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sideNav button:hover {
+  background: var(--bg-warm);
+  color: var(--text);
+}
+
+.sideNavActive {
+  background: var(--accent-dim) !important;
+  color: var(--accent) !important;
+  font-weight: 600 !important;
+}
+
+.sideNavBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.15rem;
+  height: 1.15rem;
+  padding: 0 0.35rem;
+  margin-left: 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #fff;
+  background: var(--accent);
+  border-radius: 999px;
+}
+
+.sidebarCollapsed .sideNavBadge {
+  margin-left: 0;
+  margin-top: 0.15rem;
+}
+
+.main {
+  flex: 1;
+  min-width: 0;
+  padding: 1.5rem 1.75rem 3rem;
+  overflow-x: auto;
+}
+
+.adminCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+
+.adminContent {
+  padding: 1.5rem 1.5rem 2rem;
 }
 
 .error {
-  padding: 0.75rem 1rem;
+  padding: 0.85rem 1.15rem;
   background: var(--danger-dim);
   border: 1px solid var(--danger);
   border-radius: var(--radius);
   margin-bottom: 1rem;
   color: var(--danger);
   font-size: 0.9rem;
-}
-
-.tabs {
-  display: flex;
-  gap: 0.25rem;
-  margin-bottom: 2rem;
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 0;
-}
-
-.tabs button {
-  padding: 0.65rem 1.25rem;
-  border: none;
-  background: transparent;
-  color: var(--muted);
   font-weight: 500;
-  font-size: 0.9rem;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
-  transition: all var(--transition);
-  letter-spacing: 0.01em;
 }
 
-.tabs button:hover {
-  color: var(--text);
-}
-
-.tabActive {
-  color: var(--accent) !important;
-  border-bottom-color: var(--accent) !important;
-}
-
+/* ----- Section (per-tab content) ----- */
 .section {
-  margin-bottom: 2rem;
+  margin: 0;
 }
 
 .sectionHead {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
 }
 
 .sectionHead h2 {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 1.2rem;
-  font-weight: 600;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text);
 }
 
 .addBtn {
-  padding: 0.55rem 1.2rem;
+  padding: 0.5rem 1.1rem;
   background: var(--accent);
   color: #fff;
   border: none;
   border-radius: var(--radius);
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: 0.875rem;
   text-decoration: none;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  transition: background var(--transition);
 }
 
 .addBtn:hover {
   background: var(--accent-hover);
 }
 
-/* Booking filters */
+/* ----- Filters ----- */
 .filterBar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
+  padding: 0.85rem 1rem;
+  background: var(--bg-warm);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
 }
 
 .filterSelect,
 .filterDate {
-  padding: 0.45rem 0.65rem;
+  padding: 0.5rem 0.75rem;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--surface);
   color: var(--text);
-  font-size: 0.85rem;
+  font-size: 0.875rem;
+  font-weight: 500;
 }
 
 .filterSelect {
-  min-width: 120px;
+  min-width: 115px;
 }
 
 .filterDate {
-  min-width: 130px;
+  min-width: 128px;
 }
 
 .filterReset {
-  padding: 0.45rem 0.85rem;
+  padding: 0.5rem 0.9rem;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  background: transparent;
-  color: var(--muted);
-  font-size: 0.85rem;
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: color var(--transition), background var(--transition);
 }
 
 .filterReset:hover {
@@ -136,70 +288,175 @@
 .tableWrap {
   overflow-x: auto;
   border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  background: var(--surface);
+  border-radius: var(--radius);
+  background: var(--bg-warm);
 }
 
 .table {
   width: 100%;
+  min-width: 960px;
   border-collapse: collapse;
 }
 
 .table th,
 .table td {
-  padding: 0.7rem 0.85rem;
+  padding: 0.9rem 1rem;
   text-align: left;
   border-bottom: 1px solid var(--border);
+  vertical-align: middle;
 }
 
 .table th {
-  font-size: 0.78rem;
-  color: var(--muted);
-  font-weight: 500;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.table tbody tr:last-child td {
-  border-bottom: none;
+  letter-spacing: 0.06em;
+  background: var(--bg-warm);
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
 }
 
 .table tbody tr {
   transition: background var(--transition);
 }
 
+.table tbody tr:nth-child(even) {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
 .table tbody tr:hover {
   background: var(--surface-hover);
 }
 
-.status_draft { color: var(--muted); font-weight: 500; }
-.status_pending { color: #e8b84d; font-weight: 500; }
-.status_confirmed { color: var(--info); font-weight: 500; }
-.status_completed { color: var(--success); font-weight: 500; }
-.status_cancelled { color: var(--muted); }
-.status_refunded { color: var(--muted); }
+.table tbody tr:nth-child(even):hover {
+  background: var(--surface-hover);
+}
+
+.table td {
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+.table td strong,
+.table .cellEmphasis {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.table th:nth-child(1),
+.table td:nth-child(1) {
+  width: 3rem;
+  text-align: right;
+  padding-right: 0.75rem;
+}
+
+.status_draft { color: var(--muted); font-weight: 600; }
+.status_pending { color: #c49a2e; font-weight: 600; }
+.status_confirmed { color: var(--info); font-weight: 600; }
+.status_completed { color: var(--success); font-weight: 600; }
+.status_cancelled { color: var(--muted); font-weight: 500; }
+.status_refunded { color: var(--muted); font-weight: 500; }
 
 .smBtn,
 .smBtnDanger {
-  padding: 0.3rem 0.6rem;
-  font-size: 0.78rem;
-  margin-right: 0.3rem;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-right: 0.35rem;
   border-radius: 6px;
   border: 1px solid var(--border);
   background: transparent;
-  color: var(--muted);
-  font-weight: 500;
+  color: var(--text-secondary);
   text-decoration: none;
   display: inline-block;
   cursor: pointer;
+  transition: color var(--transition), background var(--transition), border-color var(--transition);
 }
 
-.smBtn:hover { color: var(--text); background: var(--surface-hover); }
+.smBtn:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-dim); }
 .smBtnDanger:hover { color: var(--danger); border-color: var(--danger); background: var(--danger-dim); }
 
 .remainingDue {
   color: var(--danger);
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.table .cellAmount {
   font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.table .cellDate {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.table .cellTime {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.cellLatest {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.cellLatest:hover {
+  text-decoration: underline;
+}
+
+.cellShortCode {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  color: var(--text-secondary);
+}
+
+.transactionSummary {
+  margin: 0 0 1rem;
+  font-size: 1rem;
+}
+
+.transactionList {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.transactionItem {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  padding: 0.65rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+
+.transactionItem:last-child {
+  border-bottom: none;
+}
+
+.transactionDate {
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+  min-width: 8rem;
 }
 
 .commissionBadge {
@@ -278,21 +535,21 @@
 .modal {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(6px);
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 100;
-  padding: 1rem;
+  padding: 1.25rem;
 }
 
 .modalContent {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 1.75rem;
-  max-width: 460px;
+  padding: 1.75rem 2rem;
+  max-width: 440px;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
@@ -300,10 +557,11 @@
 }
 
 .modalContent h3 {
-  margin: 0 0 1.25rem;
+  margin: 0 0 1rem;
   font-family: var(--font-display);
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text);
 }
 
 .modalContent label {
@@ -353,18 +611,26 @@
 
 .formActions {
   display: flex;
-  gap: 0.5rem;
-  margin-top: 1.25rem;
+  gap: 0.6rem;
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
 }
 
 .formActions button {
-  padding: 0.55rem 1.1rem;
+  padding: 0.55rem 1.2rem;
   border-radius: var(--radius);
   border: 1px solid var(--border);
   background: var(--surface);
   color: var(--text);
-  font-weight: 500;
+  font-weight: 600;
   font-size: 0.9rem;
+  transition: all var(--transition);
+}
+
+.formActions button[type="button"]:hover {
+  background: var(--surface-hover);
+  border-color: var(--border-light);
 }
 
 .formActions button[type="submit"] {
@@ -377,21 +643,39 @@
   background: var(--accent-hover);
 }
 
-/* Inline add form (specialities) */
+/* Specialities: add bar + inline form */
+.specAddBar {
+  margin-bottom: 1.25rem;
+  padding: 0.85rem 1rem;
+  background: var(--bg-warm);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.specAddLabel {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 0.4rem;
+}
+
 .inlineAdd {
   display: flex;
   gap: 0.5rem;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .inlineAddInput {
-  padding: 0.45rem 0.7rem;
+  padding: 0.5rem 0.75rem;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--surface);
   color: var(--text);
-  font-size: 0.88rem;
-  width: 220px;
+  font-size: 0.9rem;
+  min-width: 200px;
+  max-width: 320px;
 }
 
 .inlineEditInput {
@@ -410,9 +694,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.3rem;
-  margin-top: 1rem;
-  padding: 0.5rem 0;
+  gap: 0.35rem;
+  margin-top: 1.25rem;
+  padding: 0.75rem 0 0;
 }
 
 .pageBtn {
@@ -466,16 +750,18 @@
 
 .countHint {
   display: block;
-  font-size: 0.78rem;
-  color: var(--muted);
+  font-size: 0.8rem;
+  color: var(--text-secondary);
   font-weight: 400;
-  margin-top: 0.15rem;
+  margin-top: 0.2rem;
 }
 
 .loading {
-  padding: 4rem;
+  padding: 4rem 2rem;
   text-align: center;
-  color: var(--muted);
+  font-size: 1rem;
+  color: var(--text-secondary);
+  font-weight: 500;
 }
 
 /* Booking form - wide modal with two-column layout */

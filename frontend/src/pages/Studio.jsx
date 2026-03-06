@@ -18,7 +18,7 @@ import {
   updateSpeciality,
   deleteSpeciality,
 } from '../api';
-import { formatRupiah, formatWithConversion } from '../currency';
+import { formatRupiah, formatWithConversion, formatNumberWithDots, parseNumberInput } from '../currency';
 import styles from './Studio.module.css';
 
 const ROWS_PER_PAGE = 8;
@@ -99,9 +99,19 @@ const PAYMENT_METHODS = [
 ];
 
 export function Studio() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get('tab') || 'bookings';
   const [tab, setTab] = useState(tabParam);
+
+  useEffect(() => {
+    const t = searchParams.get('tab') || 'bookings';
+    if (['bookings', 'payments', 'commissions', 'customers', 'specialities'].includes(t)) setTab(t);
+  }, [searchParams]);
+
+  const switchTab = (t) => {
+    setTab(t);
+    setSearchParams(t === 'bookings' ? {} : { tab: t }, { replace: true });
+  };
   const [payments, setPayments] = useState([]);
   const [commissions, setCommissions] = useState([]);
   const [artists, setArtists] = useState([]);
@@ -134,7 +144,6 @@ export function Studio() {
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
-
   const [newCustomer, setNewCustomer] = useState({ name: '', email: '', phone: '' });
 
   const [specialities, setSpecialities] = useState([]);
@@ -146,6 +155,9 @@ export function Studio() {
   const [bookingPage, setBookingPage] = useState(1);
   const [paymentPage, setPaymentPage] = useState(1);
   const [commissionPage, setCommissionPage] = useState(1);
+  const [customerPage, setCustomerPage] = useState(1);
+  const [customerHistoryModal, setCustomerHistoryModal] = useState(null);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const [bookingFilters, setBookingFilters] = useState({
     status: '',
@@ -160,12 +172,39 @@ export function Studio() {
   const bookingTotalPages = Math.max(1, Math.ceil(bookings.length / ROWS_PER_PAGE));
   const paymentTotalPages = Math.max(1, Math.ceil(payments.length / ROWS_PER_PAGE));
   const commissionTotalPages = Math.max(1, Math.ceil(commissions.length / ROWS_PER_PAGE));
-  const specTotalPages = Math.max(1, Math.ceil(specialities.length / ROWS_PER_PAGE));
+  const customerTotalPages = Math.max(1, Math.ceil(customers.length / ROWS_PER_PAGE));
+  const specialitiesList = Array.isArray(specialities) ? specialities : [];
+  const specTotalPages = Math.max(1, Math.ceil(specialitiesList.length / ROWS_PER_PAGE));
 
   const paginatedBookings = bookings.slice((bookingPage - 1) * ROWS_PER_PAGE, bookingPage * ROWS_PER_PAGE);
+  const pendingBookingsCount = useMemo(
+    () => bookings.filter((b) => b.status === 'pending').length,
+    [bookings],
+  );
   const paginatedPayments = payments.slice((paymentPage - 1) * ROWS_PER_PAGE, paymentPage * ROWS_PER_PAGE);
   const paginatedCommissions = commissions.slice((commissionPage - 1) * ROWS_PER_PAGE, commissionPage * ROWS_PER_PAGE);
-  const paginatedSpecialities = specialities.slice((specPage - 1) * ROWS_PER_PAGE, specPage * ROWS_PER_PAGE);
+  const paginatedCustomers = customers.slice((customerPage - 1) * ROWS_PER_PAGE, customerPage * ROWS_PER_PAGE);
+  const paginatedSpecialities = specialitiesList.slice((specPage - 1) * ROWS_PER_PAGE, specPage * ROWS_PER_PAGE);
+
+  const getCustomerBookings = (customerId) => bookings.filter((b) => b.customerId === customerId);
+  const getLatestBooking = (customerId) => {
+    const list = getCustomerBookings(customerId).sort((a, b) => {
+      const da = a.date + (a.startTime || '');
+      const db = b.date + (b.startTime || '');
+      return db.localeCompare(da);
+    });
+    return list[0] || null;
+  };
+  const getCustomerDeposit = (customerId) => {
+    return payments
+      .filter((p) => p.booking?.customerId === customerId && p.status === 'completed')
+      .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+  };
+  const getCustomerTransactions = (customerId) => {
+    return payments
+      .filter((p) => p.booking?.customerId === customerId)
+      .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+  };
 
   const buildBookingParams = (f) => {
     const params = {};
@@ -200,7 +239,7 @@ export function Studio() {
         setArtists(a);
         setCustomers(c);
         setStudios(s);
-        setSpecialities(sp);
+        setSpecialities(Array.isArray(sp) ? sp : []);
       })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
@@ -225,7 +264,7 @@ export function Studio() {
 
   useEffect(() => {
     const t = searchParams.get('tab') || 'bookings';
-    if (['bookings', 'payments', 'commissions', 'specialities'].includes(t)) {
+    if (['bookings', 'payments', 'commissions', 'customers', 'specialities'].includes(t)) {
       setTab(t);
     }
   }, [searchParams]);
@@ -346,27 +385,29 @@ export function Studio() {
 
   const addSpeciality = async (e) => {
     e.preventDefault();
-    if (!specNewName.trim()) return;
+    const name = (specNewName || '').trim();
+    if (!name) return;
     setError(null);
     try {
-      await createSpeciality({ name: specNewName.trim() });
+      await createSpeciality({ name });
       setSpecNewName('');
       load();
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Failed to add speciality');
     }
   };
 
   const saveSpecEdit = async (id) => {
-    if (!specEditName.trim()) return;
+    const name = (specEditName || '').trim();
+    if (!name) return;
     setError(null);
     try {
-      await updateSpeciality(id, { name: specEditName.trim() });
+      await updateSpeciality(id, { name });
       setSpecEditId(null);
       setSpecEditName('');
       load();
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Failed to update speciality');
     }
   };
 
@@ -377,7 +418,7 @@ export function Studio() {
       await deleteSpeciality(id);
       load();
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Failed to delete speciality');
     }
   };
 
@@ -385,42 +426,43 @@ export function Studio() {
 
   return (
     <div className={styles.wrap}>
-      <h1>Studio Management</h1>
-      <p className={styles.subtitle}>Manage artist bookings and payments</p>
+      <aside className={`${styles.sidebar} ${sidebarCollapsed ? styles.sidebarCollapsed : ''}`} aria-label="Studio menu">
+        <div className={styles.sidebarHeader}>
+          <button
+            type="button"
+            className={styles.burgerBtn}
+            onClick={() => setSidebarCollapsed((v) => !v)}
+            aria-expanded={!sidebarCollapsed}
+            aria-label={sidebarCollapsed ? 'Open menu' : 'Minimize menu'}
+          >
+            <span className={styles.burgerLine} />
+            <span className={styles.burgerLine} />
+            <span className={styles.burgerLine} />
+          </button>
+          {!sidebarCollapsed && (
+            <>
+              <h1 className={styles.sidebarTitle}>Studio Management</h1>
+              <p className={styles.sidebarSubtitle}>Manage your studio</p>
+            </>
+          )}
+        </div>
+        <nav className={styles.sideNav} aria-label="Admin sections">
+          <button type="button" data-short="B" title="Bookings" className={tab === 'bookings' ? styles.sideNavActive : ''} onClick={() => switchTab('bookings')}>
+            Bookings
+            {pendingBookingsCount > 0 && <span className={styles.sideNavBadge} aria-label={`${pendingBookingsCount} pending`}>{pendingBookingsCount}</span>}
+          </button>
+          <button type="button" data-short="P" title="Payments" className={tab === 'payments' ? styles.sideNavActive : ''} onClick={() => switchTab('payments')}>Payments</button>
+          <button type="button" data-short="C" title="Commission" className={tab === 'commissions' ? styles.sideNavActive : ''} onClick={() => switchTab('commissions')}>Commission</button>
+          <button type="button" data-short="U" title="Customers" className={tab === 'customers' ? styles.sideNavActive : ''} onClick={() => switchTab('customers')}>Customers</button>
+          <button type="button" data-short="S" title="Specialities" className={tab === 'specialities' ? styles.sideNavActive : ''} onClick={() => switchTab('specialities')}>Specialities</button>
+        </nav>
+      </aside>
 
-      {error && <div className={styles.error}>{error}</div>}
+      <main className={styles.main}>
+        {error && <div className={styles.error} role="alert">{error}</div>}
 
-      <div className={styles.tabs}>
-        <button
-          type="button"
-          className={tab === 'bookings' ? styles.tabActive : ''}
-          onClick={() => setTab('bookings')}
-        >
-          Bookings
-        </button>
-        <button
-          type="button"
-          className={tab === 'payments' ? styles.tabActive : ''}
-          onClick={() => setTab('payments')}
-        >
-          Payments
-        </button>
-        <button
-          type="button"
-          className={tab === 'commissions' ? styles.tabActive : ''}
-          onClick={() => setTab('commissions')}
-        >
-          Commission
-        </button>
-        <button
-          type="button"
-          className={tab === 'specialities' ? styles.tabActive : ''}
-          onClick={() => setTab('specialities')}
-        >
-          Specialities
-        </button>
-      </div>
-
+        <div className={styles.adminCard}>
+          <div className={styles.adminContent}>
       {tab === 'bookings' && (
         <section className={styles.section}>
           <div className={styles.sectionHead}>
@@ -508,6 +550,7 @@ export function Studio() {
             <table className={styles.table}>
               <thead>
                 <tr>
+                  <th>No.</th>
                   <th>Date</th>
                   <th>Time</th>
                   <th>Artist</th>
@@ -516,36 +559,44 @@ export function Studio() {
                   <th>Paid</th>
                   <th>Remaining</th>
                   <th>Status</th>
+                  <th>Created by</th>
+                  <th>Created at</th>
                   <th></th>
                 </tr>
               </thead>
               <tbody>
                 {paginatedBookings.length === 0 ? (
                   <tr>
-                    <td colSpan={9}>
+                    <td colSpan={12}>
                       {bookings.length === 0 && (bookingFilters.status || bookingFilters.artistId || bookingFilters.studioId || bookingFilters.customerId || bookingFilters.from || bookingFilters.to)
                         ? 'No bookings match your filters. Click Reset to clear filters.'
                         : 'No bookings yet. Create one above.'}
                     </td>
                   </tr>
                 ) : (
-                  paginatedBookings.map((b) => {
+                  paginatedBookings.map((b, i) => {
                     const commission = getCommissionFor(b.artistId, b.studioId);
+                    const createdDate = b.createdAt ? new Date(b.createdAt) : null;
+                    const createdStr = createdDate ? createdDate.toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' }) : '—';
+                    const rowNum = (bookingPage - 1) * ROWS_PER_PAGE + i + 1;
                     return (
                       <tr key={b.id}>
-                        <td>{b.date}</td>
-                        <td>{b.startTime} – {b.endTime}</td>
-                        <td>{b.artist?.name || '—'}</td>
-                        <td>{b.customer?.name || '—'}</td>
-                        <td>{formatRupiah(b.totalAmount)}</td>
-                        <td>{formatRupiah(b.paidTotal)}</td>
-                        <td className={b.remainingAmount != null && b.remainingAmount > 0 ? styles.remainingDue : ''}>
+                        <td>{rowNum}</td>
+                        <td className={styles.cellDate}>{b.date}</td>
+                        <td className={styles.cellTime}>{b.startTime} – {b.endTime}</td>
+                        <td className={styles.cellEmphasis}>{b.artist?.name || '—'}</td>
+                        <td className={styles.cellEmphasis}>{b.customer?.name || '—'}</td>
+                        <td className={styles.cellAmount}>{formatRupiah(b.totalAmount)}</td>
+                        <td className={styles.cellAmount}>{formatRupiah(b.paidTotal)}</td>
+                        <td className={b.remainingAmount != null && b.remainingAmount > 0 ? `${styles.remainingDue} ${styles.cellAmount}` : styles.cellAmount}>
                           {formatRupiah(b.remainingAmount)}
                         </td>
                         <td>
                           <span className={styles[`status_${b.status}`]}>{b.status}</span>
                           {b.review && <span className={styles.reviewBadge} title={`Reviewed: ${b.review.rating}/5`}>★ {b.review.rating}</span>}
                         </td>
+                        <td>{b.createdBy ?? '—'}</td>
+                        <td>{createdStr}</td>
                         <td>
                           <Link to={`/manage/bookings/${b.id}`} className={styles.smBtn}>Detail</Link>
                           <Link to={`/manage/bookings/${b.id}/edit`} className={styles.smBtn}>Edit</Link>
@@ -595,12 +646,12 @@ export function Studio() {
                 ) : (
                   paginatedPayments.map((p) => (
                     <tr key={p.id}>
-                      <td>{formatRupiah(p.amount)} <span className={styles.convHint}>{formatWithConversion(p.amount).usd}</span></td>
-                      <td>{p.method || '—'}</td>
+                      <td className={styles.cellAmount}>{formatRupiah(p.amount)} <span className={styles.convHint}>{formatWithConversion(p.amount).usd}</span></td>
+                      <td className={styles.cellEmphasis}>{p.method || '—'}</td>
                       <td>{p.type || '—'}</td>
                       <td>{p.transferDestination || '—'}</td>
                       <td><span className={styles[`status_${p.status}`]}>{p.status}</span></td>
-                      <td>
+                      <td className={styles.cellEmphasis}>
                         {p.booking
                           ? `${p.booking.date} – ${p.booking.artist?.name || ''}`
                           : '—'}
@@ -647,9 +698,9 @@ export function Studio() {
                 ) : (
                   paginatedCommissions.map((c) => (
                     <tr key={c.id}>
-                      <td>{c.studio?.name || '—'}</td>
-                      <td>{c.artist?.name || '—'}</td>
-                      <td>{c.commissionPercent}%</td>
+                      <td className={styles.cellEmphasis}>{c.studio?.name || '—'}</td>
+                      <td className={styles.cellEmphasis}>{c.artist?.name || '—'}</td>
+                      <td className={styles.cellAmount}>{c.commissionPercent}%</td>
                       <td>
                         <button type="button" onClick={() => openEditCommission(c)} className={styles.smBtn}>Edit</button>
                         <button type="button" onClick={() => removeCommission(c.id)} className={styles.smBtnDanger}>Remove</button>
@@ -664,19 +715,94 @@ export function Studio() {
         </section>
       )}
 
+      {tab === 'customers' && (
+        <section className={styles.section}>
+          <div className={styles.sectionHead}>
+            <div>
+              <h2>Customer profiles</h2>
+              {customers.length > 0 && <span className={styles.countHint}>Showing {(customerPage - 1) * ROWS_PER_PAGE + 1}–{Math.min(customerPage * ROWS_PER_PAGE, customers.length)} of {customers.length}</span>}
+            </div>
+          </div>
+          <div className={styles.tableWrap}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>No.</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Deposit (paid)</th>
+                  <th>Total orders</th>
+                  <th>Latest project / order</th>
+                  <th>Created</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedCustomers.length === 0 ? (
+                  <tr>
+                    <td colSpan={9}>No customers yet. Customers are added when you create a booking (select or create customer).</td>
+                  </tr>
+                ) : (
+                  paginatedCustomers.map((c, i) => {
+                    const customerBookings = getCustomerBookings(c.id);
+                    const latest = getLatestBooking(c.id);
+                    const deposit = getCustomerDeposit(c.id);
+                    const rowNum = (customerPage - 1) * ROWS_PER_PAGE + i + 1;
+                    const createdDate = c.createdAt ? new Date(c.createdAt) : null;
+                    const createdStr = createdDate ? createdDate.toLocaleDateString('en-GB', { dateStyle: 'short' }) : '—';
+                    return (
+                      <tr key={c.id}>
+                        <td>{rowNum}</td>
+                        <td className={styles.cellEmphasis}>{c.name || '—'}</td>
+                        <td>{c.email || '—'}</td>
+                        <td>{c.phone || '—'}</td>
+                        <td className={styles.cellAmount}>{formatRupiah(deposit)}</td>
+                        <td className={styles.cellAmount}>{customerBookings.length}</td>
+                        <td>
+                          {latest ? (
+                            <Link to={`/manage/bookings/${latest.id}`} className={styles.cellLatest}>
+                              {latest.date} {latest.startTime} – {latest.artist?.name || '—'}
+                              {latest.shortCode && <span className={styles.cellShortCode}> #{latest.shortCode}</span>}
+                            </Link>
+                          ) : (
+                            '—'
+                          )}
+                        </td>
+                        <td>{createdStr}</td>
+                        <td>
+                          <button type="button" className={styles.smBtn} onClick={() => setCustomerHistoryModal(c)}>History</button>
+                          <button type="button" className={styles.smBtn} onClick={() => { applyBookingFilters({ ...bookingFilters, customerId: c.id }); switchTab('bookings'); }}>View bookings</button>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+          <Pagination currentPage={customerPage} totalPages={customerTotalPages} onPageChange={setCustomerPage} />
+        </section>
+      )}
+
       {tab === 'specialities' && (
         <section className={styles.section}>
           <div className={styles.sectionHead}>
             <div>
               <h2>Specialities</h2>
-              {specialities.length > 0 && <span className={styles.countHint}>Showing {(specPage - 1) * ROWS_PER_PAGE + 1}–{Math.min(specPage * ROWS_PER_PAGE, specialities.length)} of {specialities.length}</span>}
+              {specialitiesList.length > 0 && <span className={styles.countHint}>Showing {(specPage - 1) * ROWS_PER_PAGE + 1}–{Math.min(specPage * ROWS_PER_PAGE, specialitiesList.length)} of {specialitiesList.length}</span>}
             </div>
+          </div>
+          <div className={styles.specAddBar}>
             <form onSubmit={addSpeciality} className={styles.inlineAdd}>
+              <label htmlFor="spec-new-name" className={styles.specAddLabel}>Add speciality</label>
               <input
-                placeholder="New speciality name…"
+                id="spec-new-name"
+                placeholder="e.g. Black & Grey, Japanese"
                 value={specNewName}
                 onChange={(e) => setSpecNewName(e.target.value)}
                 className={styles.inlineAddInput}
+                aria-label="New speciality name"
               />
               <button type="submit" className={styles.addBtn} disabled={!specNewName.trim()}>+ Add</button>
             </form>
@@ -685,52 +811,101 @@ export function Studio() {
             <table className={styles.table}>
               <thead>
                 <tr>
+                  <th>No.</th>
                   <th>Name</th>
-                  <th style={{ width: 180 }}></th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {paginatedSpecialities.length === 0 ? (
                   <tr>
-                    <td colSpan={2}>No specialities yet. Add one above.</td>
+                    <td colSpan={3}>No specialities yet. Add one above.</td>
                   </tr>
                 ) : (
-                  paginatedSpecialities.map((sp) => (
-                    <tr key={sp.id}>
-                      <td>
-                        {specEditId === sp.id ? (
-                          <input
-                            className={styles.inlineEditInput}
-                            value={specEditName}
-                            onChange={(e) => setSpecEditName(e.target.value)}
-                            onKeyDown={(e) => { if (e.key === 'Enter') saveSpecEdit(sp.id); if (e.key === 'Escape') setSpecEditId(null); }}
-                            autoFocus
-                          />
-                        ) : (
-                          sp.name
-                        )}
-                      </td>
-                      <td>
-                        {specEditId === sp.id ? (
-                          <>
-                            <button type="button" onClick={() => saveSpecEdit(sp.id)} className={styles.smBtn}>Save</button>
-                            <button type="button" onClick={() => setSpecEditId(null)} className={styles.smBtn}>Cancel</button>
-                          </>
-                        ) : (
-                          <>
-                            <button type="button" onClick={() => { setSpecEditId(sp.id); setSpecEditName(sp.name); }} className={styles.smBtn}>Edit</button>
-                            <button type="button" onClick={() => removeSpeciality(sp.id)} className={styles.smBtnDanger}>Delete</button>
-                          </>
-                        )}
-                      </td>
-                    </tr>
-                  ))
+                  paginatedSpecialities.map((sp, i) => {
+                    const rowNum = (specPage - 1) * ROWS_PER_PAGE + i + 1;
+                    return (
+                      <tr key={sp.id}>
+                        <td>{rowNum}</td>
+                        <td>
+                          {specEditId === sp.id ? (
+                            <input
+                              className={styles.inlineEditInput}
+                              value={specEditName}
+                              onChange={(e) => setSpecEditName(e.target.value)}
+                              onKeyDown={(e) => { if (e.key === 'Enter') saveSpecEdit(sp.id); if (e.key === 'Escape') setSpecEditId(null); }}
+                              autoFocus
+                              aria-label="Edit speciality name"
+                            />
+                          ) : (
+                            <span className={styles.cellEmphasis}>{sp.name || '—'}</span>
+                          )}
+                        </td>
+                        <td>
+                          {specEditId === sp.id ? (
+                            <>
+                              <button type="button" onClick={() => saveSpecEdit(sp.id)} className={styles.smBtn}>Save</button>
+                              <button type="button" onClick={() => setSpecEditId(null)} className={styles.smBtn}>Cancel</button>
+                            </>
+                          ) : (
+                            <>
+                              <button type="button" onClick={() => { setSpecEditId(sp.id); setSpecEditName(sp.name || ''); }} className={styles.smBtn}>Edit</button>
+                              <button type="button" onClick={() => removeSpeciality(sp.id)} className={styles.smBtnDanger}>Delete</button>
+                            </>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
           </div>
           <Pagination currentPage={specPage} totalPages={specTotalPages} onPageChange={setSpecPage} />
         </section>
+      )}
+
+      {customerHistoryModal && (
+        <div className={styles.modal} role="dialog" aria-modal="true" aria-label="Customer transaction history">
+          <div className={styles.modalContent} style={{ maxWidth: '560px' }}>
+            <h3>Transaction history – {customerHistoryModal.name}</h3>
+            <p className={styles.help}>All payments linked to this customer&apos;s bookings.</p>
+            {(() => {
+              const tx = getCustomerTransactions(customerHistoryModal.id);
+              const totalPaid = getCustomerDeposit(customerHistoryModal.id);
+              return (
+                <>
+                  <p className={styles.transactionSummary}><strong>Total paid (completed):</strong> {formatRupiah(totalPaid)}</p>
+                  {tx.length === 0 ? (
+                    <p className={styles.help}>No transactions yet.</p>
+                  ) : (
+                    <ul className={styles.transactionList}>
+                      {tx.map((p) => (
+                        <li key={p.id} className={styles.transactionItem}>
+                          <span className={styles.transactionDate}>{p.createdAt ? new Date(p.createdAt).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' }) : '—'}</span>
+                          <span className={styles.cellAmount}>{formatRupiah(p.amount)}</span>
+                          <span>{p.type || '—'}</span>
+                          <span>{p.method || '—'}</span>
+                          <span className={styles[`status_${p.status}`]}>{p.status}</span>
+                          {p.bookingId ? (
+                            <Link to={`/manage/bookings/${p.booking?.id}`} className={styles.cellLatest}>
+                              Booking {p.booking?.shortCode || p.booking?.date || p.bookingId.slice(0, 8)}
+                            </Link>
+                          ) : (
+                            '—'
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </>
+              );
+            })()}
+            <div className={styles.formActions}>
+              <button type="button" onClick={() => setCustomerHistoryModal(null)}>Close</button>
+            </div>
+          </div>
+        </div>
       )}
 
       {showPaymentForm && (
@@ -755,11 +930,11 @@ export function Studio() {
               <label>
                 Amount *
                 <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={paymentForm.amount}
-                  onChange={(e) => setPaymentForm((f) => ({ ...f, amount: e.target.value }))}
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="e.g. 500.000"
+                  value={formatNumberWithDots(paymentForm.amount)}
+                  onChange={(e) => setPaymentForm((f) => ({ ...f, amount: parseNumberInput(e.target.value) }))}
                   required
                 />
               </label>
@@ -872,6 +1047,9 @@ export function Studio() {
           </div>
         </div>
       )}
+        </div>
+        </div>
+      </main>
     </div>
   );
 }

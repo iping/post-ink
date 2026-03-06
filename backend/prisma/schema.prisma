@@ -70,6 +70,7 @@ model Customer {
 // ----- Booking (Studio: manage booking process) -----
 model Booking {
   id          String        @id @default(cuid())
+  shortCode   String?       @unique // 5-char alphanumeric for display/copy
   artistId    String
   artist      TattooArtist   @relation(fields: [artistId], references: [id], onDelete: Cascade)
   customerId  String?

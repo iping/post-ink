@@ -14,7 +14,7 @@ import {
   uploadUrl,
 } from '../api';
 import { AvailabilityCalendar } from '../components/AvailabilityCalendar';
-import { formatRupiah } from '../currency';
+import { formatRupiah, formatNumberWithDots, parseNumberInput } from '../currency';
 import styles from './BookingForm.module.css';
 
 const BOOKING_STATUSES = ['draft', 'pending', 'confirmed', 'completed', 'cancelled'];
@@ -653,13 +653,12 @@ export function BookingForm() {
               <label className={styles.label}>
                 <span className={styles.labelText}>Deposit amount (IDR) *</span>
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
                   className={styles.input}
-                  step="1000"
-                  min={minDeposit}
-                  placeholder={minDeposit ? `Min ${formatRupiah(minDeposit)}` : 'e.g. 500000'}
-                  value={depositAmount}
-                  onChange={(e) => setDepositAmount(e.target.value)}
+                  placeholder={minDeposit ? `Min ${formatRupiah(minDeposit)}` : 'e.g. 500.000'}
+                  value={formatNumberWithDots(depositAmount)}
+                  onChange={(e) => setDepositAmount(parseNumberInput(e.target.value))}
                 />
               </label>
               <label className={styles.label}>

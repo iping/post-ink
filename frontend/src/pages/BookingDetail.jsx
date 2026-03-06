@@ -6,7 +6,7 @@ import {
   createPayment,
   createReview,
 } from '../api';
-import { formatRupiah, formatWithConversion } from '../currency';
+import { formatRupiah, formatWithConversion, formatNumberWithDots, parseNumberInput } from '../currency';
 import styles from './BookingDetail.module.css';
 
 const PAYMENT_METHODS = [
@@ -17,12 +17,22 @@ const PAYMENT_METHODS = [
   { value: 'Cash', label: 'Cash' },
 ];
 
+function CopyIcon({ className, title }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden title={title}>
+      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+    </svg>
+  );
+}
+
 export function BookingDetail() {
   const { id } = useParams();
   const [booking, setBooking] = useState(null);
   const [commissions, setCommissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [copiedId, setCopiedId] = useState(false);
 
   const [downPaymentForm, setDownPaymentForm] = useState({
     amount: '',
@@ -62,6 +72,15 @@ export function BookingDetail() {
 
   const getCommissionFor = (artistId, studioId) =>
     commissions.find((c) => c.artistId === artistId && c.studioId === studioId);
+
+  const copyBookingId = () => {
+    const text = booking?.shortCode || booking?.id || '';
+    if (!text) return;
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedId(true);
+      setTimeout(() => setCopiedId(false), 2000);
+    });
+  };
 
   const addDownPayment = async (e) => {
     e.preventDefault();
@@ -136,6 +155,14 @@ export function BookingDetail() {
 
       <div className={styles.content}>
         <div className={styles.bookingSummary}>
+          <p className={styles.bookingIdRow}>
+            <strong>Booking ID:</strong>{' '}
+            <span title={booking.id} className={styles.bookingIdCode}>{booking.shortCode || booking.id?.slice(0, 8) || '—'}</span>
+            <button type="button" onClick={copyBookingId} className={styles.copyBtn} title="Copy booking ID" aria-label="Copy booking ID">
+              <CopyIcon title="Copy" />
+            </button>
+            {copiedId && <span className={styles.copiedHint}>Copied!</span>}
+          </p>
           {booking.placement && (
             <p><strong>Placement:</strong> {booking.placement}</p>
           )}
@@ -230,12 +257,11 @@ export function BookingDetail() {
           <label>
             Amount (fixed)
             <input
-              type="number"
-              step="0.01"
-              min="0"
-              placeholder="Or use % below"
-              value={downPaymentForm.amount}
-              onChange={(e) => setDownPaymentForm((f) => ({ ...f, amount: e.target.value }))}
+              type="text"
+              inputMode="numeric"
+              placeholder="e.g. 500.000 or use % below"
+              value={formatNumberWithDots(downPaymentForm.amount)}
+              onChange={(e) => setDownPaymentForm((f) => ({ ...f, amount: parseNumberInput(e.target.value) }))}
             />
           </label>
           <label>

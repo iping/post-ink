@@ -1,5 +1,19 @@
 const IDR_TO_USD = 0.000063;
 
+/** Format digits with "." as thousand separator (e.g. 500000 -> "500.000") */
+export function formatNumberWithDots(value) {
+  if (value == null || value === '') return '';
+  const digits = String(value).replace(/\D/g, '');
+  if (digits === '') return '';
+  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
+/** From input string (with dots or not), return digits-only string for state */
+export function parseNumberInput(str) {
+  if (str == null || str === '') return '';
+  return String(str).replace(/\D/g, '');
+}
+
 export function formatRupiah(amount) {
   if (amount == null) return '—';
   return 'Rp ' + Number(amount).toLocaleString('id-ID');

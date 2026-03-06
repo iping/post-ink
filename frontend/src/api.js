@@ -279,10 +279,20 @@ export async function deleteReview(id) {
   if (!res.ok) throw new Error(await res.text());
 }
 
+// Parse error body: use JSON { error } if present, else raw text
+async function errorMessage(res) {
+  const text = await res.text();
+  try {
+    const j = JSON.parse(text);
+    if (j && typeof j.error === 'string') return j.error;
+  } catch {}
+  return text || res.statusText || 'Request failed';
+}
+
 // ----- Specialities (master list CMS) -----
 export async function getSpecialities() {
   const res = await fetch(`${API}/specialities`);
-  if (!res.ok) throw new Error(await res.text());
+  if (!res.ok) throw new Error(await errorMessage(res));
   return res.json();
 }
 
@@ -292,7 +302,7 @@ export async function createSpeciality(data) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error(await res.text());
+  if (!res.ok) throw new Error(await errorMessage(res));
   return res.json();
 }
 
@@ -302,11 +312,11 @@ export async function updateSpeciality(id, data) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error(await res.text());
+  if (!res.ok) throw new Error(await errorMessage(res));
   return res.json();
 }
 
 export async function deleteSpeciality(id) {
   const res = await fetch(`${API}/specialities/${id}`, { method: 'DELETE' });
-  if (!res.ok) throw new Error(await res.text());
+  if (!res.ok) throw new Error(await errorMessage(res));
 }

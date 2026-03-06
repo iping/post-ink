@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getArtist, createArtist, updateArtist, uploadUrl, getSpecialities } from '../api';
+import { formatNumberWithDots, parseNumberInput } from '../currency';
 import styles from './ArtistForm.module.css';
 
-function FloatingField({ id, label, icon, value, onChange, required, type = 'text', placeholder, hint, maxLength, step, min, prefix, autoFocus }) {
+function FloatingField({ id, label, icon, value, onChange, required, type = 'text', placeholder, hint, maxLength, step, min, prefix, autoFocus, inputMode }) {
   const [focused, setFocused] = useState(false);
   const hasValue = value !== '' && value != null;
   const isActive = focused || hasValue;
@@ -30,6 +31,7 @@ function FloatingField({ id, label, icon, value, onChange, required, type = 'tex
           step={step}
           min={min}
           autoFocus={autoFocus}
+          inputMode={inputMode}
           className={prefix ? styles.floatInputWithPrefix : ''}
         />
         <div className={styles.floatLine}>
@@ -337,12 +339,11 @@ export function ArtistForm() {
                   id="rate"
                   label="Hourly Rate (IDR)"
                   icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>}
-                  value={form.rate}
-                  onChange={handleChange}
-                  type="number"
-                  step="50000"
-                  min="0"
-                  placeholder="750000"
+                  value={formatNumberWithDots(form.rate)}
+                  onChange={(e) => setForm((prev) => ({ ...prev, rate: parseNumberInput(e.target.value) }))}
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="750.000"
                   prefix="Rp"
                   hint="Rate charged per hour"
                 />

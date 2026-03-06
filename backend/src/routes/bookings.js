@@ -1,8 +1,25 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
+import crypto from 'crypto';
 
 const prisma = new PrismaClient();
 export const bookingsRouter = Router();
+
+const SHORT_CODE_CHARS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+function generateShortCode() {
+  let s = '';
+  const bytes = crypto.randomBytes(5);
+  for (let i = 0; i < 5; i++) s += SHORT_CODE_CHARS[bytes[i] % 36];
+  return s;
+}
+async function ensureUniqueShortCode() {
+  for (let attempt = 0; attempt < 20; attempt++) {
+    const code = generateShortCode();
+    const existing = await prisma.booking.findUnique({ where: { shortCode: code } });
+    if (!existing) return code;
+  }
+  throw new Error('Could not generate unique short code');
+}
 
 // GET /api/bookings — list all (with artist, customer). Default sort: latest first.
 bookingsRouter.get('/', async (req, res) => {
@@ -21,11 +38,18 @@ bookingsRouter.get('/', async (req, res) => {
     const orderLatest = sort === 'oldest'
       ? [{ date: 'asc' }, { startTime: 'asc' }]
       : [{ date: 'desc' }, { startTime: 'desc' }];
-    const bookings = await prisma.booking.findMany({
+    let bookings = await prisma.booking.findMany({
       where,
       include: { artist: true, customer: true, studio: true, payments: true, review: true },
       orderBy: orderLatest,
     });
+    for (const b of bookings) {
+      if (!b.shortCode) {
+        const code = await ensureUniqueShortCode();
+        await prisma.booking.update({ where: { id: b.id }, data: { shortCode: code } });
+        b.shortCode = code;
+      }
+    }
     const withTotals = bookings.map((b) => {
       const paidTotal = (b.payments || []).filter((p) => p.status === 'completed').reduce((s, p) => s + p.amount, 0);
       const totalAmount = b.totalAmount ?? 0;
@@ -59,8 +83,10 @@ bookingsRouter.get('/:id', async (req, res) => {
 bookingsRouter.post('/', async (req, res) => {
   try {
     const { artistId, customerId, studioId, date, startTime, endTime, status, notes, totalAmount, placement, preference } = req.body;
+    const shortCode = await ensureUniqueShortCode();
     const booking = await prisma.booking.create({
       data: {
+        shortCode,
         artistId,
         customerId: customerId || null,
         studioId: studioId || null,
