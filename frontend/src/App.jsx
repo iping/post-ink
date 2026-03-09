@@ -1,6 +1,7 @@
 import { Routes, Route, Link, NavLink, useNavigate } from 'react-router-dom';
 import './App.css';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { ManageLayout } from './components/ManageLayout';
 import { useAuth } from './context/AuthContext';
 import { ArtistList } from './pages/ArtistList';
 import { ArtistForm } from './pages/ArtistForm';
@@ -62,11 +63,13 @@ function App() {
           <Route path="/manage/bookings/new" element={<ProtectedRoute><BookingForm /></ProtectedRoute>} />
           <Route path="/manage/bookings/:id" element={<ProtectedRoute><BookingDetail /></ProtectedRoute>} />
           <Route path="/manage/bookings/:id/edit" element={<ProtectedRoute><BookingForm /></ProtectedRoute>} />
-          <Route path="/manage/artists" element={<ProtectedRoute><ArtistList /></ProtectedRoute>} />
-          <Route path="/manage/artists/new" element={<ProtectedRoute><ArtistForm /></ProtectedRoute>} />
-          <Route path="/manage/artists/:id" element={<ProtectedRoute><ArtistDetail /></ProtectedRoute>} />
-          <Route path="/manage/artists/:id/edit" element={<ProtectedRoute><ArtistForm /></ProtectedRoute>} />
-          <Route path="/manage/artists/:id/availability" element={<ProtectedRoute><ArtistAvailability /></ProtectedRoute>} />
+          <Route path="/manage/artists" element={<ProtectedRoute><ManageLayout /></ProtectedRoute>}>
+            <Route index element={<ArtistList />} />
+            <Route path="new" element={<ArtistForm />} />
+            <Route path=":id" element={<ArtistDetail />} />
+            <Route path=":id/edit" element={<ArtistForm />} />
+            <Route path=":id/availability" element={<ArtistAvailability />} />
+          </Route>
         </Routes>
       </main>
       <footer className="footer">

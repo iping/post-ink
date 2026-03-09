@@ -1,0 +1,55 @@
+import { useState } from 'react';
+import { Link, NavLink, Outlet } from 'react-router-dom';
+import styles from '../pages/Studio.module.css';
+
+/**
+ * Shared layout for management pages: sidebar + main content.
+ * Used for /manage/artists/* so artist management has the same side menu as Studio.
+ */
+export function ManageLayout() {
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  return (
+    <div className={styles.wrap}>
+      <aside className={`${styles.sidebar} ${sidebarCollapsed ? styles.sidebarCollapsed : ''}`} aria-label="Studio menu">
+        <div className={styles.sidebarHeader}>
+          <button
+            type="button"
+            className={styles.burgerBtn}
+            onClick={() => setSidebarCollapsed((v) => !v)}
+            aria-expanded={!sidebarCollapsed}
+            aria-label={sidebarCollapsed ? 'Open menu' : 'Minimize menu'}
+          >
+            <span className={styles.burgerLine} />
+            <span className={styles.burgerLine} />
+            <span className={styles.burgerLine} />
+          </button>
+          {!sidebarCollapsed && (
+            <>
+              <h1 className={styles.sidebarTitle}>Studio Management</h1>
+              <p className={styles.sidebarSubtitle}>Manage your studio</p>
+            </>
+          )}
+        </div>
+        <nav className={styles.sideNav} aria-label="Admin sections">
+          <NavLink to="/manage" end className={({ isActive }) => `${styles.sideNavLink} ${isActive ? styles.sideNavActive : ''}`} data-short="B" title="Bookings">
+            Bookings
+          </NavLink>
+          <NavLink to="/manage/artists" className={({ isActive }) => `${styles.sideNavLink} ${isActive ? styles.sideNavActive : ''}`} data-short="A" title="Tattoo Artist Management">
+            Tattoo Artist Management
+          </NavLink>
+          <Link to="/manage?tab=projects" className={styles.sideNavLink} data-short="Pr" title="Projects">Projects</Link>
+          <Link to="/manage?tab=payments" className={styles.sideNavLink} data-short="P" title="Payments">Payments</Link>
+          <Link to="/manage?tab=commissions" className={styles.sideNavLink} data-short="C" title="Commission">Commission</Link>
+          <Link to="/manage?tab=customers" className={styles.sideNavLink} data-short="U" title="Customers">Customers</Link>
+          <Link to="/manage?tab=specialities" className={styles.sideNavLink} data-short="S" title="Specialities">Specialities</Link>
+          <Link to="/manage?tab=payment-destinations" className={styles.sideNavLink} data-short="Pay" title="Payment options">Payment options</Link>
+          <Link to="/manage?tab=users" className={styles.sideNavLink} data-short="Us" title="Users">Users</Link>
+        </nav>
+      </aside>
+      <main className={styles.main}>
+        <Outlet />
+      </main>
+    </div>
+  );
+}
