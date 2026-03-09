@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 import { execSync } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -93,6 +94,18 @@ async function main() {
   await prisma.customer.deleteMany({});
   await prisma.tattooStudio.deleteMany({});
   await prisma.speciality.deleteMany({});
+  await prisma.user.deleteMany({});
+
+  // ─── Platform users (login to management) ───
+  const adminHash = await bcrypt.hash('admin123', await bcrypt.genSalt(10));
+  await prisma.user.create({
+    data: {
+      email: 'admin@post.ink',
+      passwordHash: adminHash,
+      name: 'Admin',
+      role: 'admin',
+    },
+  });
 
   // ─── Specialities (master list) ───
   const specialityNames = [
@@ -351,6 +364,19 @@ async function main() {
     }
   }
 
+  // ─── Sample Project (first active booking: "Alpha" fixed rate) ───
+  if (createdActiveBookings.length > 0) {
+    await prisma.project.create({
+      data: {
+        bookingId: createdActiveBookings[0].id,
+        name: 'Alpha',
+        pricingType: 'fixed',
+        fixedAmount: createdActiveBookings[0].totalAmount ?? 5000000,
+        notes: 'Half sleeve botanical — agreed total',
+      },
+    });
+  }
+
   // ─── Cancelled Bookings ───
   const cancelledBookings = [
     { artistIdx: 1, customerIdx: 3, studioIdx: 0, daysAgo: 5, start: '14:00', end: '17:00', amount: 4000000, notes: 'Traditional anchor — customer rescheduled' },
@@ -474,6 +500,7 @@ async function main() {
 
   const totalBookings = activeBookings.length + cancelledBookings.length + completedBookings.length;
   console.log(`Seed complete: ${createdArtists.length} artists, ${studios.length} studios, ${customers.length} customers, ${totalBookings} bookings, ${reviewCount} reviews.`);
+  console.log('Default login: admin@post.ink / admin123');
 }
 
 main()

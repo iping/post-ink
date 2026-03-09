@@ -1,0 +1,123 @@
+.wrap {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.card {
+  width: 100%;
+  max-width: 400px;
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, #e0e0e0);
+  border-radius: var(--radius-lg, 12px);
+  padding: 2rem;
+  box-shadow: var(--shadow-md, 0 4px 12px rgba(0,0,0,0.08));
+}
+
+.title {
+  margin: 0 0 0.25rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text, #1a1a1a);
+  text-align: center;
+}
+
+.subtitle {
+  margin: 0 0 1.5rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary, #666);
+  text-align: center;
+}
+
+.form label {
+  display: block;
+  margin-bottom: 1rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary, #555);
+}
+
+.form input {
+  width: 100%;
+  margin-top: 0.35rem;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--border, #ddd);
+  border-radius: var(--radius, 8px);
+  font-size: 1rem;
+  background: var(--bg, #fafafa);
+  color: var(--text, #1a1a1a);
+}
+
+.form input:focus {
+  outline: none;
+  border-color: var(--accent, #c9a86c);
+  box-shadow: 0 0 0 2px rgba(201, 168, 108, 0.2);
+}
+
+.error {
+  padding: 0.65rem 0.85rem;
+  margin-bottom: 1rem;
+  background: var(--danger-dim, #fde8e8);
+  border: 1px solid var(--danger, #c53030);
+  border-radius: var(--radius, 8px);
+  color: var(--danger, #c53030);
+  font-size: 0.9rem;
+}
+
+.submit {
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--accent, #c9a86c);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius, 8px);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.submit:hover:not(:disabled) {
+  background: var(--accent-hover, #b8955a);
+}
+
+.submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.footer {
+  margin: 1.25rem 0 0;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.footer a {
+  color: var(--accent, #c9a86c);
+  text-decoration: none;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+.help {
+  margin: 1rem 0 0;
+  padding: 0.75rem 1rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary, #666);
+  background: var(--bg-warm, #f8f6f3);
+  border-radius: var(--radius, 8px);
+  border: 1px solid var(--border, #eee);
+}
+
+.help code {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.85em;
+  padding: 0.1rem 0.35rem;
+  background: rgba(0,0,0,0.06);
+  border-radius: 4px;
+}

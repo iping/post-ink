@@ -1,3 +1,10 @@
+import path from 'path';
+import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.join(__dirname, '..', '.env') });
+
 import express from 'express';
 import cors from 'cors';
 import { artistsRouter } from './routes/artists.js';
@@ -10,6 +17,9 @@ import { commissionsRouter } from './routes/commissions.js';
 import { reviewsRouter } from './routes/reviews.js';
 import { specialitiesRouter } from './routes/specialities.js';
 import { uploadsRouter } from './routes/uploads.js';
+import { authRouter } from './routes/auth.js';
+import { usersRouter } from './routes/users.js';
+import { projectsRouter } from './routes/projects.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -18,9 +28,12 @@ app.use(cors({ origin: true }));
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
 
+app.use('/api/auth', authRouter);
+app.use('/api/users', usersRouter);
 app.use('/api/artists/:artistId/availability', availabilityRouter);
 app.use('/api/artists', artistsRouter);
 app.use('/api/bookings', bookingsRouter);
+app.use('/api/projects', projectsRouter);
 app.use('/api/payments', paymentsRouter);
 app.use('/api/customers', customersRouter);
 app.use('/api/studios', studiosRouter);

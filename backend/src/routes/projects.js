@@ -1,0 +1,128 @@
+import { Router } from 'express';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+export const projectsRouter = Router();
+
+// GET /api/projects — list all (optional ?bookingId= to filter)
+projectsRouter.get('/', async (req, res) => {
+  try {
+    const { bookingId } = req.query;
+    const where = bookingId ? { bookingId } : {};
+    const projects = await prisma.project.findMany({
+      where,
+      include: { booking: { include: { artist: true, customer: true, studio: true } } },
+      orderBy: { createdAt: 'desc' },
+    });
+    res.json(projects);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// GET /api/projects/:id — get one project
+projectsRouter.get('/:id', async (req, res) => {
+  try {
+    const project = await prisma.project.findUnique({
+      where: { id: req.params.id },
+      include: { booking: { include: { artist: true, customer: true, studio: true } } },
+    });
+    if (!project) return res.status(404).json({ error: 'Project not found' });
+    res.json(project);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// POST /api/projects — create (bookingId required; one project per booking)
+projectsRouter.post('/', async (req, res) => {
+  try {
+    const { bookingId, name, pricingType, fixedAmount, hourlyRate, agreedHours, notes } = req.body;
+    if (!bookingId || !name || !pricingType) {
+      return res.status(400).json({ error: 'bookingId, name, and pricingType required' });
+    }
+    if (!['fixed', 'hourly'].includes(pricingType)) {
+      return res.status(400).json({ error: 'pricingType must be "fixed" or "hourly"' });
+    }
+    const existing = await prisma.project.findUnique({ where: { bookingId } });
+    if (existing) {
+      return res.status(400).json({ error: 'This booking already has a project' });
+    }
+    const data = {
+      bookingId,
+      name: String(name).trim(),
+      pricingType,
+      notes: notes?.trim() || null,
+    };
+    if (pricingType === 'fixed') {
+      data.fixedAmount = fixedAmount != null ? Number(fixedAmount) : null;
+      data.hourlyRate = null;
+      data.agreedHours = null;
+    } else {
+      data.hourlyRate = hourlyRate != null ? Number(hourlyRate) : null;
+      data.agreedHours = agreedHours != null ? Number(agreedHours) : null;
+      data.fixedAmount = null;
+    }
+    const project = await prisma.project.create({
+      data,
+      include: { booking: { include: { artist: true, customer: true, studio: true } } },
+    });
+    res.status(201).json(project);
+  } catch (e) {
+    if (e.code === 'P2003') return res.status(400).json({ error: 'Booking not found' });
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// PATCH /api/projects/:id
+projectsRouter.patch('/:id', async (req, res) => {
+  try {
+    const { name, pricingType, fixedAmount, hourlyRate, agreedHours, notes } = req.body;
+    const existing = await prisma.project.findUnique({ where: { id: req.params.id } });
+    if (!existing) return res.status(404).json({ error: 'Project not found' });
+    const data = {};
+    if (name !== undefined) data.name = String(name).trim();
+    if (pricingType !== undefined) {
+      if (!['fixed', 'hourly'].includes(pricingType)) {
+        return res.status(400).json({ error: 'pricingType must be "fixed" or "hourly"' });
+      }
+      data.pricingType = pricingType;
+      if (pricingType === 'fixed') {
+        data.fixedAmount = fixedAmount != null ? Number(fixedAmount) : null;
+        data.hourlyRate = null;
+        data.agreedHours = null;
+      } else {
+        data.hourlyRate = hourlyRate != null ? Number(hourlyRate) : null;
+        data.agreedHours = agreedHours != null ? Number(agreedHours) : null;
+        data.fixedAmount = null;
+      }
+    } else {
+      if (existing.pricingType === 'fixed' && fixedAmount !== undefined) data.fixedAmount = Number(fixedAmount);
+      if (existing.pricingType === 'hourly') {
+        if (hourlyRate !== undefined) data.hourlyRate = Number(hourlyRate);
+        if (agreedHours !== undefined) data.agreedHours = Number(agreedHours);
+      }
+    }
+    if (notes !== undefined) data.notes = notes?.trim() || null;
+    const project = await prisma.project.update({
+      where: { id: req.params.id },
+      data,
+      include: { booking: { include: { artist: true, customer: true, studio: true } } },
+    });
+    res.json(project);
+  } catch (e) {
+    if (e.code === 'P2025') return res.status(404).json({ error: 'Project not found' });
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// DELETE /api/projects/:id
+projectsRouter.delete('/:id', async (req, res) => {
+  try {
+    await prisma.project.delete({ where: { id: req.params.id } });
+    res.status(204).end();
+  } catch (e) {
+    if (e.code === 'P2025') return res.status(404).json({ error: 'Project not found' });
+    res.status(500).json({ error: e.message });
+  }
+});

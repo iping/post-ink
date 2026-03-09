@@ -19,6 +19,7 @@ async function main() {
     tattooStudios,
     customers,
     bookings,
+    projects,
     payments,
     studioCommissions,
     reviews,
@@ -29,9 +30,10 @@ async function main() {
     prisma.tattooStudio.findMany({ orderBy: { name: 'asc' } }),
     prisma.customer.findMany({ orderBy: { name: 'asc' } }),
     prisma.booking.findMany({
-      include: { artist: true, customer: true, studio: true, payments: true, review: true },
+      include: { artist: true, customer: true, studio: true, payments: true, review: true, project: true },
       orderBy: [{ date: 'desc' }, { startTime: 'desc' }],
     }),
+    prisma.project.findMany({ orderBy: { createdAt: 'asc' } }),
     prisma.payment.findMany({ orderBy: { createdAt: 'asc' } }),
     prisma.studioCommission.findMany({ orderBy: [{ studioId: 'asc' }, { artistId: 'asc' }] }),
     prisma.review.findMany({ orderBy: { createdAt: 'asc' } }),
@@ -45,6 +47,7 @@ async function main() {
     tattooStudios,
     customers,
     bookings,
+    projects,
     payments,
     studioCommissions,
     reviews,
@@ -56,7 +59,7 @@ async function main() {
   fs.writeFileSync(outPath, JSON.stringify(data, null, 2), 'utf8');
   console.log(`Exported to ${outPath}`);
   console.log(
-    `  Specialities: ${data.specialities.length}, Artists: ${data.tattooArtists.length}, Studios: ${data.tattooStudios.length}, Customers: ${data.customers.length}, Bookings: ${data.bookings.length}, Payments: ${data.payments.length}, Reviews: ${data.reviews.length}`,
+    `  Specialities: ${data.specialities.length}, Artists: ${data.tattooArtists.length}, Studios: ${data.tattooStudios.length}, Customers: ${data.customers.length}, Bookings: ${data.bookings.length}, Projects: ${data.projects.length}, Payments: ${data.payments.length}, Reviews: ${data.reviews.length}`,
   );
 }
 

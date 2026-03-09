@@ -8,6 +8,17 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ----- Platform User (login to management) -----
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  role         String   @default("staff") // admin, staff
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
 // ----- Tattoo Artist -----
 model TattooArtist {
   id               String   @id @default(cuid())
@@ -89,10 +100,28 @@ model Booking {
   updatedAt   DateTime      @updatedAt
   payments    Payment[]
   review      Review?
+  project     Project?
 
   @@index([artistId])
   @@index([customerId])
   @@index([date])
+}
+
+// ----- Project (work to be done after booking; fixed or hourly rate) -----
+model Project {
+  id           String   @id @default(cuid())
+  bookingId    String   @unique
+  booking      Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  name         String   // e.g. "Alpha"
+  pricingType  String   // "fixed" | "hourly"
+  fixedAmount  Float?   // agreed total when pricingType = fixed (admin-defined, customer agreed)
+  hourlyRate   Float?   // IDR per hour when pricingType = hourly (artist–customer agreement)
+  agreedHours  Float?   // optional: agreed hours when hourly (total = hourlyRate * agreedHours)
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([bookingId])
 }
 
 // ----- Payment (Studio: manage payment process) -----

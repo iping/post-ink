@@ -17,6 +17,10 @@ import {
   createSpeciality,
   updateSpeciality,
   deleteSpeciality,
+  getUsers,
+  createUser,
+  updateUser,
+  deleteUser,
 } from '../api';
 import { formatRupiah, formatWithConversion, formatNumberWithDots, parseNumberInput } from '../currency';
 import styles from './Studio.module.css';
@@ -105,7 +109,7 @@ export function Studio() {
 
   useEffect(() => {
     const t = searchParams.get('tab') || 'bookings';
-    if (['bookings', 'payments', 'commissions', 'customers', 'specialities'].includes(t)) setTab(t);
+    if (['bookings', 'payments', 'commissions', 'customers', 'specialities', 'users'].includes(t)) setTab(t);
   }, [searchParams]);
 
   const switchTab = (t) => {
@@ -118,8 +122,12 @@ export function Studio() {
   const [customers, setCustomers] = useState([]);
   const [studios, setStudios] = useState([]);
   const [bookings, setBookings] = useState([]);
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showUserForm, setShowUserForm] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
+  const [userForm, setUserForm] = useState({ email: '', name: '', password: '', role: 'staff' });
 
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [editingPayment, setEditingPayment] = useState(null);
@@ -195,10 +203,23 @@ export function Studio() {
     });
     return list[0] || null;
   };
-  const getCustomerDeposit = (customerId) => {
+  /** Total paid (all payment types, completed) for this customer's bookings */
+  const getCustomerTotalPaid = (customerId) => {
     return payments
       .filter((p) => p.booking?.customerId === customerId && p.status === 'completed')
       .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+  };
+  /** Deposit total: completed down_payment only for this customer's bookings */
+  const getCustomerDeposit = (customerId) => {
+    return payments
+      .filter((p) => p.booking?.customerId === customerId && p.status === 'completed' && p.type === 'down_payment')
+      .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+  };
+  /** List of deposit payments (down_payment) for this customer, for display */
+  const getCustomerDepositPayments = (customerId) => {
+    return payments
+      .filter((p) => p.booking?.customerId === customerId && p.type === 'down_payment')
+      .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
   };
   const getCustomerTransactions = (customerId) => {
     return payments
@@ -231,8 +252,9 @@ export function Studio() {
       getCustomers(),
       getStudios(),
       getSpecialities(),
+      getUsers(),
     ])
-      .then(([b, p, co, a, c, s, sp]) => {
+      .then(([b, p, co, a, c, s, sp, u]) => {
         setBookings(b);
         setPayments(p);
         setCommissions(co);
@@ -240,6 +262,7 @@ export function Studio() {
         setCustomers(c);
         setStudios(s);
         setSpecialities(Array.isArray(sp) ? sp : []);
+        setUsers(Array.isArray(u) ? u : []);
       })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
@@ -422,6 +445,39 @@ export function Studio() {
     }
   };
 
+  const saveUser = async (e) => {
+    e.preventDefault();
+    setError(null);
+    const email = (userForm.email || '').trim();
+    if (!email) return setError('Email required');
+    try {
+      if (editingUser) {
+        const data = { email, name: (userForm.name || '').trim() || null, role: userForm.role };
+        if (userForm.password) data.password = userForm.password;
+        await updateUser(editingUser.id, data);
+      } else {
+        if (!userForm.password || userForm.password.length < 6) return setError('Password required (min 6 characters)');
+        await createUser({ email, name: (userForm.name || '').trim() || null, password: userForm.password, role: userForm.role });
+      }
+      setShowUserForm(false);
+      setEditingUser(null);
+      setUserForm({ email: '', name: '', password: '', role: 'staff' });
+      load();
+    } catch (err) {
+      setError(err.message || 'Failed to save user');
+    }
+  };
+
+  const removeUser = async (id) => {
+    setError(null);
+    try {
+      await deleteUser(id);
+      load();
+    } catch (err) {
+      setError(err.message || 'Failed to delete user');
+    }
+  };
+
   if (loading) return <div className={styles.loading}>Loading studio…</div>;
 
   return (
@@ -455,6 +511,7 @@ export function Studio() {
           <button type="button" data-short="C" title="Commission" className={tab === 'commissions' ? styles.sideNavActive : ''} onClick={() => switchTab('commissions')}>Commission</button>
           <button type="button" data-short="U" title="Customers" className={tab === 'customers' ? styles.sideNavActive : ''} onClick={() => switchTab('customers')}>Customers</button>
           <button type="button" data-short="S" title="Specialities" className={tab === 'specialities' ? styles.sideNavActive : ''} onClick={() => switchTab('specialities')}>Specialities</button>
+          <button type="button" data-short="Us" title="Users" className={tab === 'users' ? styles.sideNavActive : ''} onClick={() => switchTab('users')}>Users</button>
         </nav>
       </aside>
 
@@ -558,6 +615,7 @@ export function Studio() {
                   <th>Total</th>
                   <th>Paid</th>
                   <th>Remaining</th>
+                  <th>Project</th>
                   <th>Status</th>
                   <th>Created by</th>
                   <th>Created at</th>
@@ -567,7 +625,7 @@ export function Studio() {
               <tbody>
                 {paginatedBookings.length === 0 ? (
                   <tr>
-                    <td colSpan={12}>
+                    <td colSpan={13}>
                       {bookings.length === 0 && (bookingFilters.status || bookingFilters.artistId || bookingFilters.studioId || bookingFilters.customerId || bookingFilters.from || bookingFilters.to)
                         ? 'No bookings match your filters. Click Reset to clear filters.'
                         : 'No bookings yet. Create one above.'}
@@ -591,6 +649,7 @@ export function Studio() {
                         <td className={b.remainingAmount != null && b.remainingAmount > 0 ? `${styles.remainingDue} ${styles.cellAmount}` : styles.cellAmount}>
                           {formatRupiah(b.remainingAmount)}
                         </td>
+                        <td>{b.project?.name || '—'}</td>
                         <td>
                           <span className={styles[`status_${b.status}`]}>{b.status}</span>
                           {b.review && <span className={styles.reviewBadge} title={`Reviewed: ${b.review.rating}/5`}>★ {b.review.rating}</span>}
@@ -731,9 +790,10 @@ export function Studio() {
                   <th>Name</th>
                   <th>Email</th>
                   <th>Phone</th>
-                  <th>Deposit (paid)</th>
-                  <th>Total orders</th>
-                  <th>Latest project / order</th>
+                  <th>Deposit</th>
+                  <th>Total paid</th>
+                  <th>Orders</th>
+                  <th>Latest project</th>
                   <th>Created</th>
                   <th></th>
                 </tr>
@@ -741,13 +801,14 @@ export function Studio() {
               <tbody>
                 {paginatedCustomers.length === 0 ? (
                   <tr>
-                    <td colSpan={9}>No customers yet. Customers are added when you create a booking (select or create customer).</td>
+                    <td colSpan={10}>No customers yet. Customers are added when you create a booking (select or create customer).</td>
                   </tr>
                 ) : (
                   paginatedCustomers.map((c, i) => {
                     const customerBookings = getCustomerBookings(c.id);
                     const latest = getLatestBooking(c.id);
                     const deposit = getCustomerDeposit(c.id);
+                    const totalPaid = getCustomerTotalPaid(c.id);
                     const rowNum = (customerPage - 1) * ROWS_PER_PAGE + i + 1;
                     const createdDate = c.createdAt ? new Date(c.createdAt) : null;
                     const createdStr = createdDate ? createdDate.toLocaleDateString('en-GB', { dateStyle: 'short' }) : '—';
@@ -758,6 +819,7 @@ export function Studio() {
                         <td>{c.email || '—'}</td>
                         <td>{c.phone || '—'}</td>
                         <td className={styles.cellAmount}>{formatRupiah(deposit)}</td>
+                        <td className={styles.cellAmount}>{formatRupiah(totalPaid)}</td>
                         <td className={styles.cellAmount}>{customerBookings.length}</td>
                         <td>
                           {latest ? (
@@ -865,6 +927,56 @@ export function Studio() {
         </section>
       )}
 
+      {tab === 'users' && (
+        <section className={styles.section}>
+          <div className={styles.sectionHead}>
+            <div>
+              <h2>User management</h2>
+              {users.length > 0 && <span className={styles.countHint}>{users.length} user{users.length !== 1 ? 's' : ''}</span>}
+            </div>
+            <button type="button" className={styles.addBtn} onClick={() => { setEditingUser(null); setUserForm({ email: '', name: '', password: '', role: 'staff' }); setShowUserForm(true); }}>+ Add user</button>
+          </div>
+          <div className={styles.tableWrap}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>No.</th>
+                  <th>Email</th>
+                  <th>Name</th>
+                  <th>Role</th>
+                  <th>Created</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.length === 0 ? (
+                  <tr>
+                    <td colSpan={6}>No users yet. Add one to allow login to the platform.</td>
+                  </tr>
+                ) : (
+                  users.map((u, i) => {
+                    const createdStr = u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-GB', { dateStyle: 'short' }) : '—';
+                    return (
+                      <tr key={u.id}>
+                        <td>{i + 1}</td>
+                        <td className={styles.cellEmphasis}>{u.email}</td>
+                        <td>{u.name || '—'}</td>
+                        <td><span className={u.role === 'admin' ? styles.status_confirmed : ''}>{u.role}</span></td>
+                        <td>{createdStr}</td>
+                        <td>
+                          <button type="button" className={styles.smBtn} onClick={() => { setEditingUser(u); setUserForm({ email: u.email, name: u.name || '', password: '', role: u.role }); setShowUserForm(true); }}>Edit</button>
+                          <button type="button" className={styles.smBtnDanger} onClick={() => { if (window.confirm(`Remove user ${u.email}?`)) removeUser(u.id); }}>Delete</button>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+
       {customerHistoryModal && (
         <div className={styles.modal} role="dialog" aria-modal="true" aria-label="Customer transaction history">
           <div className={styles.modalContent} style={{ maxWidth: '560px' }}>
@@ -872,10 +984,28 @@ export function Studio() {
             <p className={styles.help}>All payments linked to this customer&apos;s bookings.</p>
             {(() => {
               const tx = getCustomerTransactions(customerHistoryModal.id);
-              const totalPaid = getCustomerDeposit(customerHistoryModal.id);
+              const totalPaid = getCustomerTotalPaid(customerHistoryModal.id);
+              const depositTotal = getCustomerDeposit(customerHistoryModal.id);
+              const depositPayments = getCustomerDepositPayments(customerHistoryModal.id);
               return (
                 <>
-                  <p className={styles.transactionSummary}><strong>Total paid (completed):</strong> {formatRupiah(totalPaid)}</p>
+                  <h4>Deposit information</h4>
+                  <p className={styles.transactionSummary}><strong>Total deposits (down payments):</strong> {formatRupiah(depositTotal)}</p>
+                  {depositPayments.length === 0 ? (
+                    <p className={styles.help}>No deposit payments yet.</p>
+                  ) : (
+                    <ul className={styles.paymentList}>
+                      {depositPayments.map((p) => (
+                        <li key={p.id}>
+                          {p.createdAt ? new Date(p.createdAt).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' }) : '—'} — {formatRupiah(p.amount)} ({p.status})
+                          {p.bookingId && (
+                            <> · <Link to={`/manage/bookings/${p.booking?.id}`} className={styles.cellLatest}>Booking {p.booking?.shortCode || p.booking?.date || p.bookingId.slice(0, 8)}</Link></>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  <p className={styles.transactionSummary}><strong>Total paid (all completed):</strong> {formatRupiah(totalPaid)}</p>
                   {tx.length === 0 ? (
                     <p className={styles.help}>No transactions yet.</p>
                   ) : (
@@ -1042,6 +1172,61 @@ export function Studio() {
               <div className={styles.formActions}>
                 <button type="submit">Save</button>
                 <button type="button" onClick={() => setShowCommissionForm(false)}>Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {showUserForm && (
+        <div className={styles.modal} role="dialog" aria-modal="true" aria-label={editingUser ? 'Edit user' : 'Add user'}>
+          <div className={styles.modalContent}>
+            <h3>{editingUser ? 'Edit user' : 'Add user'}</h3>
+            <p className={styles.help}>Users can sign in to access Studio Management.</p>
+            <form onSubmit={saveUser}>
+              <label>
+                Email *
+                <input
+                  type="email"
+                  value={userForm.email}
+                  onChange={(e) => setUserForm((f) => ({ ...f, email: e.target.value }))}
+                  placeholder="user@example.com"
+                  required
+                  disabled={!!editingUser}
+                />
+              </label>
+              <label>
+                Name
+                <input
+                  value={userForm.name}
+                  onChange={(e) => setUserForm((f) => ({ ...f, name: e.target.value }))}
+                  placeholder="Display name"
+                />
+              </label>
+              <label>
+                Password {editingUser ? '(leave blank to keep current)' : '*'}
+                <input
+                  type="password"
+                  value={userForm.password}
+                  onChange={(e) => setUserForm((f) => ({ ...f, password: e.target.value }))}
+                  placeholder={editingUser ? '••••••••' : 'Min 6 characters'}
+                  minLength={editingUser ? undefined : 6}
+                  required={!editingUser}
+                />
+              </label>
+              <label>
+                Role
+                <select
+                  value={userForm.role}
+                  onChange={(e) => setUserForm((f) => ({ ...f, role: e.target.value }))}
+                >
+                  <option value="staff">Staff</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </label>
+              <div className={styles.formActions}>
+                <button type="submit">Save</button>
+                <button type="button" onClick={() => { setShowUserForm(false); setEditingUser(null); }}>Cancel</button>
               </div>
             </form>
           </div>

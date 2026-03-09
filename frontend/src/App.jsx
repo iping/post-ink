@@ -1,5 +1,7 @@
-import { Routes, Route, Link, NavLink } from 'react-router-dom';
+import { Routes, Route, Link, NavLink, useNavigate } from 'react-router-dom';
 import './App.css';
+import { ProtectedRoute } from './components/ProtectedRoute';
+import { useAuth } from './context/AuthContext';
 import { ArtistList } from './pages/ArtistList';
 import { ArtistForm } from './pages/ArtistForm';
 import { ArtistDetail } from './pages/ArtistDetail';
@@ -9,8 +11,17 @@ import { Discover } from './pages/Discover';
 import { ArtistBooking } from './pages/ArtistBooking';
 import { BookingForm } from './pages/BookingForm';
 import { BookingDetail } from './pages/BookingDetail';
+import { Login } from './pages/Login';
 
 function App() {
+  const { user, token, logout } = useAuth();
+  const navigate = useNavigate();
+
+  function handleLogout() {
+    logout();
+    navigate('/login', { replace: true });
+  }
+
   return (
     <div className="app">
       <header className="header">
@@ -20,10 +31,18 @@ function App() {
         </Link>
         <nav>
           <NavLink to="/" end>Discover</NavLink>
-          <NavLink to="/manage" className={({ isActive }) => isActive ? 'active nav-manage' : 'nav-manage'}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-            Management
-          </NavLink>
+          {token ? (
+            <>
+              <NavLink to="/manage" className={({ isActive }) => isActive ? 'active nav-manage' : 'nav-manage'}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+                Management
+              </NavLink>
+              <span className="header-user">{user?.email || user?.name || 'User'}</span>
+              <button type="button" className="header-logout" onClick={handleLogout}>Log out</button>
+            </>
+          ) : (
+            <NavLink to="/login" className="nav-manage">Sign in</NavLink>
+          )}
         </nav>
       </header>
       <main className="main">
@@ -34,17 +53,20 @@ function App() {
           <Route path="/artists/:id" element={<ArtistDetail />} />
           <Route path="/artists/:id/book" element={<ArtistBooking />} />
 
-          {/* Management / admin */}
-          <Route path="/manage" element={<Studio />} />
-          <Route path="/manage/studio" element={<Studio />} />
-          <Route path="/manage/bookings/new" element={<BookingForm />} />
-          <Route path="/manage/bookings/:id" element={<BookingDetail />} />
-          <Route path="/manage/bookings/:id/edit" element={<BookingForm />} />
-          <Route path="/manage/artists" element={<ArtistList />} />
-          <Route path="/manage/artists/new" element={<ArtistForm />} />
-          <Route path="/manage/artists/:id" element={<ArtistDetail />} />
-          <Route path="/manage/artists/:id/edit" element={<ArtistForm />} />
-          <Route path="/manage/artists/:id/availability" element={<ArtistAvailability />} />
+          {/* Login (public) */}
+          <Route path="/login" element={<Login />} />
+
+          {/* Management / admin (protected) */}
+          <Route path="/manage" element={<ProtectedRoute><Studio /></ProtectedRoute>} />
+          <Route path="/manage/studio" element={<ProtectedRoute><Studio /></ProtectedRoute>} />
+          <Route path="/manage/bookings/new" element={<ProtectedRoute><BookingForm /></ProtectedRoute>} />
+          <Route path="/manage/bookings/:id" element={<ProtectedRoute><BookingDetail /></ProtectedRoute>} />
+          <Route path="/manage/bookings/:id/edit" element={<ProtectedRoute><BookingForm /></ProtectedRoute>} />
+          <Route path="/manage/artists" element={<ProtectedRoute><ArtistList /></ProtectedRoute>} />
+          <Route path="/manage/artists/new" element={<ProtectedRoute><ArtistForm /></ProtectedRoute>} />
+          <Route path="/manage/artists/:id" element={<ProtectedRoute><ArtistDetail /></ProtectedRoute>} />
+          <Route path="/manage/artists/:id/edit" element={<ProtectedRoute><ArtistForm /></ProtectedRoute>} />
+          <Route path="/manage/artists/:id/availability" element={<ProtectedRoute><ArtistAvailability /></ProtectedRoute>} />
         </Routes>
       </main>
       <footer className="footer">
