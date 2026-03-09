@@ -140,6 +140,38 @@
   color: var(--text);
 }
 
+.sideNavLink {
+  width: 100%;
+  padding: 0.75rem 1.25rem;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  text-align: left;
+  text-decoration: none;
+  font-size: inherit;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.sideNavLink:hover {
+  background: var(--bg-warm);
+  color: var(--text);
+}
+.sidebarCollapsed .sideNavLink {
+  padding: 0.65rem;
+  font-size: 0;
+  justify-content: center;
+}
+.sidebarCollapsed .sideNavLink::before {
+  content: attr(data-short);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: inherit;
+}
+
 .sideNavActive {
   background: var(--accent-dim) !important;
   color: var(--accent) !important;
@@ -695,6 +727,52 @@
   font-size: 0.88rem;
   width: 100%;
   box-shadow: 0 0 0 2px var(--accent-dim);
+}
+
+.destForm {
+  margin-bottom: 1.25rem;
+  padding: 1rem 1.25rem;
+  background: var(--bg-warm);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: 1fr 1fr auto;
+  align-items: end;
+  flex-wrap: wrap;
+}
+.destFormLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.destFormLabel input,
+.destFormLabel select {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.9rem;
+}
+.destFormCheck {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+.destFormCheck input { width: auto; margin: 0; }
+.destFormActions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+@media (max-width: 700px) {
+  .destForm { grid-template-columns: 1fr; }
 }
 
 /* Pagination */

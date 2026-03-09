@@ -7,8 +7,12 @@ function authHeaders() {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-export async function getArtists() {
-  const res = await fetch(`${API}/artists`);
+export async function getArtists(opts = {}) {
+  const params = new URLSearchParams();
+  if (opts.activeOnly) params.set('activeOnly', 'true');
+  const qs = params.toString();
+  const url = qs ? `${API}/artists?${qs}` : `${API}/artists`;
+  const res = await fetch(url);
   if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
@@ -35,6 +39,12 @@ export async function updateArtist(id, formData) {
   });
   if (!res.ok) throw new Error(await res.text());
   return res.json();
+}
+
+export async function updateArtistStatus(id, isActive) {
+  const fd = new FormData();
+  fd.append('isActive', isActive ? 'true' : 'false');
+  return updateArtist(id, fd);
 }
 
 export async function deleteArtist(id) {
@@ -359,6 +369,40 @@ export async function updateSpeciality(id, data) {
 
 export async function deleteSpeciality(id) {
   const res = await fetch(`${API}/specialities/${id}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error(await errorMessage(res));
+}
+
+// ----- Payment destinations (where booking fee can be paid) -----
+export async function getPaymentDestinations(params = {}) {
+  const q = new URLSearchParams(params);
+  const url = `${API}/payment-destinations` + (q.toString() ? `?${q}` : '');
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(await errorMessage(res));
+  return res.json();
+}
+
+export async function createPaymentDestination(data) {
+  const res = await fetch(`${API}/payment-destinations`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error(await errorMessage(res));
+  return res.json();
+}
+
+export async function updatePaymentDestination(id, data) {
+  const res = await fetch(`${API}/payment-destinations/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error(await errorMessage(res));
+  return res.json();
+}
+
+export async function deletePaymentDestination(id) {
+  const res = await fetch(`${API}/payment-destinations/${id}`, { method: 'DELETE' });
   if (!res.ok) throw new Error(await errorMessage(res));
 }
 

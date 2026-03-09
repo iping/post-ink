@@ -29,7 +29,9 @@ export const artistsRouter = Router();
 
 artistsRouter.get('/', async (req, res) => {
   try {
+    const activeOnly = req.query.activeOnly === 'true';
     const artists = await prisma.tattooArtist.findMany({
+      where: activeOnly ? { isActive: true } : undefined,
       orderBy: { updatedAt: 'desc' },
       include: {
         availability: true,
@@ -82,6 +84,7 @@ artistsRouter.post('/', upload.fields([{ name: 'photos', maxCount: 10 }, { name:
       rate: req.body.rate != null && req.body.rate !== '' ? Number(req.body.rate) : null,
       photos: JSON.stringify([...existingPhotos, ...photos]),
       portfolio: JSON.stringify([...existingPortfolio, ...portfolio]),
+      isActive: req.body.isActive !== 'false' && req.body.isActive !== false,
     };
     const artist = await prisma.tattooArtist.create({ data });
     res.status(201).json(artist);
@@ -105,6 +108,7 @@ artistsRouter.patch('/:id', upload.fields([{ name: 'photos', maxCount: 10 }, { n
       ...(req.body.experiences !== undefined && { experiences: req.body.experiences || null }),
       ...(req.body.speciality !== undefined && { speciality: req.body.speciality || null }),
       ...(req.body.rate !== undefined && { rate: req.body.rate != null && req.body.rate !== '' ? Number(req.body.rate) : null }),
+      ...(req.body.isActive !== undefined && { isActive: req.body.isActive === 'true' || req.body.isActive === true }),
       photos: JSON.stringify([...existingPhotos, ...photos]),
       portfolio: JSON.stringify([...existingPortfolio, ...portfolio]),
     };

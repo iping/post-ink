@@ -29,6 +29,7 @@ model TattooArtist {
   rate             Float?   // hourly rate in IDR
   photos           String   // JSON array of image URLs/paths
   portfolio        String   // JSON array of portfolio image URLs
+  isActive         Boolean  @default(true)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
@@ -157,6 +158,20 @@ model StudioCommission {
   @@unique([studioId, artistId])
   @@index([studioId])
   @@index([artistId])
+}
+
+// ----- Payment destination (where booking fee can be paid: Bank, Credit Card, Cash) -----
+model PaymentDestination {
+  id        String   @id @default(cuid())
+  name      String   // Bank Name or display name (e.g. "BCA", "Mandiri")
+  account   String?  // Bank Account or reference (e.g. "1234567890")
+  type      String   // "Bank" | "Credit Card" | "Cash"
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([type])
+  @@index([isActive])
 }
 
 // ----- Speciality (master list for artist speciality picker) -----

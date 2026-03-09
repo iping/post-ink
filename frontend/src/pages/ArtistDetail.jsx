@@ -44,6 +44,20 @@ export function ArtistDetail() {
   if (error) return <div className={styles.error}>Error: {error}</div>;
   if (!artist) return null;
 
+  if (!isManage && artist.isActive === false) {
+    return (
+      <div className={styles.wrap}>
+        <div className={styles.toolbar}>
+          <Link to="/">← Discover</Link>
+        </div>
+        <div className={styles.unavailableBlock}>
+          <p>This tattoo artist is not currently available.</p>
+          <Link to="/">Browse active artists</Link>
+        </div>
+      </div>
+    );
+  }
+
   const photos = safeParse(artist.photos);
   const portfolio = safeParse(artist.portfolio);
   const conv = artist.rate ? formatWithConversion(artist.rate) : null;

@@ -38,7 +38,7 @@ export function Discover() {
   const [lightboxImg, setLightboxImg] = useState(null);
 
   useEffect(() => {
-    getArtists()
+    getArtists({ activeOnly: true })
       .then(setArtists)
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -47,6 +47,7 @@ export function Discover() {
   const allStyles = getAllStyles(artists);
 
   const filtered = artists.filter((a) => {
+    if (a.isActive === false) return false;
     if (filter && !(a.speciality || '').toLowerCase().includes(filter.toLowerCase())) return false;
     if (search) {
       const q = search.toLowerCase();

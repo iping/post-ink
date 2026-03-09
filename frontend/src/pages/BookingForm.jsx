@@ -8,7 +8,11 @@ import {
   createBooking,
   updateBooking,
   createCustomer,
+  createPayment,
+  getPayments,
+  getPaymentDestinations,
   uploadPreferenceImages,
+  uploadPaymentEvidence,
   uploadUrl,
 } from '../api';
 import { AvailabilityCalendar } from '../components/AvailabilityCalendar';
@@ -78,13 +82,21 @@ export function BookingForm() {
   const [useNewCustomer, setUseNewCustomer] = useState(false);
   const [uploadingPreference, setUploadingPreference] = useState(false);
   const [useCustomTime, setUseCustomTime] = useState(false);
-
+  const [depositDestinationId, setDepositDestinationId] = useState(''); // selected PaymentDestination id
+  const [depositEvidenceUrl, setDepositEvidenceUrl] = useState('');
+  const [uploadingEvidence, setUploadingEvidence] = useState(false);
+  const [paymentDestinations, setPaymentDestinations] = useState([]);
+  const [payments, setPayments] = useState([]);
+  const [estimationMode, setEstimationMode] = useState('unlimited'); // 'unlimited' | 'rate'
+  const [estimationAmount, setEstimationAmount] = useState('');
   useEffect(() => {
-    Promise.all([getArtists(), getCustomers(), getStudios()])
-      .then(([a, c, s]) => {
+    Promise.all([getArtists({ activeOnly: true }), getCustomers(), getStudios(), getPaymentDestinations({ activeOnly: 'true' }), getPayments()])
+      .then(([a, c, s, pd, pm]) => {
         setArtists(a);
         setCustomers(c);
         setStudios(s);
+        setPaymentDestinations(Array.isArray(pd) ? pd : []);
+        setPayments(Array.isArray(pm) ? pm : []);
         if (s.length > 0 && !bookingForm.studioId) {
           setBookingForm((f) => ({ ...f, studioId: s[0].id }));
         }
@@ -209,10 +221,15 @@ export function BookingForm() {
     if (asDraft && !payload.artistId && artists.length > 0) {
       payload.artistId = artists[0].id;
     }
-    // New booking, fixed price: use artist's 1 hour rate as total when not set in form
-    if (!isEdit && payload.pricingType === 'fixed' && (payload.totalAmount == null || payload.totalAmount <= 0)) {
-      const artist = artists.find((a) => a.id === payload.artistId);
-      payload.totalAmount = artist?.rate != null ? Number(artist.rate) : 0;
+    // New booking, fixed price: use estimation (rate or unlimited)
+    if (!isEdit && payload.pricingType === 'fixed') {
+      if (estimationMode === 'unlimited') {
+        payload.totalAmount = null;
+      } else {
+        const artist = artists.find((a) => a.id === payload.artistId);
+        const amt = estimationAmount !== '' ? Number(estimationAmount) : (artist?.rate != null ? Number(artist.rate) : null);
+        payload.totalAmount = amt != null && amt > 0 ? amt : null;
+      }
     }
     if (!payload.artistId) {
       setError(asDraft ? 'Add at least one artist in Manage → Artists to save a draft.' : 'Select studio and artist, then date and time.');
@@ -225,6 +242,25 @@ export function BookingForm() {
       } else {
         const created = await createBooking(payload);
         if (created?.id) {
+          const dest = depositDestinationId ? paymentDestinations.find((d) => d.id === depositDestinationId) : null;
+          const depositAmt = minDeposit;
+          if (dest && depositAmt > 0) {
+            try {
+              await createPayment({
+                bookingId: created.id,
+                amount: depositAmt,
+                currency: 'IDR',
+                method: dest.type,
+                type: 'down_payment',
+                transferDestination: dest.account || null,
+                evidenceUrl: depositEvidenceUrl || null,
+                status: 'completed',
+              });
+            } catch (payErr) {
+              setError(payErr.message);
+              return;
+            }
+          }
           navigate(`/manage/bookings/${created.id}`);
         } else {
           navigate('/manage?tab=bookings');
@@ -278,6 +314,34 @@ export function BookingForm() {
   const selectedArtist = artists.find((a) => a.id === bookingForm.artistId);
   const minDeposit = selectedArtist?.rate != null ? Number(selectedArtist.rate) : 0;
 
+  /** Deposit total (completed down_payment) for a customer, for dropdown display */
+  const getCustomerDeposit = (customerId) => {
+    return (payments || [])
+      .filter((p) => (p.booking?.customerId ?? p.booking?.customer?.id) === customerId && p.status === 'completed' && p.type === 'down_payment')
+      .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+  };
+
+  const handleEvidenceChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > MAX_IMAGE_SIZE) {
+      setError('Payment evidence must be 2MB or less.');
+      e.target.value = '';
+      return;
+    }
+    setError(null);
+    setUploadingEvidence(true);
+    try {
+      const { url } = await uploadPaymentEvidence(file);
+      setDepositEvidenceUrl(url);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setUploadingEvidence(false);
+      e.target.value = '';
+    }
+  };
+
   if (loading) return <div className={styles.loading}>Loading…</div>;
 
   return (
@@ -312,9 +376,12 @@ export function BookingForm() {
             </label>
             <label className={styles.label}>
               <span className={styles.labelText}>Tattoo artist</span>
+              {bookingForm.artistId && !artists.some((a) => a.id === bookingForm.artistId) && (
+                <p className={styles.helper} role="status">Selected artist is no longer available. Please choose an active artist.</p>
+              )}
               <select
                 className={styles.input}
-                value={bookingForm.artistId}
+                value={artists.some((a) => a.id === bookingForm.artistId) ? bookingForm.artistId : ''}
                 onChange={(e) => handleArtistChange(e.target.value)}
                 aria-label="Select artist"
               >
@@ -462,9 +529,14 @@ export function BookingForm() {
                   onChange={(e) => setBookingForm((f) => ({ ...f, customerId: e.target.value }))}
                 >
                   <option value="">— No customer —</option>
-                  {customers.map((c) => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
+                  {customers.map((c) => {
+                    const deposit = getCustomerDeposit(c.id);
+                    return (
+                      <option key={c.id} value={c.id}>
+                        {c.name}{deposit > 0 ? ` — Deposit: ${formatRupiah(deposit)}` : ''}
+                      </option>
+                    );
+                  })}
                 </select>
               </label>
             )}
@@ -591,19 +663,90 @@ export function BookingForm() {
 
           {!isEdit && (
             <section className={styles.block} aria-label="Agreed price and first deposit">
-              <h2 className={styles.blockTitle}>Agreed price & deposit</h2>
-              <p className={styles.blockDesc}>
-                Price comes from the artist’s 1 hour rate. You can add further deposit and payment on the booking detail page after saving.
-              </p>
-              <div className={styles.readOnlyField}>
-                <span className={styles.labelText}>First Deposit</span>
-                <p className={styles.readOnlyValue}>
-                  {bookingForm.artistId && minDeposit > 0
-                    ? formatRupiah(minDeposit)
-                    : '—'}
-                </p>
-                <span className={styles.pricingTypeHint}>1 hour rate of selected tattoo artist.</span>
+              <h2 className={styles.blockTitle}>Project Estimation Price and Deposit</h2>
+              <div className={styles.label}>
+                <span className={styles.labelText}>Project estimation (amount)</span>
+                <div className={styles.estimationOptions} role="radiogroup" aria-label="Estimation mode">
+                  <label className={`${styles.estimationOption} ${estimationMode === 'unlimited' ? styles.estimationOptionActive : ''}`}>
+                    <input
+                      type="radio"
+                      name="estimationMode"
+                      value="unlimited"
+                      checked={estimationMode === 'unlimited'}
+                      onChange={() => setEstimationMode('unlimited')}
+                      className={styles.estimationRadio}
+                    />
+                    <span>Hourly Rate</span>
+                  </label>
+                  <label className={`${styles.estimationOption} ${estimationMode === 'rate' ? styles.estimationOptionActive : ''}`}>
+                    <input
+                      type="radio"
+                      name="estimationMode"
+                      value="rate"
+                      checked={estimationMode === 'rate'}
+                      onChange={() => setEstimationMode('rate')}
+                      className={styles.estimationRadio}
+                    />
+                    <span>Fix Rate</span>
+                  </label>
+                </div>
               </div>
+              {estimationMode === 'rate' && (
+                <label className={styles.label}>
+                  <span className={styles.labelText}>Amount (IDR)</span>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    className={styles.input}
+                    placeholder={minDeposit > 0 ? `e.g. ${formatNumberWithDots(minDeposit)}` : 'e.g. 500.000'}
+                    value={formatNumberWithDots(estimationAmount)}
+                    onChange={(e) => setEstimationAmount(parseNumberInput(e.target.value))}
+                  />
+                </label>
+              )}
+              <div className={styles.readOnlyField}>
+                <span className={styles.labelText}>First deposit (1h rate, fixed)</span>
+                <p className={styles.readOnlyValue}>
+                  {bookingForm.artistId && minDeposit > 0 ? formatRupiah(minDeposit) : '—'}
+                </p>
+              </div>
+              {bookingForm.artistId && minDeposit > 0 && (
+                <>
+                  <label className={styles.label}>
+                    <span className={styles.labelText}>Paid?</span>
+                    <select
+                      className={styles.input}
+                      value={depositDestinationId}
+                      onChange={(e) => setDepositDestinationId(e.target.value)}
+                      aria-label="Where booking fee was paid"
+                    >
+                      <option value="">No</option>
+                      {paymentDestinations.map((d) => (
+                        <option key={d.id} value={d.id}>
+                          {d.name}{d.account ? ` — ${d.account}` : ''}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className={styles.label}>
+                    <span className={styles.labelText}>Receipt (optional)</span>
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/gif,image/webp"
+                      className={styles.fileInput}
+                      onChange={handleEvidenceChange}
+                      disabled={uploadingEvidence}
+                    />
+                    {uploadingEvidence && <span className={styles.uploading}>Uploading…</span>}
+                    {depositEvidenceUrl && (
+                      <div className={styles.evidenceThumb}>
+                        <img src={depositEvidenceUrl} alt="Receipt" className={styles.evidenceThumbImg} />
+                        <button type="button" onClick={() => setDepositEvidenceUrl('')} className={styles.thumbRemove}>×</button>
+                      </div>
+                    )}
+                  </label>
+                </>
+              )}
             </section>
           )}
 
@@ -622,7 +765,7 @@ export function BookingForm() {
               !bookingForm.artistId ||
               !bookingForm.date ||
               !bookingForm.startTime ||
-              (bookingForm.pricingType === 'fixed' && !isEdit && (!selectedArtist || selectedArtist.rate == null || Number(selectedArtist.rate) <= 0))
+              (bookingForm.pricingType === 'fixed' && !isEdit && estimationMode === 'rate' && !(Number(estimationAmount) > 0 || (selectedArtist?.rate != null && Number(selectedArtist.rate) > 0)))
             }
             className={styles.primaryBtn}
           >

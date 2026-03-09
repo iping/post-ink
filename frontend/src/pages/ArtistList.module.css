@@ -46,6 +46,203 @@
   box-shadow: var(--shadow-md);
 }
 
+/* ----- Tattoo artist table (simple, clean) ----- */
+.tableWrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.table th,
+.table td {
+  padding: 0.625rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+  font-size: 0.875rem;
+}
+
+.table thead tr {
+  background: #fafafa;
+  border-bottom: 1px solid var(--border);
+}
+
+.table th {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.table th:nth-child(1) { width: 2.5rem; }
+.table th:nth-child(2) { width: 3.5rem; }
+.table th:nth-child(3) { width: 14%; }
+.table th:nth-child(4) { width: 24%; }
+.table th:nth-child(5) { width: 10%; }
+.table th:nth-child(6) { width: 11%; }
+.table th:nth-child(7) { width: 18%; }
+.table th:nth-child(8) { width: 9rem; text-align: right; }
+
+.table tbody tr:hover {
+  background: #fafafa;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.rowInactive {
+  background: #f5f5f5;
+}
+.rowInactive:hover {
+  background: #efefef;
+}
+.rowInactive .cellName .nameLink,
+.rowInactive .cellSpec,
+.rowInactive .cellExp,
+.rowInactive .cellRate {
+  color: var(--text-secondary);
+}
+
+.emptyCell {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.cellNum {
+  width: 2.5rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 0.8125rem;
+}
+
+.cellPhoto {
+  width: 3.5rem;
+}
+.photoThumb {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+.photoPlaceholder {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  background: #eee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #bbb;
+}
+
+.cellName {
+  font-weight: 600;
+  min-width: 0;
+}
+.nameLink {
+  color: var(--text);
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+.nameLink:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.cellSpec {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  line-height: 1.35;
+  min-width: 0;
+}
+
+.cellExp {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+.cellRate {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.cellStatus {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: nowrap;
+}
+.badgeActive {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.2rem 0.45rem;
+  border-radius: 4px;
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+.badgeInactive {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.2rem 0.45rem;
+  border-radius: 4px;
+  background: #e5e5e5;
+  color: #666;
+}
+.table .toggleBtn {
+  padding: 0.2rem 0.45rem;
+  font-size: 0.7rem;
+  border-radius: 4px;
+}
+
+.table th:last-child,
+.cellActions {
+  width: 9rem;
+  max-width: 9rem;
+  padding-left: 0.5rem;
+  padding-right: 0.75rem;
+  text-align: right;
+}
+.table th:last-child {
+  text-align: right;
+}
+.cellActions {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.35rem;
+  align-items: center;
+  justify-content: flex-end;
+}
+.tableBtn {
+  font-size: 0.75rem;
+  padding: 0.3rem 0.5rem;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.tableBtn:hover {
+  background: #f8f8f8;
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 .grid {
   list-style: none;
   margin: 0;
@@ -69,6 +266,89 @@
   transform: translateY(-3px);
   box-shadow: var(--shadow-lg);
   border-color: var(--border-light);
+}
+
+.cardInactive {
+  background: var(--bg);
+  border-color: var(--border);
+  opacity: 0.92;
+}
+.cardInactive:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+.cardInactive .thumbWrap {
+  position: relative;
+}
+.cardInactive .thumbWrap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(128, 128, 128, 0.35);
+  pointer-events: none;
+}
+.cardInactive .thumb {
+  filter: grayscale(60%);
+}
+.cardInactive .cardBody h2,
+.cardInactive .cardBody .speciality,
+.cardInactive .cardBody .exp,
+.cardInactive .cardBody .rate,
+.cardInactive .cardBody .desc {
+  color: var(--text-secondary);
+}
+.cardInactive .cardStatus {
+  background: #e8e8e8;
+  border-bottom-color: #d0d0d0;
+}
+.cardInactive .statusLabel {
+  color: #666;
+}
+.cardInactive .workPreview {
+  filter: grayscale(50%);
+}
+
+.cardStatus {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  gap: 0.5rem;
+}
+.statusLabel {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+.toggleBtn {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.3rem 0.65rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  min-width: 2.5rem;
+  transition: background var(--transition), border-color var(--transition), color var(--transition);
+}
+.toggleBtn:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+.toggleBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.savedLabel {
+  font-size: 0.75rem;
+  color: var(--success, #0a7c42);
+  font-weight: 600;
+  margin-left: 0.25rem;
 }
 
 .cardLink {

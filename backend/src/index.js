@@ -20,6 +20,7 @@ import { uploadsRouter } from './routes/uploads.js';
 import { authRouter } from './routes/auth.js';
 import { usersRouter } from './routes/users.js';
 import { projectsRouter } from './routes/projects.js';
+import { paymentDestinationsRouter } from './routes/payment-destinations.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -40,6 +41,7 @@ app.use('/api/studios', studiosRouter);
 app.use('/api/commissions', commissionsRouter);
 app.use('/api/reviews', reviewsRouter);
 app.use('/api/specialities', specialitiesRouter);
+app.use('/api/payment-destinations', paymentDestinationsRouter);
 app.use('/api/uploads', uploadsRouter);
 
 app.get('/api/health', (_, res) => res.json({ ok: true }));

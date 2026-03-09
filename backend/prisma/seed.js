@@ -96,6 +96,7 @@ async function main() {
   await prisma.customer.deleteMany({});
   await prisma.tattooStudio.deleteMany({});
   await prisma.speciality.deleteMany({});
+  await prisma.paymentDestination.deleteMany({});
   await prisma.user.deleteMany({});
 
   // ─── Platform users (login to management) ───
@@ -118,6 +119,18 @@ async function main() {
   ];
   for (const name of specialityNames) {
     await prisma.speciality.create({ data: { name } });
+  }
+
+  // ─── Payment destinations (where booking fee can be paid) ───
+  const paymentDestData = [
+    { name: 'BCA', account: '1234567890', type: 'Bank', isActive: true },
+    { name: 'Mandiri', account: '0987654321', type: 'Bank', isActive: true },
+    { name: 'BNI', account: '1122334455', type: 'Bank', isActive: true },
+    { name: 'Credit Card', account: '4111 1111 1111 1111', type: 'Credit Card', isActive: true },
+    { name: 'Cash', account: null, type: 'Cash', isActive: true },
+  ];
+  for (const d of paymentDestData) {
+    await prisma.paymentDestination.create({ data: d });
   }
 
   // ─── 10 Tattoo Artists ───
@@ -202,6 +215,7 @@ async function main() {
       rate: 700000,
       photos: JSON.stringify([img.hendra.profile, img.hendra.profile2]),
       portfolio: JSON.stringify([img.hendra.work1, img.hendra.work2, img.hendra.work3]),
+      isActive: false,
     },
     {
       name: 'Siska Maharani',
@@ -211,21 +225,30 @@ async function main() {
       rate: 600000,
       photos: JSON.stringify([img.siska.profile, img.siska.profile2]),
       portfolio: JSON.stringify([img.siska.work1, img.siska.work2, img.siska.work3, img.siska.work4]),
+      isActive: false,
     },
   ];
 
-  // Per-artist schedule patterns
+  // 1 slot = 1 hour, 9am to 9pm (12 slots per day)
+  const ONE_HOUR_SLOTS = [];
+  for (let h = 9; h < 21; h++) {
+    const start = `${String(h).padStart(2, '0')}:00`;
+    const end = `${String(h + 1).padStart(2, '0')}:00`;
+    ONE_HOUR_SLOTS.push({ start, end });
+  }
+
+  // Per-artist: off days (no slots), booked days (all 12 slots unavailable), partial days (first 4 slots unavailable)
   const schedules = [
-    { offDays: [0, 3], slots: (d) => d === 6 ? [{ start: '10:00', end: '14:00' }] : [{ start: '09:00', end: '12:00' }, { start: '13:00', end: '17:00' }], bookedDays: [1, 4, 8, 11], partialDays: [2, 5, 9, 12] },
-    { offDays: [0, 1], slots: (d) => d === 6 ? [{ start: '11:00', end: '16:00' }] : [{ start: '10:00', end: '13:00' }, { start: '14:00', end: '18:00' }, { start: '19:00', end: '21:00' }], bookedDays: [2, 6, 10], partialDays: [3, 7, 13] },
-    { offDays: [0, 5], slots: (d) => d === 6 ? [{ start: '10:00', end: '15:00' }] : [{ start: '09:00', end: '12:30' }, { start: '14:00', end: '17:30' }], bookedDays: [1, 3, 7, 9, 12], partialDays: [4, 6, 10] },
-    { offDays: [0, 6], slots: () => [{ start: '10:00', end: '13:00' }, { start: '14:00', end: '18:00' }], bookedDays: [2, 5, 9, 14, 18], partialDays: [1, 6, 11, 15] },
-    { offDays: [0, 1], slots: (d) => d === 6 ? [{ start: '10:00', end: '14:00' }] : [{ start: '11:00', end: '14:00' }, { start: '15:00', end: '19:00' }], bookedDays: [3, 7, 10, 16], partialDays: [2, 8, 13, 17] },
-    { offDays: [0], slots: (d) => d === 6 ? [{ start: '09:00', end: '13:00' }] : [{ start: '09:00', end: '12:00' }, { start: '13:00', end: '17:00' }, { start: '18:00', end: '21:00' }], bookedDays: [1, 4, 8, 11, 15, 19], partialDays: [2, 5, 9, 13, 16, 20] },
-    { offDays: [0, 6], slots: () => [{ start: '09:00', end: '12:00' }, { start: '13:00', end: '17:00' }], bookedDays: [1, 5, 10, 14], partialDays: [3, 7, 12, 16] },
-    { offDays: [0, 1], slots: (d) => d === 6 ? [{ start: '10:00', end: '15:00' }] : [{ start: '10:00', end: '13:00' }, { start: '14:00', end: '18:00' }], bookedDays: [2, 6, 9, 13], partialDays: [4, 8, 11, 15] },
-    { offDays: [0, 3], slots: (d) => d === 6 ? [{ start: '11:00', end: '15:00' }] : [{ start: '10:00', end: '13:00' }, { start: '14:00', end: '19:00' }], bookedDays: [1, 5, 8, 12, 17], partialDays: [2, 6, 10, 14, 18] },
-    { offDays: [0, 1], slots: (d) => d === 6 ? [{ start: '12:00', end: '17:00' }] : [{ start: '11:00', end: '14:00' }, { start: '15:00', end: '20:00' }], bookedDays: [3, 7, 11, 15], partialDays: [2, 5, 9, 13, 16] },
+    { offDays: [0, 3], bookedDays: [1, 4, 8, 11], partialDays: [2, 5, 9, 12] },
+    { offDays: [0, 1], bookedDays: [2, 6, 10], partialDays: [3, 7, 13] },
+    { offDays: [0, 5], bookedDays: [1, 3, 7, 9, 12], partialDays: [4, 6, 10] },
+    { offDays: [0, 6], bookedDays: [2, 5, 9, 14, 18], partialDays: [1, 6, 11, 15] },
+    { offDays: [0, 1], bookedDays: [3, 7, 10, 16], partialDays: [2, 8, 13, 17] },
+    { offDays: [0], bookedDays: [1, 4, 8, 11, 15, 19], partialDays: [2, 5, 9, 13, 16, 20] },
+    { offDays: [0, 6], bookedDays: [1, 5, 10, 14], partialDays: [3, 7, 12, 16] },
+    { offDays: [0, 1], bookedDays: [2, 6, 9, 13], partialDays: [4, 8, 11, 15] },
+    { offDays: [0, 3], bookedDays: [1, 5, 8, 12, 17], partialDays: [2, 6, 10, 14, 18] },
+    { offDays: [0, 1], bookedDays: [3, 7, 11, 15], partialDays: [2, 5, 9, 13, 16] },
   ];
 
   const createdArtists = [];
@@ -242,15 +265,14 @@ async function main() {
       if (sched.offDays.includes(day)) continue;
 
       const dateStr = date.toISOString().slice(0, 10);
-      const daySlots = sched.slots(day);
       const isFullyBooked = sched.bookedDays.includes(d);
       const isPartial = sched.partialDays.includes(d);
 
-      for (let si = 0; si < daySlots.length; si++) {
-        const slot = daySlots[si];
+      for (let si = 0; si < ONE_HOUR_SLOTS.length; si++) {
+        const slot = ONE_HOUR_SLOTS[si];
         let available = true;
         if (isFullyBooked) available = false;
-        if (isPartial && si === 0) available = false;
+        else if (isPartial && si < 4) available = false; // first 4 slots (9am–1pm) unavailable on partial days
 
         await prisma.artistAvailability.create({
           data: { artistId: artist.id, date: dateStr, startTime: slot.start, endTime: slot.end, isAvailable: available },

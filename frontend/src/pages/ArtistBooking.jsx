@@ -163,6 +163,14 @@ export function ArtistBooking() {
 
   if (loading) return <div className={styles.loadingWrap}><span className={styles.spinner} /> Loading…</div>;
   if (!artist) return <div className={styles.loadingWrap}>Artist not found</div>;
+  if (artist.isActive === false) {
+    return (
+      <div className={styles.loadingWrap}>
+        <p className={styles.unavailableMsg}>This tattoo artist is not currently available for booking.</p>
+        <Link to="/" className={styles.backLink}>Browse active artists</Link>
+      </div>
+    );
+  }
 
   if (success) {
     return (

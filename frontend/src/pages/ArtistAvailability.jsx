@@ -9,13 +9,23 @@ import {
 } from '../api';
 import styles from './ArtistAvailability.module.css';
 
+// 1 slot = 1 hour, from 9am to 9pm (12 slots per day)
+const SLOT_HOURS_START = 9;
+const SLOT_HOURS_END = 21;
+const ONE_HOUR_SLOTS = [];
+for (let h = SLOT_HOURS_START; h < SLOT_HOURS_END; h++) {
+  const start = `${String(h).padStart(2, '0')}:00`;
+  const end = `${String(h + 1).padStart(2, '0')}:00`;
+  ONE_HOUR_SLOTS.push({ startTime: start, endTime: end });
+}
+
 export function ArtistAvailability() {
   const { id } = useParams();
   const [artist, setArtist] = useState(null);
   const [slots, setSlots] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [form, setForm] = useState({ date: '', startTime: '09:00', endTime: '17:00', isAvailable: true });
+  const [form, setForm] = useState({ date: '', isAvailable: true });
   const [saving, setSaving] = useState(false);
 
   const load = () => {
@@ -32,18 +42,25 @@ export function ArtistAvailability() {
     load();
   }, [id]);
 
-  const handleAdd = async (e) => {
+  const handleAddDay = async (e) => {
     e.preventDefault();
     if (!form.date) return;
+    const existingForDate = slots.filter((s) => s.date === form.date);
+    const existingStarts = new Set(existingForDate.map((s) => s.startTime));
+    const toCreate = ONE_HOUR_SLOTS.filter((slot) => !existingStarts.has(slot.startTime)).map((slot) => ({
+      date: form.date,
+      startTime: slot.startTime,
+      endTime: slot.endTime,
+      isAvailable: form.isAvailable,
+    }));
+    if (toCreate.length === 0) {
+      setError('This date already has all slots (9am–9pm).');
+      return;
+    }
     setSaving(true);
     setError(null);
     try {
-      await addAvailability(id, {
-        date: form.date,
-        startTime: form.startTime,
-        endTime: form.endTime,
-        isAvailable: form.isAvailable,
-      });
+      await addAvailability(id, { slots: toCreate });
       setForm((prev) => ({ ...prev, date: '' }));
       load();
     } catch (err) {
@@ -92,7 +109,7 @@ export function ArtistAvailability() {
         <h1>Availability</h1>
       </div>
 
-      <form onSubmit={handleAdd} className={styles.form}>
+      <form onSubmit={handleAddDay} className={styles.form}>
         <label>
           Date
           <input
@@ -102,32 +119,17 @@ export function ArtistAvailability() {
             required
           />
         </label>
-        <label>
-          Start
-          <input
-            type="time"
-            value={form.startTime}
-            onChange={(e) => setForm((prev) => ({ ...prev, startTime: e.target.value }))}
-          />
-        </label>
-        <label>
-          End
-          <input
-            type="time"
-            value={form.endTime}
-            onChange={(e) => setForm((prev) => ({ ...prev, endTime: e.target.value }))}
-          />
-        </label>
         <label className={styles.check}>
           <input
             type="checkbox"
             checked={form.isAvailable}
             onChange={(e) => setForm((prev) => ({ ...prev, isAvailable: e.target.checked }))}
           />
-          Available
+          All slots available
         </label>
-        <button type="submit" disabled={saving}>{saving ? 'Adding…' : 'Add slot'}</button>
+        <button type="submit" disabled={saving}>{saving ? 'Adding…' : 'Add day (9am–9pm, 1h slots)'}</button>
       </form>
+      <p className={styles.hint}>Each day gets 12 one-hour slots: 09:00–10:00 … 20:00–21:00.</p>
 
       <section className={styles.slots}>
         <h2>Slots</h2>

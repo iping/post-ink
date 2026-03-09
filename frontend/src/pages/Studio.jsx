@@ -19,6 +19,10 @@ import {
   createSpeciality,
   updateSpeciality,
   deleteSpeciality,
+  getPaymentDestinations,
+  createPaymentDestination,
+  updatePaymentDestination,
+  deletePaymentDestination,
   getUsers,
   createUser,
   updateUser,
@@ -111,7 +115,7 @@ export function Studio() {
 
   useEffect(() => {
     const t = searchParams.get('tab') || 'bookings';
-    if (['bookings', 'projects', 'payments', 'commissions', 'customers', 'specialities', 'users'].includes(t)) setTab(t);
+    if (['bookings', 'projects', 'payments', 'commissions', 'customers', 'specialities', 'payment-destinations', 'users'].includes(t)) setTab(t);
   }, [searchParams]);
 
   const switchTab = (t) => {
@@ -163,6 +167,12 @@ export function Studio() {
   const [specEditId, setSpecEditId] = useState(null);
   const [specEditName, setSpecEditName] = useState('');
 
+  const [paymentDestinations, setPaymentDestinations] = useState([]);
+  const [destPage, setDestPage] = useState(1);
+  const [showDestForm, setShowDestForm] = useState(false);
+  const [editingDest, setEditingDest] = useState(null);
+  const [destForm, setDestForm] = useState({ name: '', account: '', type: 'Bank', isActive: true });
+
   const [bookingPage, setBookingPage] = useState(1);
   const [paymentPage, setPaymentPage] = useState(1);
   const [commissionPage, setCommissionPage] = useState(1);
@@ -187,6 +197,9 @@ export function Studio() {
   const specialitiesList = Array.isArray(specialities) ? specialities : [];
   const specTotalPages = Math.max(1, Math.ceil(specialitiesList.length / ROWS_PER_PAGE));
 
+  const destList = Array.isArray(paymentDestinations) ? paymentDestinations : [];
+  const destTotalPages = Math.max(1, Math.ceil(destList.length / ROWS_PER_PAGE));
+
   const paginatedBookings = bookings.slice((bookingPage - 1) * ROWS_PER_PAGE, bookingPage * ROWS_PER_PAGE);
   const pendingBookingsCount = useMemo(
     () => bookings.filter((b) => b.status === 'pending').length,
@@ -196,6 +209,7 @@ export function Studio() {
   const paginatedCommissions = commissions.slice((commissionPage - 1) * ROWS_PER_PAGE, commissionPage * ROWS_PER_PAGE);
   const paginatedCustomers = customers.slice((customerPage - 1) * ROWS_PER_PAGE, customerPage * ROWS_PER_PAGE);
   const paginatedSpecialities = specialitiesList.slice((specPage - 1) * ROWS_PER_PAGE, specPage * ROWS_PER_PAGE);
+  const paginatedDests = destList.slice((destPage - 1) * ROWS_PER_PAGE, destPage * ROWS_PER_PAGE);
 
   const getCustomerBookings = (customerId) => bookings.filter((b) => b.customerId === customerId);
   const getLatestBooking = (customerId) => {
@@ -209,24 +223,30 @@ export function Studio() {
   /** Total paid (all payment types, completed) for this customer's bookings */
   const getCustomerTotalPaid = (customerId) => {
     return payments
-      .filter((p) => p.booking?.customerId === customerId && p.status === 'completed')
+      .filter((p) => {
+        const bid = p.booking?.customerId ?? p.booking?.customer?.id;
+        return bid === customerId && p.status === 'completed';
+      })
       .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
   };
   /** Deposit total: completed down_payment only for this customer's bookings */
   const getCustomerDeposit = (customerId) => {
     return payments
-      .filter((p) => p.booking?.customerId === customerId && p.status === 'completed' && p.type === 'down_payment')
+      .filter((p) => {
+        const bid = p.booking?.customerId ?? p.booking?.customer?.id;
+        return bid === customerId && p.status === 'completed' && p.type === 'down_payment';
+      })
       .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
   };
   /** List of deposit payments (down_payment) for this customer, for display */
   const getCustomerDepositPayments = (customerId) => {
     return payments
-      .filter((p) => p.booking?.customerId === customerId && p.type === 'down_payment')
+      .filter((p) => (p.booking?.customerId ?? p.booking?.customer?.id) === customerId && p.type === 'down_payment')
       .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
   };
   const getCustomerTransactions = (customerId) => {
     return payments
-      .filter((p) => p.booking?.customerId === customerId)
+      .filter((p) => (p.booking?.customerId ?? p.booking?.customer?.id) === customerId)
       .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
   };
 
@@ -256,9 +276,10 @@ export function Studio() {
       getCustomers(),
       getStudios(),
       getSpecialities(),
+      getPaymentDestinations(),
       getUsers(),
     ])
-      .then(([b, p, pr, co, a, c, s, sp, u]) => {
+      .then(([b, p, pr, co, a, c, s, sp, pd, u]) => {
         setBookings(b);
         setPayments(p);
         setProjects(Array.isArray(pr) ? pr : []);
@@ -267,6 +288,7 @@ export function Studio() {
         setCustomers(c);
         setStudios(s);
         setSpecialities(Array.isArray(sp) ? sp : []);
+        setPaymentDestinations(Array.isArray(pd) ? pd : []);
         setUsers(Array.isArray(u) ? u : []);
       })
       .catch((e) => setError(e.message))
@@ -460,6 +482,47 @@ export function Studio() {
     }
   };
 
+  const DEST_TYPES = [{ value: 'Bank', label: 'Bank' }, { value: 'Credit Card', label: 'Credit Card' }, { value: 'Cash', label: 'Cash' }];
+  const saveDest = async (e) => {
+    e.preventDefault();
+    setError(null);
+    const name = (destForm.name || '').trim();
+    if (!name) return setError('Bank name / display name is required');
+    try {
+      if (editingDest) {
+        await updatePaymentDestination(editingDest.id, {
+          name,
+          account: (destForm.account || '').trim() || undefined,
+          type: destForm.type,
+          isActive: destForm.isActive,
+        });
+        setEditingDest(null);
+      } else {
+        await createPaymentDestination({
+          name,
+          account: (destForm.account || '').trim() || undefined,
+          type: destForm.type,
+          isActive: destForm.isActive,
+        });
+      }
+      setDestForm({ name: '', account: '', type: 'Bank', isActive: true });
+      setShowDestForm(false);
+      load();
+    } catch (err) {
+      setError(err.message || 'Failed to save');
+    }
+  };
+  const removeDest = async (id) => {
+    if (!window.confirm('Delete this payment option?')) return;
+    setError(null);
+    try {
+      await deletePaymentDestination(id);
+      load();
+    } catch (err) {
+      setError(err.message || 'Failed to delete');
+    }
+  };
+
   const saveUser = async (e) => {
     e.preventDefault();
     setError(null);
@@ -522,11 +585,13 @@ export function Studio() {
             Bookings
             {pendingBookingsCount > 0 && <span className={styles.sideNavBadge} aria-label={`${pendingBookingsCount} pending`}>{pendingBookingsCount}</span>}
           </button>
+          <Link to="/manage/artists" className={styles.sideNavLink} data-short="A" title="Tattoo Artist Management">Tattoo Artist Management</Link>
           <button type="button" data-short="Pr" title="Projects" className={tab === 'projects' ? styles.sideNavActive : ''} onClick={() => switchTab('projects')}>Projects</button>
           <button type="button" data-short="P" title="Payments" className={tab === 'payments' ? styles.sideNavActive : ''} onClick={() => switchTab('payments')}>Payments</button>
           <button type="button" data-short="C" title="Commission" className={tab === 'commissions' ? styles.sideNavActive : ''} onClick={() => switchTab('commissions')}>Commission</button>
           <button type="button" data-short="U" title="Customers" className={tab === 'customers' ? styles.sideNavActive : ''} onClick={() => switchTab('customers')}>Customers</button>
           <button type="button" data-short="S" title="Specialities" className={tab === 'specialities' ? styles.sideNavActive : ''} onClick={() => switchTab('specialities')}>Specialities</button>
+          <button type="button" data-short="Pay" title="Payment options" className={tab === 'payment-destinations' ? styles.sideNavActive : ''} onClick={() => switchTab('payment-destinations')}>Payment options</button>
           <button type="button" data-short="Us" title="Users" className={tab === 'users' ? styles.sideNavActive : ''} onClick={() => switchTab('users')}>Users</button>
         </nav>
       </aside>
@@ -628,6 +693,7 @@ export function Studio() {
                   <th>Time</th>
                   <th>Artist</th>
                   <th>Customer</th>
+                  <th>Deposit</th>
                   <th>Total</th>
                   <th>Paid</th>
                   <th>Remaining</th>
@@ -641,7 +707,7 @@ export function Studio() {
               <tbody>
                 {paginatedBookings.length === 0 ? (
                   <tr>
-                    <td colSpan={13}>
+                    <td colSpan={14}>
                       {bookings.length === 0 && (bookingFilters.status || bookingFilters.artistId || bookingFilters.studioId || bookingFilters.customerId || bookingFilters.from || bookingFilters.to)
                         ? 'No bookings match your filters. Click Reset to clear filters.'
                         : 'No bookings yet. Create one above.'}
@@ -653,6 +719,7 @@ export function Studio() {
                     const createdDate = b.createdAt ? new Date(b.createdAt) : null;
                     const createdStr = createdDate ? createdDate.toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' }) : '—';
                     const rowNum = (bookingPage - 1) * ROWS_PER_PAGE + i + 1;
+                    const bookingDeposit = (b.payments || []).filter((p) => p.type === 'down_payment' && p.status === 'completed').reduce((s, p) => s + (Number(p.amount) || 0), 0);
                     return (
                       <tr key={b.id}>
                         <td>{rowNum}</td>
@@ -660,6 +727,7 @@ export function Studio() {
                         <td className={styles.cellTime}>{b.startTime} – {b.endTime}</td>
                         <td className={styles.cellEmphasis}>{b.artist?.name || '—'}</td>
                         <td className={styles.cellEmphasis}>{b.customer?.name || '—'}</td>
+                        <td className={styles.cellAmount}>{formatRupiah(bookingDeposit)}</td>
                         <td className={styles.cellAmount}>{formatRupiah(b.totalAmount)}</td>
                         <td className={styles.cellAmount}>{formatRupiah(b.paidTotal)}</td>
                         <td className={b.remainingAmount != null && b.remainingAmount > 0 ? `${styles.remainingDue} ${styles.cellAmount}` : styles.cellAmount}>
@@ -1002,6 +1070,83 @@ export function Studio() {
             </table>
           </div>
           <Pagination currentPage={specPage} totalPages={specTotalPages} onPageChange={setSpecPage} />
+        </section>
+      )}
+
+      {tab === 'payment-destinations' && (
+        <section className={styles.section}>
+          <div className={styles.sectionHead}>
+            <div>
+              <h2>Payment options</h2>
+              {destList.length > 0 && <span className={styles.countHint}>Showing {(destPage - 1) * ROWS_PER_PAGE + 1}–{Math.min(destPage * ROWS_PER_PAGE, destList.length)} of {destList.length}</span>}
+            </div>
+            <button type="button" className={styles.addBtn} onClick={() => { setEditingDest(null); setDestForm({ name: '', account: '', type: 'Bank', isActive: true }); setShowDestForm(true); }}>+ Add</button>
+          </div>
+          {showDestForm && (
+            <form onSubmit={saveDest} className={styles.destForm}>
+              <label className={styles.destFormLabel}>
+                Bank name / display name *
+                <input value={destForm.name} onChange={(e) => setDestForm((f) => ({ ...f, name: e.target.value }))} placeholder="e.g. BCA, Mandiri" required />
+              </label>
+              <label className={styles.destFormLabel}>
+                Bank account / reference
+                <input value={destForm.account} onChange={(e) => setDestForm((f) => ({ ...f, account: e.target.value }))} placeholder="e.g. 1234567890" />
+              </label>
+              <label className={styles.destFormLabel}>
+                Type
+                <select value={destForm.type} onChange={(e) => setDestForm((f) => ({ ...f, type: e.target.value }))}>
+                  {DEST_TYPES.map((d) => <option key={d.value} value={d.value}>{d.label}</option>)}
+                </select>
+              </label>
+              <label className={styles.destFormCheck}>
+                <input type="checkbox" checked={destForm.isActive} onChange={(e) => setDestForm((f) => ({ ...f, isActive: e.target.checked }))} />
+                Active (shown in booking form)
+              </label>
+              <div className={styles.destFormActions}>
+                <button type="submit" className={styles.addBtn}>{editingDest ? 'Update' : 'Add'}</button>
+                <button type="button" className={styles.smBtn} onClick={() => { setShowDestForm(false); setEditingDest(null); }}>Cancel</button>
+              </div>
+            </form>
+          )}
+          <div className={styles.tableWrap}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>No.</th>
+                  <th>Bank name</th>
+                  <th>Bank account</th>
+                  <th>Type</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedDests.length === 0 ? (
+                  <tr>
+                    <td colSpan={6}>No payment options yet. Add one to show in the booking form.</td>
+                  </tr>
+                ) : (
+                  paginatedDests.map((d, i) => {
+                    const rowNum = (destPage - 1) * ROWS_PER_PAGE + i + 1;
+                    return (
+                      <tr key={d.id}>
+                        <td>{rowNum}</td>
+                        <td className={styles.cellEmphasis}>{d.name || '—'}</td>
+                        <td>{d.account || '—'}</td>
+                        <td>{d.type || '—'}</td>
+                        <td>{d.isActive ? 'Active' : 'Inactive'}</td>
+                        <td>
+                          <button type="button" onClick={() => { setEditingDest(d); setDestForm({ name: d.name || '', account: d.account || '', type: d.type || 'Bank', isActive: d.isActive !== false }); setShowDestForm(true); }} className={styles.smBtn}>Edit</button>
+                          <button type="button" onClick={() => removeDest(d.id)} className={styles.smBtnDanger}>Delete</button>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+          <Pagination currentPage={destPage} totalPages={destTotalPages} onPageChange={setDestPage} />
         </section>
       )}
 

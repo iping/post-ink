@@ -84,6 +84,12 @@
   cursor: not-allowed;
 }
 
+.hint {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
 .slots h2 {
   margin: 0 0 1rem;
   font-family: var(--font-display);

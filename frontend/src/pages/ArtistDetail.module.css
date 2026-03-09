@@ -366,3 +366,22 @@
 .error {
   color: var(--danger);
 }
+
+.unavailableBlock {
+  padding: 3rem 2rem;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.unavailableBlock p {
+  margin: 0 0 1rem;
+}
+
+.unavailableBlock a {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.unavailableBlock a:hover {
+  text-decoration: underline;
+}
