@@ -21,6 +21,18 @@ async function ensureUniqueShortCode() {
   throw new Error('Could not generate unique short code');
 }
 
+/** For hourly pricing: total = sum of (hourlyRate × agreedHours) across projects (accumulative). */
+function computedTotalForBooking(booking) {
+  if (booking.pricingType === 'hourly' && Array.isArray(booking.projects) && booking.projects.length > 0) {
+    const sum = booking.projects.reduce(
+      (acc, p) => acc + (Number(p.hourlyRate) || 0) * (Number(p.agreedHours) || 0),
+      0
+    );
+    return sum > 0 ? sum : null;
+  }
+  return booking.totalAmount != null ? Number(booking.totalAmount) : null;
+}
+
 // GET /api/bookings — list all (with artist, customer). Default sort: latest first.
 bookingsRouter.get('/', async (req, res) => {
   try {
@@ -40,7 +52,7 @@ bookingsRouter.get('/', async (req, res) => {
       : [{ date: 'desc' }, { startTime: 'desc' }];
     let bookings = await prisma.booking.findMany({
       where,
-      include: { artist: true, customer: true, studio: true, payments: true, review: true, project: true },
+      include: { artist: true, customer: true, studio: true, payments: true, review: true, projects: true },
       orderBy: orderLatest,
     });
     for (const b of bookings) {
@@ -52,8 +64,8 @@ bookingsRouter.get('/', async (req, res) => {
     }
     const withTotals = bookings.map((b) => {
       const paidTotal = (b.payments || []).filter((p) => p.status === 'completed').reduce((s, p) => s + p.amount, 0);
-      const totalAmount = b.totalAmount ?? 0;
-      const remainingAmount = totalAmount > 0 ? Math.max(0, totalAmount - paidTotal) : null;
+      const totalAmount = computedTotalForBooking(b);
+      const remainingAmount = totalAmount != null && totalAmount > 0 ? Math.max(0, totalAmount - paidTotal) : null;
       return { ...b, paidTotal, remainingAmount };
     });
     res.json(withTotals);
@@ -67,12 +79,12 @@ bookingsRouter.get('/:id', async (req, res) => {
   try {
     const booking = await prisma.booking.findUnique({
       where: { id: req.params.id },
-      include: { artist: true, customer: true, studio: true, payments: true, review: true, project: true },
+      include: { artist: true, customer: true, studio: true, payments: true, review: true, projects: true },
     });
     if (!booking) return res.status(404).json({ error: 'Booking not found' });
     const paidTotal = (booking.payments || []).filter((p) => p.status === 'completed').reduce((s, p) => s + p.amount, 0);
-    const totalAmount = booking.totalAmount ?? 0;
-    const remainingAmount = totalAmount > 0 ? Math.max(0, totalAmount - paidTotal) : null;
+    const totalAmount = computedTotalForBooking(booking);
+    const remainingAmount = totalAmount != null && totalAmount > 0 ? Math.max(0, totalAmount - paidTotal) : null;
     res.json({ ...booking, paidTotal, remainingAmount });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -82,28 +94,35 @@ bookingsRouter.get('/:id', async (req, res) => {
 // POST /api/bookings
 bookingsRouter.post('/', async (req, res) => {
   try {
-    const { artistId, customerId, studioId, date, startTime, endTime, status, notes, totalAmount, placement, preference } = req.body;
+    const { artistId, customerId, studioId, date, startTime, endTime, status, notes, totalAmount, placement, preference, pricingType } = req.body;
     const shortCode = await ensureUniqueShortCode();
+    const data = {
+      shortCode,
+      artistId,
+      customerId: customerId || null,
+      studioId: studioId || null,
+      date,
+      startTime: startTime || '09:00',
+      endTime: endTime || '17:00',
+      status: status || 'pending',
+      notes: notes || null,
+      totalAmount: totalAmount != null ? Number(totalAmount) : null,
+      placement: placement || null,
+      preference: preference || null,
+    };
+    if (pricingType === 'fixed' || pricingType === 'hourly') data.pricingType = pricingType;
     const booking = await prisma.booking.create({
-      data: {
-        shortCode,
-        artistId,
-        customerId: customerId || null,
-        studioId: studioId || null,
-        date,
-        startTime: startTime || '09:00',
-        endTime: endTime || '17:00',
-        status: status || 'pending',
-        notes: notes || null,
-        totalAmount: totalAmount != null ? Number(totalAmount) : null,
-        placement: placement || null,
-        preference: preference || null,
-      },
+      data,
       include: { artist: true, customer: true, studio: true, payments: true },
     });
+    const withProjects = await prisma.booking.findUnique({
+      where: { id: booking.id },
+      include: { artist: true, customer: true, studio: true, payments: true, projects: true },
+    });
     const paidTotal = 0;
-    const remainingAmount = booking.totalAmount != null ? Math.max(0, booking.totalAmount - paidTotal) : null;
-    res.status(201).json({ ...booking, paidTotal, remainingAmount });
+    const computedTotal = withProjects ? computedTotalForBooking(withProjects) : (booking.totalAmount ?? null);
+    const remainingAmount = computedTotal != null ? Math.max(0, computedTotal - paidTotal) : null;
+    res.status(201).json({ ...withProjects, paidTotal, remainingAmount });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -125,14 +144,15 @@ bookingsRouter.patch('/:id', async (req, res) => {
     if (body.totalAmount !== undefined) data.totalAmount = body.totalAmount == null ? null : Number(body.totalAmount);
     if (body.placement !== undefined) data.placement = body.placement || null;
     if (body.preference !== undefined) data.preference = body.preference || null;
+    if (body.pricingType === 'fixed' || body.pricingType === 'hourly') data.pricingType = body.pricingType;
     const booking = await prisma.booking.update({
       where: { id: req.params.id },
       data,
-      include: { artist: true, customer: true, studio: true, payments: true },
+      include: { artist: true, customer: true, studio: true, payments: true, projects: true },
     });
     const paidTotal = (booking.payments || []).filter((p) => p.status === 'completed').reduce((s, p) => s + p.amount, 0);
-    const totalAmount = booking.totalAmount ?? 0;
-    const remainingAmount = totalAmount > 0 ? Math.max(0, totalAmount - paidTotal) : null;
+    const totalAmount = computedTotalForBooking(booking);
+    const remainingAmount = totalAmount != null && totalAmount > 0 ? Math.max(0, totalAmount - paidTotal) : null;
     res.json({ ...booking, paidTotal, remainingAmount });
   } catch (e) {
     if (e.code === 'P2025') return res.status(404).json({ error: 'Booking not found' });

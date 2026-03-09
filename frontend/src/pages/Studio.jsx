@@ -3,10 +3,12 @@ import { Link, useSearchParams } from 'react-router-dom';
 import {
   getBookings,
   getPayments,
+  getProjects,
   getArtists,
   getCustomers,
   getStudios,
   deleteBooking,
+  updateBooking,
   createPayment,
   updatePayment,
   getCommissions,
@@ -87,7 +89,7 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
   );
 }
 
-const BOOKING_STATUSES = ['draft', 'pending', 'confirmed', 'completed', 'cancelled'];
+const BOOKING_STATUSES = ['draft', 'pending', 'confirmed', 'in_progress', 'completed', 'cancelled'];
 const PAYMENT_STATUSES = ['pending', 'completed', 'refunded'];
 const PAYMENT_TYPES = [
   { value: 'down_payment', label: 'Down payment' },
@@ -109,7 +111,7 @@ export function Studio() {
 
   useEffect(() => {
     const t = searchParams.get('tab') || 'bookings';
-    if (['bookings', 'payments', 'commissions', 'customers', 'specialities', 'users'].includes(t)) setTab(t);
+    if (['bookings', 'projects', 'payments', 'commissions', 'customers', 'specialities', 'users'].includes(t)) setTab(t);
   }, [searchParams]);
 
   const switchTab = (t) => {
@@ -122,6 +124,7 @@ export function Studio() {
   const [customers, setCustomers] = useState([]);
   const [studios, setStudios] = useState([]);
   const [bookings, setBookings] = useState([]);
+  const [projects, setProjects] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -247,6 +250,7 @@ export function Studio() {
     Promise.all([
       getBookings(bookingParams),
       getPayments(),
+      getProjects(),
       getCommissions(),
       getArtists(),
       getCustomers(),
@@ -254,9 +258,10 @@ export function Studio() {
       getSpecialities(),
       getUsers(),
     ])
-      .then(([b, p, co, a, c, s, sp, u]) => {
+      .then(([b, p, pr, co, a, c, s, sp, u]) => {
         setBookings(b);
         setPayments(p);
+        setProjects(Array.isArray(pr) ? pr : []);
         setCommissions(co);
         setArtists(a);
         setCustomers(c);
@@ -299,6 +304,16 @@ export function Studio() {
     if (!window.confirm('Delete this booking?')) return;
     try {
       await deleteBooking(id);
+      load();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const proceedBooking = async (b) => {
+    if (!['pending', 'confirmed'].includes(b.status)) return;
+    try {
+      await updateBooking(b.id, { status: 'in_progress' });
       load();
     } catch (err) {
       setError(err.message);
@@ -507,6 +522,7 @@ export function Studio() {
             Bookings
             {pendingBookingsCount > 0 && <span className={styles.sideNavBadge} aria-label={`${pendingBookingsCount} pending`}>{pendingBookingsCount}</span>}
           </button>
+          <button type="button" data-short="Pr" title="Projects" className={tab === 'projects' ? styles.sideNavActive : ''} onClick={() => switchTab('projects')}>Projects</button>
           <button type="button" data-short="P" title="Payments" className={tab === 'payments' ? styles.sideNavActive : ''} onClick={() => switchTab('payments')}>Payments</button>
           <button type="button" data-short="C" title="Commission" className={tab === 'commissions' ? styles.sideNavActive : ''} onClick={() => switchTab('commissions')}>Commission</button>
           <button type="button" data-short="U" title="Customers" className={tab === 'customers' ? styles.sideNavActive : ''} onClick={() => switchTab('customers')}>Customers</button>
@@ -649,7 +665,7 @@ export function Studio() {
                         <td className={b.remainingAmount != null && b.remainingAmount > 0 ? `${styles.remainingDue} ${styles.cellAmount}` : styles.cellAmount}>
                           {formatRupiah(b.remainingAmount)}
                         </td>
-                        <td>{b.project?.name || '—'}</td>
+                        <td>{(b.projects?.length ?? 0) > 0 ? (b.projects?.length === 1 ? b.projects[0].name : `${b.projects?.length} projects`) : '—'}</td>
                         <td>
                           <span className={styles[`status_${b.status}`]}>{b.status}</span>
                           {b.review && <span className={styles.reviewBadge} title={`Reviewed: ${b.review.rating}/5`}>★ {b.review.rating}</span>}
@@ -659,6 +675,9 @@ export function Studio() {
                         <td>
                           <Link to={`/manage/bookings/${b.id}`} className={styles.smBtn}>Detail</Link>
                           <Link to={`/manage/bookings/${b.id}/edit`} className={styles.smBtn}>Edit</Link>
+                          {(b.status === 'pending' || b.status === 'confirmed') && (
+                            <button type="button" onClick={() => proceedBooking(b)} className={styles.smBtn}>Proceed</button>
+                          )}
                           <button type="button" onClick={() => removeBooking(b.id)} className={styles.smBtnDanger}>Delete</button>
                           {commission && <span className={styles.commissionBadge} title="Commission set">{commission.commissionPercent}%</span>}
                         </td>
@@ -670,6 +689,65 @@ export function Studio() {
             </table>
           </div>
           <Pagination currentPage={bookingPage} totalPages={bookingTotalPages} onPageChange={setBookingPage} />
+        </section>
+      )}
+
+      {tab === 'projects' && (
+        <section className={styles.section}>
+          <div className={styles.sectionHead}>
+            <div>
+              <h2>Projects</h2>
+              <span className={styles.countHint}>Work tied to bookings. {projects.length} project{projects.length !== 1 ? 's' : ''}</span>
+            </div>
+          </div>
+          <div className={styles.tableWrap}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>Project name</th>
+                  <th>Booking</th>
+                  <th>Artist</th>
+                  <th>Customer</th>
+                  <th>Studio</th>
+                  <th>Pricing</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {projects.length === 0 ? (
+                  <tr>
+                    <td colSpan={7}>No projects yet. Add a project from a booking detail page.</td>
+                  </tr>
+                ) : (
+                  projects.map((pr) => {
+                    const b = pr.booking;
+                    const pricingStr = pr.pricingType === 'fixed'
+                      ? `Fixed — ${formatRupiah(pr.fixedAmount)}`
+                      : `Hourly — ${formatRupiah(pr.hourlyRate)}/hr${pr.agreedHours ? ` × ${pr.agreedHours} hrs` : ''}`;
+                    return (
+                      <tr key={pr.id}>
+                        <td className={styles.cellEmphasis}>{pr.name}</td>
+                        <td>
+                          {b ? (
+                            <Link to={`/manage/bookings/${b.id}`} className={styles.link}>
+                              {b.date} {b.startTime}
+                            </Link>
+                          ) : '—'}
+                        </td>
+                        <td>{b?.artist?.name ?? '—'}</td>
+                        <td>{b?.customer?.name ?? '—'}</td>
+                        <td>{b?.studio?.name ?? '—'}</td>
+                        <td className={styles.cellAmount}>{pricingStr}</td>
+                        <td>
+                          {b && <Link to={`/manage/bookings/${b.id}`} className={styles.smBtn}>Booking</Link>}
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
         </section>
       )}
 

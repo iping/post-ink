@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   getBooking,
+  updateBooking,
   getCommissions,
   createPayment,
   createReview,
@@ -36,6 +37,14 @@ function getDefaultProjectName(booking) {
   return [artistInitial, customerName, monthStr].filter(Boolean).join(' – ');
 }
 
+/** Default name for a new project/session (e.g. "JD – Jane – Feb 2025 (Session 2)"). */
+function getDefaultProjectNameForNew(booking) {
+  const base = getDefaultProjectName(booking);
+  const count = (booking.projects || []).length;
+  if (count === 0) return base;
+  return `${base} (Session ${count + 1})`;
+}
+
 function CopyIcon({ className, title }) {
   return (
     <svg className={className} viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden title={title}>
@@ -66,7 +75,7 @@ export function BookingDetail() {
   const [lightboxUrl, setLightboxUrl] = useState(null);
 
   const [projectForm, setProjectForm] = useState({ name: '', pricingType: 'fixed', fixedAmount: '', hourlyRate: '', agreedHours: '', notes: '' });
-  const [editingProject, setEditingProject] = useState(false);
+  const [editingProject, setEditingProject] = useState(null); // project id when editing, null when adding
   const [projectSubmitting, setProjectSubmitting] = useState(false);
 
   const load = async () => {
@@ -102,9 +111,10 @@ export function BookingDetail() {
     setError(null);
     setProjectSubmitting(true);
     try {
-      const projectName = booking.project
+      const isEditing = editingProject != null;
+      const projectName = isEditing
         ? projectForm.name.trim()
-        : (projectForm.name.trim() || getDefaultProjectName(booking)).trim();
+        : (projectForm.name.trim() || getDefaultProjectNameForNew(booking)).trim();
       const payload = {
         bookingId: booking.id,
         name: projectName,
@@ -117,14 +127,14 @@ export function BookingDetail() {
         payload.hourlyRate = booking.artist?.rate != null ? Number(booking.artist.rate) : null;
         payload.agreedHours = projectForm.agreedHours ? Number(projectForm.agreedHours) : null;
       }
-      if (booking.project) {
-        await updateProject(booking.project.id, payload);
+      if (isEditing) {
+        await updateProject(editingProject, payload);
       } else {
         await createProject(payload);
       }
       const updated = await getBooking(booking.id);
       setBooking(updated);
-      setEditingProject(false);
+      setEditingProject(null);
       setProjectForm({ name: '', pricingType: 'fixed', fixedAmount: '', hourlyRate: '', agreedHours: '', notes: '' });
     } catch (err) {
       setError(err.message);
@@ -133,14 +143,28 @@ export function BookingDetail() {
     }
   };
 
-  const removeProject = async () => {
-    if (!booking?.project || !window.confirm('Remove this project?')) return;
+  const removeProject = async (projectId) => {
+    if (!projectId || !window.confirm('Remove this project/session?')) return;
     setError(null);
     try {
-      await deleteProject(booking.project.id);
+      await deleteProject(projectId);
       const updated = await getBooking(booking.id);
       setBooking(updated);
-      setProjectForm({ name: '', pricingType: 'fixed', fixedAmount: '', hourlyRate: '', agreedHours: '', notes: '' });
+      if (editingProject === projectId) {
+        setEditingProject(null);
+        setProjectForm({ name: '', pricingType: 'fixed', fixedAmount: '', hourlyRate: '', agreedHours: '', notes: '' });
+      }
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+    const proceedToFirstSession = async () => {
+    if (!booking || !['pending', 'confirmed'].includes(booking.status)) return;
+    setError(null);
+    try {
+      const updated = await updateBooking(booking.id, { status: 'in_progress' });
+      setBooking(updated);
     } catch (err) {
       setError(err.message);
     }
@@ -273,6 +297,9 @@ export function BookingDetail() {
           )}
             </div>
             <div className={formStyles.actions}>
+              {(booking.status === 'pending' || booking.status === 'confirmed') && (
+                <button type="button" onClick={proceedToFirstSession} className={formStyles.primaryBtn}>Proceed</button>
+              )}
               <Link to={`/manage/bookings/${id}/edit`} className={formStyles.primaryBtn}>Edit booking</Link>
             </div>
           </section>
@@ -334,27 +361,44 @@ export function BookingDetail() {
           </section>
 
           <section className={formStyles.block}>
-            <h2 className={formStyles.blockTitle}>Project</h2>
-            <p className={formStyles.blockDesc}>Work to be done. Fixed rate = admin-defined, customer agreed. Hourly = artist–customer agreement.</p>
-            {booking.project ? (
-          <div className={styles.bookingSummary}>
-            {!editingProject ? (
-              <>
-                <p><strong>Name:</strong> {booking.project.name}</p>
-                <p><strong>Pricing:</strong> {booking.project.pricingType === 'fixed'
-                  ? `Fixed — ${formatRupiah(booking.project.fixedAmount)}`
-                  : `Hourly — ${formatRupiah(booking.project.hourlyRate)}/hr${booking.project.agreedHours ? ` × ${booking.project.agreedHours} hrs` : ''}`}
-                </p>
-                {booking.project.notes && <p><strong>Notes:</strong> {booking.project.notes}</p>}
-                <div className={styles.formActions}>
-                  <button type="button" className={styles.smBtn} onClick={() => { setEditingProject(true); setProjectForm({ name: booking.project.name, pricingType: booking.project.pricingType, fixedAmount: booking.project.fixedAmount ?? '', hourlyRate: booking.project.hourlyRate ?? '', agreedHours: booking.project.agreedHours ?? '', notes: booking.project.notes ?? '' }); }}>Edit project</button>
-                  <button type="button" className={styles.smBtnDanger} onClick={removeProject}>Remove project</button>
-                </div>
-              </>
-            ) : (
+            <h2 className={formStyles.blockTitle}>Projects / sessions</h2>
+            <p className={formStyles.blockDesc}>One booking can have multiple projects or sessions (e.g. hourly rate: add a project per session). Fixed = admin-defined total; Hourly = artist rate × hours per session.</p>
+            {((booking.projects || []).slice().sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))).map((proj) => (
+              <div key={proj.id} className={styles.bookingSummary} style={{ marginBottom: '1rem' }}>
+                {editingProject === proj.id ? (
+                  <form onSubmit={saveProject} className={styles.downPaymentForm}>
+                    <label>Project name * <input value={projectForm.name} onChange={(e) => setProjectForm((f) => ({ ...f, name: e.target.value }))} placeholder="e.g. Session 1" required /></label>
+                    <label>Pricing <select value={projectForm.pricingType} onChange={(e) => setProjectForm((f) => ({ ...f, pricingType: e.target.value }))}><option value="fixed">Fixed rate</option><option value="hourly">Hourly rate</option></select></label>
+                    {projectForm.pricingType === 'fixed' && <label>Fixed amount (IDR) <input type="number" min="0" step="1000" placeholder="e.g. 5000000" value={projectForm.fixedAmount} onChange={(e) => setProjectForm((f) => ({ ...f, fixedAmount: e.target.value }))} /></label>}
+                    {projectForm.pricingType === 'hourly' && (
+                      <>
+                        <label>Hourly rate (IDR) <input type="number" min="0" step="1000" placeholder="From artist profile" value={booking?.artist?.rate ?? ''} readOnly aria-readonly /></label>
+                        <label>Agreed hours (optional) <input type="number" min="0" step="0.5" placeholder="e.g. 4" value={projectForm.agreedHours} onChange={(e) => setProjectForm((f) => ({ ...f, agreedHours: e.target.value }))} /></label>
+                      </>
+                    )}
+                    <label>Notes <input value={projectForm.notes} onChange={(e) => setProjectForm((f) => ({ ...f, notes: e.target.value }))} placeholder="Optional" /></label>
+                    <div className={styles.formActions}><button type="submit" disabled={projectSubmitting}>Save</button><button type="button" onClick={() => { setEditingProject(null); setProjectForm({ name: '', pricingType: 'fixed', fixedAmount: '', hourlyRate: '', agreedHours: '', notes: '' }); }}>Cancel</button></div>
+                  </form>
+                ) : (
+                  <>
+                    <p><strong>Name:</strong> {proj.name}</p>
+                    <p><strong>Pricing:</strong> {proj.pricingType === 'fixed'
+                      ? `Fixed — ${formatRupiah(proj.fixedAmount)}`
+                      : `Hourly — ${formatRupiah(proj.hourlyRate)}/hr${proj.agreedHours ? ` × ${proj.agreedHours} hrs` : ''}`}</p>
+                    {proj.notes && <p><strong>Notes:</strong> {proj.notes}</p>}
+                    <div className={styles.formActions}>
+                      <button type="button" className={styles.smBtn} onClick={() => { setEditingProject(proj.id); setProjectForm({ name: proj.name, pricingType: proj.pricingType, fixedAmount: proj.fixedAmount ?? '', hourlyRate: proj.hourlyRate ?? '', agreedHours: proj.agreedHours ?? '', notes: proj.notes ?? '' }); }}>Edit</button>
+                      <button type="button" className={styles.smBtnDanger} onClick={() => removeProject(proj.id)}>Remove</button>
+                    </div>
+                  </>
+                )}
+              </div>
+            ))}
+            {editingProject === null && (
               <form onSubmit={saveProject} className={styles.downPaymentForm}>
-                <label>Project name * <input value={projectForm.name} onChange={(e) => setProjectForm((f) => ({ ...f, name: e.target.value }))} placeholder="e.g. Alpha" required /></label>
-                <label>Pricing <select value={projectForm.pricingType} onChange={(e) => setProjectForm((f) => ({ ...f, pricingType: e.target.value }))}><option value="fixed">Fixed rate</option><option value="hourly">Hourly rate</option></select></label>
+                <h3 className={formStyles.blockTitle} style={{ fontSize: '1rem', marginTop: (booking.projects || []).length > 0 ? '1rem' : 0 }}>Add project / session</h3>
+                <label>Project name * <input value={projectForm.name || getDefaultProjectNameForNew(booking)} onChange={(e) => setProjectForm((f) => ({ ...f, name: e.target.value }))} placeholder="Auto: Artist – Customer – Month (Session N)" required /></label>
+                <label>Pricing <select value={projectForm.pricingType} onChange={(e) => setProjectForm((f) => ({ ...f, pricingType: e.target.value }))}><option value="fixed">Fixed rate (admin-defined, customer agreed)</option><option value="hourly">Hourly rate (artist–customer agreement)</option></select></label>
                 {projectForm.pricingType === 'fixed' && <label>Fixed amount (IDR) <input type="number" min="0" step="1000" placeholder="e.g. 5000000" value={projectForm.fixedAmount} onChange={(e) => setProjectForm((f) => ({ ...f, fixedAmount: e.target.value }))} /></label>}
                 {projectForm.pricingType === 'hourly' && (
                   <>
@@ -363,24 +407,8 @@ export function BookingDetail() {
                   </>
                 )}
                 <label>Notes <input value={projectForm.notes} onChange={(e) => setProjectForm((f) => ({ ...f, notes: e.target.value }))} placeholder="Optional" /></label>
-                <div className={styles.formActions}><button type="submit" disabled={projectSubmitting}>Save</button><button type="button" onClick={() => setEditingProject(false)}>Cancel</button></div>
+                <div className={styles.formActions}><button type="submit" disabled={projectSubmitting}>Add project</button></div>
               </form>
-            )}
-          </div>
-        ) : (
-          <form onSubmit={saveProject} className={styles.downPaymentForm}>
-            <label>Project name * <input value={projectForm.name || getDefaultProjectName(booking)} onChange={(e) => setProjectForm((f) => ({ ...f, name: e.target.value }))} placeholder="Auto: Artist – Customer – Month" required /></label>
-            <label>Pricing <select value={projectForm.pricingType} onChange={(e) => setProjectForm((f) => ({ ...f, pricingType: e.target.value }))}><option value="fixed">Fixed rate (admin-defined, customer agreed)</option><option value="hourly">Hourly rate (artist–customer agreement)</option></select></label>
-            {projectForm.pricingType === 'fixed' && <label>Fixed amount (IDR) <input type="number" min="0" step="1000" placeholder="e.g. 5000000" value={projectForm.fixedAmount} onChange={(e) => setProjectForm((f) => ({ ...f, fixedAmount: e.target.value }))} /></label>}
-            {projectForm.pricingType === 'hourly' && (
-              <>
-                <label>Hourly rate (IDR) <input type="number" min="0" step="1000" placeholder="From artist profile" value={booking?.artist?.rate ?? ''} readOnly aria-readonly /></label>
-                <label>Agreed hours (optional) <input type="number" min="0" step="0.5" placeholder="e.g. 4" value={projectForm.agreedHours} onChange={(e) => setProjectForm((f) => ({ ...f, agreedHours: e.target.value }))} /></label>
-              </>
-            )}
-            <label>Notes <input value={projectForm.notes} onChange={(e) => setProjectForm((f) => ({ ...f, notes: e.target.value }))} placeholder="Optional" /></label>
-            <div className={styles.formActions}><button type="submit" disabled={projectSubmitting}>Add project</button></div>
-          </form>
             )}
           </section>
 

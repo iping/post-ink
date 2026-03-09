@@ -392,6 +392,111 @@
   margin-bottom: 1rem;
 }
 
+.pricingTypeGroup {
+  margin-bottom: 0.75rem;
+}
+.pricingTypeLabel {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 0.35rem;
+}
+.pricingTypeHint {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.75rem;
+}
+
+.readOnlyField {
+  margin-bottom: 1rem;
+}
+.readOnlyField .labelText {
+  display: block;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.35rem;
+}
+.readOnlyValue {
+  margin: 0 0 0.25rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.readOnlyField .pricingTypeHint {
+  margin-bottom: 0;
+}
+
+.pricingTypeGroup .radioOption {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-right: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+.pricingTypeGroup .radioOption input {
+  width: auto;
+  margin: 0;
+}
+
+/* Option of booking: card-style choices */
+.bookingOptionCards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+.bookingOptionCard {
+  display: block;
+  padding: 1rem 1.25rem;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+.bookingOptionCard:hover {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+.bookingOptionCardActive {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+.bookingOptionInput {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.bookingOptionTitle {
+  display: block;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 0.25rem;
+}
+.bookingOptionDesc {
+  display: block;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+.blockSubtitle {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-top: 1.5rem;
+  margin-bottom: 0.35rem;
+}
+.createBookingNote {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+  font-style: italic;
+}
+
 .radioLabel {
   display: flex;
   align-items: center;

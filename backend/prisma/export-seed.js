@@ -30,7 +30,7 @@ async function main() {
     prisma.tattooStudio.findMany({ orderBy: { name: 'asc' } }),
     prisma.customer.findMany({ orderBy: { name: 'asc' } }),
     prisma.booking.findMany({
-      include: { artist: true, customer: true, studio: true, payments: true, review: true, project: true },
+      include: { artist: true, customer: true, studio: true, payments: true, review: true, projects: true },
       orderBy: [{ date: 'desc' }, { startTime: 'desc' }],
     }),
     prisma.project.findMany({ orderBy: { createdAt: 'asc' } }),

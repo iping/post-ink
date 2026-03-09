@@ -91,26 +91,27 @@ model Booking {
   date        String        // YYYY-MM-DD
   startTime   String
   endTime     String
-  status      String        @default("pending") // pending, confirmed, completed, cancelled
-  totalAmount Float?        // agreed total price; remaining = totalAmount - sum(payments)
-  placement   String?       // body placement e.g. Arm, Back, Chest
+  status       String        @default("pending") // pending, confirmed, completed, cancelled
+  pricingType  String?       // "fixed" | "hourly": fixed = totalAmount is final; hourly = total from projects (hours × rate, accumulative)
+  totalAmount  Float?        // agreed total when pricingType=fixed; when hourly, total computed from projects
+  placement    String?       // body placement e.g. Arm, Back, Chest
   preference  String?       // customer reference / preference (style, image ref, etc.)
   notes       String?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
   payments    Payment[]
   review      Review?
-  project     Project?
+  projects    Project[]
 
   @@index([artistId])
   @@index([customerId])
   @@index([date])
 }
 
-// ----- Project (work to be done after booking; fixed or hourly rate) -----
+// ----- Project (work/session per booking; one booking can have multiple projects/sessions) -----
 model Project {
   id           String   @id @default(cuid())
-  bookingId    String   @unique
+  bookingId    String
   booking      Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
   name         String   // e.g. "Alpha"
   pricingType  String   // "fixed" | "hourly"

@@ -34,7 +34,7 @@ projectsRouter.get('/:id', async (req, res) => {
   }
 });
 
-// POST /api/projects — create (bookingId required; one project per booking)
+// POST /api/projects — create (bookingId required; one booking can have many projects/sessions)
 projectsRouter.post('/', async (req, res) => {
   try {
     const { bookingId, name, pricingType, fixedAmount, hourlyRate, agreedHours, notes } = req.body;
@@ -43,10 +43,6 @@ projectsRouter.post('/', async (req, res) => {
     }
     if (!['fixed', 'hourly'].includes(pricingType)) {
       return res.status(400).json({ error: 'pricingType must be "fixed" or "hourly"' });
-    }
-    const existing = await prisma.project.findUnique({ where: { bookingId } });
-    if (existing) {
-      return res.status(400).json({ error: 'This booking already has a project' });
     }
     const data = {
       bookingId,

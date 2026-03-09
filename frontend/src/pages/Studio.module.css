@@ -365,6 +365,7 @@
 .status_draft { color: var(--muted); font-weight: 600; }
 .status_pending { color: #c49a2e; font-weight: 600; }
 .status_confirmed { color: var(--info); font-weight: 600; }
+.status_in_progress { color: #2e7d32; font-weight: 700; }
 .status_completed { color: var(--success); font-weight: 600; }
 .status_cancelled { color: var(--muted); font-weight: 500; }
 .status_refunded { color: var(--muted); font-weight: 500; }
@@ -387,6 +388,13 @@
 
 .smBtn:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-dim); }
 .smBtnDanger:hover { color: var(--danger); border-color: var(--danger); background: var(--danger-dim); }
+
+.link {
+  color: var(--accent);
+  font-weight: 500;
+  text-decoration: none;
+}
+.link:hover { text-decoration: underline; }
 
 .remainingDue {
   color: var(--danger);

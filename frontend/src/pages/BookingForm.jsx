@@ -8,27 +8,17 @@ import {
   createBooking,
   updateBooking,
   createCustomer,
-  createPayment,
   uploadPreferenceImages,
-  uploadPaymentEvidence,
   uploadUrl,
 } from '../api';
 import { AvailabilityCalendar } from '../components/AvailabilityCalendar';
 import { formatRupiah, formatNumberWithDots, parseNumberInput } from '../currency';
 import styles from './BookingForm.module.css';
 
-const BOOKING_STATUSES = ['draft', 'pending', 'confirmed', 'completed', 'cancelled'];
+const BOOKING_STATUSES = ['draft', 'pending', 'confirmed', 'in_progress', 'completed', 'cancelled'];
 
 const MAX_PREFERENCE_IMAGES = 3;
 const MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2MB
-
-const DEPOSIT_METHODS = [
-  { value: 'BCA', label: 'BCA - 1234567890' },
-  { value: 'Mandiri', label: 'Mandiri - 0987654321' },
-  { value: 'BNI', label: 'BNI - 1122334455' },
-  { value: 'Credit Card', label: 'Credit Card - 4111 1111 1111 1111' },
-  { value: 'Cash', label: 'Cash - —' },
-];
 
 const PLACEMENT_OPTIONS = [
   { value: 'Arm', label: 'Arm - Upper limb' },
@@ -75,6 +65,7 @@ export function BookingForm() {
     startTime: '09:00',
     endTime: '17:00',
     status: 'draft',
+    pricingType: 'fixed', // 'fixed' = final transaction refers to totalAmount; 'hourly' = total from projects (accumulative)
     totalAmount: '',
     placement: '',
     placementOther: '',
@@ -87,11 +78,6 @@ export function BookingForm() {
   const [useNewCustomer, setUseNewCustomer] = useState(false);
   const [uploadingPreference, setUploadingPreference] = useState(false);
   const [useCustomTime, setUseCustomTime] = useState(false);
-  const [depositAmount, setDepositAmount] = useState('');
-  const [depositMethod, setDepositMethod] = useState('BCA');
-  const [depositTransferTo, setDepositTransferTo] = useState('');
-  const [depositEvidenceUrl, setDepositEvidenceUrl] = useState('');
-  const [uploadingEvidence, setUploadingEvidence] = useState(false);
 
   useEffect(() => {
     Promise.all([getArtists(), getCustomers(), getStudios()])
@@ -135,6 +121,7 @@ export function BookingForm() {
             startTime: b.startTime,
             endTime: b.endTime,
             status: b.status,
+            pricingType: b.pricingType === 'hourly' ? 'hourly' : 'fixed',
             totalAmount: b.totalAmount ?? '',
             placement: placementInList ? b.placement : (b.placement ? 'Other' : ''),
             placementOther: placementInList ? '' : (b.placement || ''),
@@ -185,7 +172,8 @@ export function BookingForm() {
       startTime,
       endTime,
       status: statusOverride ?? bookingForm.status,
-      totalAmount: bookingForm.totalAmount === '' ? null : Number(bookingForm.totalAmount),
+      pricingType: bookingForm.pricingType === 'hourly' ? 'hourly' : 'fixed',
+      totalAmount: bookingForm.pricingType === 'hourly' ? null : (bookingForm.totalAmount === '' ? null : Number(bookingForm.totalAmount)),
       placement: placementValue,
       preference:
         (bookingForm.preference?.trim() || bookingForm.preferenceImages?.length)
@@ -212,7 +200,8 @@ export function BookingForm() {
         return;
       }
     }
-    const status = asDraft ? 'draft' : bookingForm.status;
+    // Create booking = valid transaction (pending); Save as draft = draft
+    const status = asDraft ? 'draft' : (isEdit ? bookingForm.status : 'pending');
     const payload = {
       ...buildPayload(status),
       customerId: customerId || null,
@@ -220,51 +209,33 @@ export function BookingForm() {
     if (asDraft && !payload.artistId && artists.length > 0) {
       payload.artistId = artists[0].id;
     }
+    // New booking, fixed price: use artist's 1 hour rate as total when not set in form
+    if (!isEdit && payload.pricingType === 'fixed' && (payload.totalAmount == null || payload.totalAmount <= 0)) {
+      const artist = artists.find((a) => a.id === payload.artistId);
+      payload.totalAmount = artist?.rate != null ? Number(artist.rate) : 0;
+    }
     if (!payload.artistId) {
       setError(asDraft ? 'Add at least one artist in Manage → Artists to save a draft.' : 'Select studio and artist, then date and time.');
       return;
     }
-    const selectedArtist = artists.find((a) => a.id === payload.artistId);
-    const minDeposit = selectedArtist?.rate != null ? Number(selectedArtist.rate) : 0;
-    if (!asDraft && !isEdit) {
-      const dep = Number(depositAmount);
-      if (dep < minDeposit) {
-        setError(`Deposit must be at least ${formatRupiah(minDeposit)} (1 hour artist rate).`);
-        return;
-      }
-      if (!depositTransferTo.trim()) {
-        setError('Enter where the deposit goes (e.g. BCA 1234567890).');
-        return;
-      }
-      if (!depositEvidenceUrl) {
-        setError('Upload payment evidence (receipt) before creating the booking.');
-        return;
-      }
-    }
     try {
       if (isEdit) {
         await updateBooking(id, payload);
+        navigate('/manage?tab=bookings');
       } else {
         const created = await createBooking(payload);
-        if (!asDraft && created?.id && depositAmount && depositTransferTo && depositEvidenceUrl) {
-          await createPayment({
-            bookingId: created.id,
-            amount: Number(depositAmount),
-            currency: 'IDR',
-            method: depositMethod,
-            type: 'down_payment',
-            transferDestination: depositTransferTo.trim(),
-            evidenceUrl: depositEvidenceUrl,
-            status: 'completed',
-          });
+        if (created?.id) {
+          navigate(`/manage/bookings/${created.id}`);
+        } else {
+          navigate('/manage?tab=bookings');
         }
       }
-      navigate('/manage?tab=bookings');
     } catch (err) {
       setError(err.message);
     }
   };
 
+  // New booking: Save booking (create, no deposit). Edit: Save booking or Save as draft.
   const handleSubmit = (e) => saveBooking(e, false);
   const handleSaveDraft = (e) => saveBooking(e, true);
 
@@ -306,27 +277,6 @@ export function BookingForm() {
 
   const selectedArtist = artists.find((a) => a.id === bookingForm.artistId);
   const minDeposit = selectedArtist?.rate != null ? Number(selectedArtist.rate) : 0;
-
-  const handleEvidenceChange = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > MAX_IMAGE_SIZE) {
-      setError('Payment evidence must be 2MB or less.');
-      e.target.value = '';
-      return;
-    }
-    setError(null);
-    setUploadingEvidence(true);
-    try {
-      const { url } = await uploadPaymentEvidence(file);
-      setDepositEvidenceUrl(url);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setUploadingEvidence(false);
-      e.target.value = '';
-    }
-  };
 
   if (loading) return <div className={styles.loading}>Loading…</div>;
 
@@ -554,7 +504,7 @@ export function BookingForm() {
           </section>
 
           <section className={styles.block}>
-            <h2 className={styles.blockTitle}>Booking details</h2>
+            <h2 className={styles.blockTitle}>Project Details</h2>
             <label className={styles.label}>
               <span className={styles.labelText}>Where should the tattoo be placed?</span>
               <select
@@ -640,94 +590,43 @@ export function BookingForm() {
           </section>
 
           {!isEdit && (
-            <section className={styles.block} aria-label="Deposit and payment">
-              <h2 className={styles.blockTitle}>Deposit & payment</h2>
+            <section className={styles.block} aria-label="Agreed price and first deposit">
+              <h2 className={styles.blockTitle}>Agreed price & deposit</h2>
               <p className={styles.blockDesc}>
-                This booking blocks the artist’s schedule. Minimum deposit is 1 hour at the artist’s rate. Upload payment evidence before creating the booking.
+                Price comes from the artist’s 1 hour rate. You can add further deposit and payment on the booking detail page after saving.
               </p>
-              {bookingForm.artistId && minDeposit > 0 && (
-                <p className={styles.minDepositNote}>
-                  Minimum deposit (1 hour): <strong>{formatRupiah(minDeposit)}</strong>
+              <div className={styles.readOnlyField}>
+                <span className={styles.labelText}>First Deposit</span>
+                <p className={styles.readOnlyValue}>
+                  {bookingForm.artistId && minDeposit > 0
+                    ? formatRupiah(minDeposit)
+                    : '—'}
                 </p>
-              )}
-              <label className={styles.label}>
-                <span className={styles.labelText}>Deposit amount (IDR) *</span>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  className={styles.input}
-                  placeholder={minDeposit ? `Min ${formatRupiah(minDeposit)}` : 'e.g. 500.000'}
-                  value={formatNumberWithDots(depositAmount)}
-                  onChange={(e) => setDepositAmount(parseNumberInput(e.target.value))}
-                />
-              </label>
-              <label className={styles.label}>
-                <span className={styles.labelText}>Where does the deposit go? *</span>
-                <select
-                  className={styles.input}
-                  value={depositMethod}
-                  onChange={(e) => setDepositMethod(e.target.value)}
-                >
-                  {DEPOSIT_METHODS.map((m) => (
-                    <option key={m.value} value={m.value}>{m.label}</option>
-                  ))}
-                </select>
-              </label>
-              <label className={styles.label}>
-                <span className={styles.labelText}>Transfer destination (e.g. BCA 1234567890) *</span>
-                <input
-                  type="text"
-                  className={styles.input}
-                  placeholder="Account number or reference"
-                  value={depositTransferTo}
-                  onChange={(e) => setDepositTransferTo(e.target.value)}
-                />
-              </label>
-              <label className={styles.label}>
-                <span className={styles.labelText}>Upload payment evidence (receipt) *</span>
-                <p className={styles.uploadHint}>One image, max 2MB. Required to create the booking.</p>
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/gif,image/webp"
-                  className={styles.fileInput}
-                  onChange={handleEvidenceChange}
-                  disabled={uploadingEvidence}
-                />
-                {uploadingEvidence && <span className={styles.uploading}>Uploading…</span>}
-                {depositEvidenceUrl && (
-                  <div className={styles.evidenceThumb}>
-                    <img src={depositEvidenceUrl} alt="Payment evidence" className={styles.evidenceThumbImg} />
-                    <span className={styles.evidenceThumbLabel}>Evidence uploaded</span>
-                    <button type="button" onClick={() => setDepositEvidenceUrl('')} className={styles.thumbRemove}>×</button>
-                  </div>
-                )}
-              </label>
+                <span className={styles.pricingTypeHint}>1 hour rate of selected tattoo artist.</span>
+              </div>
             </section>
           )}
 
         </div>
 
         <div className={styles.actions}>
-          <button
-            type="button"
-            onClick={handleSaveDraft}
-            className={styles.secondaryBtn}
-          >
-            Save as draft
-          </button>
-          <Link to="/manage?tab=bookings" className={styles.tertiaryBtn}>Cancel</Link>
+          {isEdit && (
+            <>
+              <button type="button" onClick={handleSaveDraft} className={styles.secondaryBtn}>Save as draft</button>
+              <Link to="/manage?tab=bookings" className={styles.tertiaryBtn}>Cancel</Link>
+            </>
+          )}
           <button
             type="submit"
             disabled={
               !bookingForm.artistId ||
               !bookingForm.date ||
               !bookingForm.startTime ||
-              (!isEdit &&
-                (Number(depositAmount) < minDeposit || !depositTransferTo.trim() || !depositEvidenceUrl))
+              (bookingForm.pricingType === 'fixed' && !isEdit && (!selectedArtist || selectedArtist.rate == null || Number(selectedArtist.rate) <= 0))
             }
             className={styles.primaryBtn}
           >
-            {isEdit ? 'Save booking' : 'Create booking'}
+            Save booking
           </button>
         </div>
       </form>

@@ -85,8 +85,10 @@ const img = {
 async function main() {
   execSync('npx prisma migrate deploy', { cwd: backendDir, stdio: 'inherit' });
 
+  // Clean in dependency order (children first, then parents)
   await prisma.review.deleteMany({});
   await prisma.payment.deleteMany({});
+  await prisma.project.deleteMany({});
   await prisma.booking.deleteMany({});
   await prisma.studioCommission.deleteMany({});
   await prisma.artistAvailability.deleteMany({});
@@ -343,6 +345,7 @@ async function main() {
         startTime: ab.start,
         endTime: ab.end,
         status: ab.status,
+        pricingType: 'fixed',
         totalAmount: ab.amount,
         notes: ab.notes,
       },
@@ -364,7 +367,8 @@ async function main() {
     }
   }
 
-  // ─── Sample Project (first active booking: "Alpha" fixed rate) ───
+  // ─── Projects (depend on booking + artist rate for hourly) ───
+  // Fixed-rate project for first active booking
   if (createdActiveBookings.length > 0) {
     await prisma.project.create({
       data: {
@@ -373,6 +377,36 @@ async function main() {
         pricingType: 'fixed',
         fixedAmount: createdActiveBookings[0].totalAmount ?? 5000000,
         notes: 'Half sleeve botanical — agreed total',
+      },
+    });
+  }
+  // Hourly project: second active booking gets 2 sessions (accumulative hours)
+  if (createdActiveBookings.length > 1) {
+    const hourlyBooking = createdActiveBookings[1];
+    const artistForHourly = createdArtists[activeBookings[1].artistIdx];
+    const rate = artistForHourly.rate ?? 500000;
+    await prisma.booking.update({
+      where: { id: hourlyBooking.id },
+      data: { pricingType: 'hourly', totalAmount: null },
+    });
+    await prisma.project.create({
+      data: {
+        bookingId: hourlyBooking.id,
+        name: 'Session 1',
+        pricingType: 'hourly',
+        hourlyRate: rate,
+        agreedHours: 2,
+        notes: 'Traditional eagle — first session',
+      },
+    });
+    await prisma.project.create({
+      data: {
+        bookingId: hourlyBooking.id,
+        name: 'Session 2',
+        pricingType: 'hourly',
+        hourlyRate: rate,
+        agreedHours: 1.5,
+        notes: 'Roses and shading',
       },
     });
   }
@@ -395,6 +429,7 @@ async function main() {
         startTime: cb.start,
         endTime: cb.end,
         status: 'cancelled',
+        pricingType: 'fixed',
         totalAmount: cb.amount,
         notes: cb.notes,
       },
@@ -450,6 +485,7 @@ async function main() {
         startTime: cb.start,
         endTime: cb.end,
         status: 'completed',
+        pricingType: 'fixed',
         totalAmount: cb.amount,
         notes: cb.notes,
       },
@@ -499,7 +535,9 @@ async function main() {
   }
 
   const totalBookings = activeBookings.length + cancelledBookings.length + completedBookings.length;
-  console.log(`Seed complete: ${createdArtists.length} artists, ${studios.length} studios, ${customers.length} customers, ${totalBookings} bookings, ${reviewCount} reviews.`);
+  const totalProjects = await prisma.project.count();
+  const totalPayments = await prisma.payment.count();
+  console.log(`Seed complete: ${createdArtists.length} artists, ${studios.length} studios, ${customers.length} customers, ${totalBookings} bookings, ${totalProjects} projects, ${totalPayments} payments, ${reviewCount} reviews.`);
   console.log('Default login: admin@post.ink / admin123');
 }
 
