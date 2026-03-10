@@ -481,6 +481,7 @@ export function BookingDetail() {
                         <table className={styles.sessionTable}>
                           <thead>
                             <tr>
+                              <th>No.</th>
                               <th>Date</th>
                               <th>Time</th>
                               <th>Hours</th>
@@ -491,6 +492,7 @@ export function BookingDetail() {
                           <tbody>
                             {sessions.map((sess, idx) => (
                               <tr key={sess.id} className={editingSessionId === sess.id ? styles.sessionRowEditing : ''}>
+                                <td>{idx + 1}</td>
                                 <td>
                                   {idx === 0 && <span className={styles.firstSessionBadge}>First</span>}{' '}
                                   <span>{sess.date}</span>

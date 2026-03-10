@@ -730,6 +730,7 @@ export function Studio() {
             <table className={styles.table}>
               <thead>
                 <tr>
+                  <th>No.</th>
                   <th>Project name</th>
                   <th>Booking</th>
                   <th>Artist</th>
@@ -742,16 +743,17 @@ export function Studio() {
               <tbody>
                 {projects.length === 0 ? (
                   <tr>
-                    <td colSpan={7}>No projects yet. Add a project from a booking detail page.</td>
+                    <td colSpan={8}>No projects yet. Add a project from a booking detail page.</td>
                   </tr>
                 ) : (
-                  projects.map((pr) => {
+                  projects.map((pr, i) => {
                     const b = pr.booking;
                     const pricingStr = pr.pricingType === 'fixed'
                       ? `Fixed — ${formatRupiah(pr.fixedAmount)}`
                       : `Hourly — ${formatRupiah(pr.hourlyRate)}/hr${pr.agreedHours ? ` × ${pr.agreedHours} hrs` : ''}`;
                     return (
                       <tr key={pr.id}>
+                        <td>{i + 1}</td>
                         <td className={styles.cellEmphasis}>{pr.name}</td>
                         <td>
                           {b ? (
@@ -791,6 +793,7 @@ export function Studio() {
             <table className={styles.table}>
               <thead>
                 <tr>
+                  <th>No.</th>
                   <th>Date</th>
                   <th>Time</th>
                   <th>Project</th>
@@ -805,15 +808,17 @@ export function Studio() {
               <tbody>
                 {paginatedSessions.length === 0 ? (
                   <tr>
-                    <td colSpan={9}>No sessions yet. Add sessions from a booking detail page.</td>
+                    <td colSpan={10}>No sessions yet. Add sessions from a booking detail page.</td>
                   </tr>
                 ) : (
-                  paginatedSessions.map((sess) => {
+                  paginatedSessions.map((sess, i) => {
                     const proj = sess.project;
                     const b = proj?.booking;
                     const timeStr = [sess.startTime, sess.endTime].filter(Boolean).join(' – ') || '—';
+                    const rowNum = (sessionPage - 1) * ROWS_PER_PAGE + i + 1;
                     return (
                       <tr key={sess.id}>
+                        <td>{rowNum}</td>
                         <td>{sess.date ?? '—'}</td>
                         <td>{timeStr}</td>
                         <td className={styles.cellEmphasis}>{proj?.name ?? '—'}</td>
@@ -857,6 +862,7 @@ export function Studio() {
             <table className={styles.table}>
               <thead>
                 <tr>
+                  <th>No.</th>
                   <th>Amount</th>
                   <th>Method</th>
                   <th>Type</th>
@@ -869,11 +875,14 @@ export function Studio() {
               <tbody>
                 {paginatedPayments.length === 0 ? (
                   <tr>
-                    <td colSpan={7}>No payments yet. Create one above or add a down payment from a booking.</td>
+                    <td colSpan={8}>No payments yet. Create one above or add a down payment from a booking.</td>
                   </tr>
                 ) : (
-                  paginatedPayments.map((p) => (
+                  paginatedPayments.map((p, i) => {
+                    const rowNum = (paymentPage - 1) * ROWS_PER_PAGE + i + 1;
+                    return (
                     <tr key={p.id}>
+                      <td>{rowNum}</td>
                       <td className={styles.cellAmount}>{formatRupiah(p.amount)} <span className={styles.convHint}>{formatWithConversion(p.amount).usd}</span></td>
                       <td className={styles.cellEmphasis}>{p.method || '—'}</td>
                       <td>{p.type || '—'}</td>
@@ -888,7 +897,8 @@ export function Studio() {
                         <button type="button" onClick={() => openEditPayment(p)} className={styles.smBtn}>Edit</button>
                       </td>
                     </tr>
-                  ))
+                  );
+                  })
                 )}
               </tbody>
             </table>
@@ -912,6 +922,7 @@ export function Studio() {
             <table className={styles.table}>
               <thead>
                 <tr>
+                  <th>No.</th>
                   <th>Studio</th>
                   <th>Artist</th>
                   <th>Studio commission %</th>
@@ -921,11 +932,14 @@ export function Studio() {
               <tbody>
                 {paginatedCommissions.length === 0 ? (
                   <tr>
-                    <td colSpan={4}>No commission agreements. Add one to set the % the studio takes per artist.</td>
+                    <td colSpan={5}>No commission agreements. Add one to set the % the studio takes per artist.</td>
                   </tr>
                 ) : (
-                  paginatedCommissions.map((c) => (
+                  paginatedCommissions.map((c, i) => {
+                    const rowNum = (commissionPage - 1) * ROWS_PER_PAGE + i + 1;
+                    return (
                     <tr key={c.id}>
+                      <td>{rowNum}</td>
                       <td className={styles.cellEmphasis}>{c.studio?.name || '—'}</td>
                       <td className={styles.cellEmphasis}>{c.artist?.name || '—'}</td>
                       <td className={styles.cellAmount}>{c.commissionPercent}%</td>
@@ -934,7 +948,8 @@ export function Studio() {
                         <button type="button" onClick={() => removeCommission(c.id)} className={styles.smBtnDanger}>Remove</button>
                       </td>
                     </tr>
-                  ))
+                  );
+                  })
                 )}
               </tbody>
             </table>
