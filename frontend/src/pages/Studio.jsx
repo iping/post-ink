@@ -30,6 +30,7 @@ import {
 } from '../api';
 import { formatRupiah, formatWithConversion, formatNumberWithDots, parseNumberInput } from '../currency';
 import styles from './Studio.module.css';
+import { ArtistList } from './ArtistList';
 
 const ROWS_PER_PAGE = 8;
 
@@ -115,7 +116,7 @@ export function Studio() {
 
   useEffect(() => {
     const t = searchParams.get('tab') || 'bookings';
-    if (['bookings', 'projects', 'payments', 'commissions', 'customers', 'specialities', 'payment-destinations', 'users'].includes(t)) setTab(t);
+    if (['bookings', 'artists', 'projects', 'payments', 'commissions', 'customers', 'specialities', 'payment-destinations', 'users'].includes(t)) setTab(t);
   }, [searchParams]);
 
   const switchTab = (t) => {
@@ -585,7 +586,7 @@ export function Studio() {
             Bookings
             {pendingBookingsCount > 0 && <span className={styles.sideNavBadge} aria-label={`${pendingBookingsCount} pending`}>{pendingBookingsCount}</span>}
           </button>
-          <Link to="/manage/artists" className={styles.sideNavLink} data-short="A" title="Tattoo Artist Management">Tattoo Artist Management</Link>
+          <button type="button" data-short="A" title="Tattoo Artist" className={tab === 'artists' ? styles.sideNavActive : ''} onClick={() => switchTab('artists')}>Tattoo Artist</button>
           <button type="button" data-short="Pr" title="Projects" className={tab === 'projects' ? styles.sideNavActive : ''} onClick={() => switchTab('projects')}>Projects</button>
           <button type="button" data-short="P" title="Payments" className={tab === 'payments' ? styles.sideNavActive : ''} onClick={() => switchTab('payments')}>Payments</button>
           <button type="button" data-short="C" title="Commission" className={tab === 'commissions' ? styles.sideNavActive : ''} onClick={() => switchTab('commissions')}>Commission</button>
@@ -759,6 +760,8 @@ export function Studio() {
           <Pagination currentPage={bookingPage} totalPages={bookingTotalPages} onPageChange={setBookingPage} />
         </section>
       )}
+
+      {tab === 'artists' && <ArtistList />}
 
       {tab === 'projects' && (
         <section className={styles.section}>

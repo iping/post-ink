@@ -1,9 +1,8 @@
-import { Routes, Route, Link, NavLink, useNavigate } from 'react-router-dom';
+import { Routes, Route, Link, NavLink, useNavigate, Navigate } from 'react-router-dom';
 import './App.css';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { ManageLayout } from './components/ManageLayout';
 import { useAuth } from './context/AuthContext';
-import { ArtistList } from './pages/ArtistList';
 import { ArtistForm } from './pages/ArtistForm';
 import { ArtistDetail } from './pages/ArtistDetail';
 import { ArtistAvailability } from './pages/ArtistAvailability';
@@ -64,7 +63,7 @@ function App() {
           <Route path="/manage/bookings/:id" element={<ProtectedRoute><BookingDetail /></ProtectedRoute>} />
           <Route path="/manage/bookings/:id/edit" element={<ProtectedRoute><BookingForm /></ProtectedRoute>} />
           <Route path="/manage/artists" element={<ProtectedRoute><ManageLayout /></ProtectedRoute>}>
-            <Route index element={<ArtistList />} />
+            <Route index element={<Navigate to="/manage?tab=artists" replace />} />
             <Route path="new" element={<ArtistForm />} />
             <Route path=":id" element={<ArtistDetail />} />
             <Route path=":id/edit" element={<ArtistForm />} />

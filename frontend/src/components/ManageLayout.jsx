@@ -35,9 +35,7 @@ export function ManageLayout() {
           <NavLink to="/manage" end className={({ isActive }) => `${styles.sideNavLink} ${isActive ? styles.sideNavActive : ''}`} data-short="B" title="Bookings">
             Bookings
           </NavLink>
-          <NavLink to="/manage/artists" className={({ isActive }) => `${styles.sideNavLink} ${isActive ? styles.sideNavActive : ''}`} data-short="A" title="Tattoo Artist Management">
-            Tattoo Artist Management
-          </NavLink>
+          <Link to="/manage?tab=artists" className={styles.sideNavLink} data-short="A" title="Tattoo Artist">Tattoo Artist</Link>
           <Link to="/manage?tab=projects" className={styles.sideNavLink} data-short="Pr" title="Projects">Projects</Link>
           <Link to="/manage?tab=payments" className={styles.sideNavLink} data-short="P" title="Payments">Payments</Link>
           <Link to="/manage?tab=commissions" className={styles.sideNavLink} data-short="C" title="Commission">Commission</Link>

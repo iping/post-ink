@@ -88,7 +88,7 @@ export function ArtistList() {
       <div className={layoutStyles.adminContent}>
         <div className={layoutStyles.sectionHead}>
           <div>
-            <h2 className={styles.pageTitle}>Tattoo Artist Management</h2>
+            <h2 className={styles.pageTitle}>Tattoo Artist</h2>
             {artists.length > 0 ? (
               <span className={layoutStyles.countHint}>
                 Showing {(page - 1) * ROWS_PER_PAGE + 1}–{Math.min(page * ROWS_PER_PAGE, artists.length)} of {artists.length}

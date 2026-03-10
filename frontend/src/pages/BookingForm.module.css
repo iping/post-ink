@@ -355,6 +355,26 @@
   line-height: 1.4;
 }
 
+.depositBalanceHint {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.deductHint {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin: 0.25rem 0 0;
+  font-style: italic;
+}
+
+.deductRequiredHint {
+  font-size: 0.9rem;
+  color: #b45309;
+  margin: 0.35rem 0 0;
+  font-weight: 600;
+}
+
 @media (min-width: 900px) {
   .labelText {
     font-size: 1.05rem;
@@ -429,6 +449,12 @@
   margin: 0 0 0.25rem;
   font-size: 1.1rem;
   font-weight: 600;
+  color: var(--text);
+}
+.amountLeftValue {
+  margin: 0 0 0.2rem;
+  font-size: 1.1rem;
+  font-weight: 700;
   color: var(--text);
 }
 .readOnlyField .pricingTypeHint {
@@ -653,6 +679,16 @@
     padding-top: 2rem;
     gap: 1rem;
   }
+}
+
+/* Total payment (1h) shown to the left of Save booking */
+.totalPaymentLabel {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+.totalPaymentLabel strong {
+  color: var(--text);
+  font-weight: 700;
 }
 
 /* Primary: main action (Create booking / Save booking) — aligned right */

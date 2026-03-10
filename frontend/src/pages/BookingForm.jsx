@@ -83,6 +83,7 @@ export function BookingForm() {
   const [uploadingPreference, setUploadingPreference] = useState(false);
   const [useCustomTime, setUseCustomTime] = useState(false);
   const [depositDestinationId, setDepositDestinationId] = useState(''); // selected PaymentDestination id
+  const [deductFromDeposit, setDeductFromDeposit] = useState(false);
   const [depositEvidenceUrl, setDepositEvidenceUrl] = useState('');
   const [uploadingEvidence, setUploadingEvidence] = useState(false);
   const [paymentDestinations, setPaymentDestinations] = useState([]);
@@ -235,6 +236,17 @@ export function BookingForm() {
       setError(asDraft ? 'Add at least one artist in Manage → Artists to save a draft.' : 'Select studio and artist, then date and time.');
       return;
     }
+    if (!asDraft && payload.customerId && minDeposit > 0) {
+      const customerBalance = getCustomerDeposit(payload.customerId);
+      if (customerBalance >= minDeposit && !deductFromDeposit) {
+        setError('Please use the customer\'s deposit first. Check "Deduct booking fee from customer\'s deposit" to continue the booking.');
+        return;
+      }
+      if (deductFromDeposit && customerBalance < minDeposit) {
+        setError(`Customer deposit (${formatRupiah(customerBalance)}) is less than booking fee (${formatRupiah(minDeposit)}). Uncheck "Deduct from deposit" or choose another customer.`);
+        return;
+      }
+    }
     try {
       if (isEdit) {
         await updateBooking(id, payload);
@@ -242,23 +254,43 @@ export function BookingForm() {
       } else {
         const created = await createBooking(payload);
         if (created?.id) {
-          const dest = depositDestinationId ? paymentDestinations.find((d) => d.id === depositDestinationId) : null;
           const depositAmt = minDeposit;
-          if (dest && depositAmt > 0) {
-            try {
-              await createPayment({
-                bookingId: created.id,
-                amount: depositAmt,
-                currency: 'IDR',
-                method: dest.type,
-                type: 'down_payment',
-                transferDestination: dest.account || null,
-                evidenceUrl: depositEvidenceUrl || null,
-                status: 'completed',
-              });
-            } catch (payErr) {
-              setError(payErr.message);
-              return;
+          if (depositAmt > 0) {
+            if (deductFromDeposit) {
+              try {
+                await createPayment({
+                  bookingId: created.id,
+                  amount: depositAmt,
+                  currency: 'IDR',
+                  method: 'From deposit',
+                  type: 'down_payment',
+                  transferDestination: null,
+                  evidenceUrl: null,
+                  status: 'completed',
+                });
+              } catch (payErr) {
+                setError(payErr.message);
+                return;
+              }
+            } else {
+              const dest = depositDestinationId ? paymentDestinations.find((d) => d.id === depositDestinationId) : null;
+              if (dest) {
+                try {
+                  await createPayment({
+                    bookingId: created.id,
+                    amount: depositAmt,
+                    currency: 'IDR',
+                    method: dest.type,
+                    type: 'down_payment',
+                    transferDestination: dest.account || null,
+                    evidenceUrl: depositEvidenceUrl || null,
+                    status: 'completed',
+                  });
+                } catch (payErr) {
+                  setError(payErr.message);
+                  return;
+                }
+              }
             }
           }
           navigate(`/manage/bookings/${created.id}`);
@@ -526,14 +558,17 @@ export function BookingForm() {
                 <select
                   className={styles.input}
                   value={bookingForm.customerId}
-                  onChange={(e) => setBookingForm((f) => ({ ...f, customerId: e.target.value }))}
+                  onChange={(e) => {
+                    setBookingForm((f) => ({ ...f, customerId: e.target.value }));
+                    setDeductFromDeposit(false);
+                  }}
                 >
                   <option value="">— No customer —</option>
                   {customers.map((c) => {
                     const deposit = getCustomerDeposit(c.id);
                     return (
                       <option key={c.id} value={c.id}>
-                        {c.name}{deposit > 0 ? ` — Deposit: ${formatRupiah(deposit)}` : ''}
+                        {c.name} — Deposit: {formatRupiah(deposit)}
                       </option>
                     );
                   })}
@@ -712,39 +747,94 @@ export function BookingForm() {
               </div>
               {bookingForm.artistId && minDeposit > 0 && (
                 <>
-                  <label className={styles.label}>
-                    <span className={styles.labelText}>Paid?</span>
-                    <select
-                      className={styles.input}
-                      value={depositDestinationId}
-                      onChange={(e) => setDepositDestinationId(e.target.value)}
-                      aria-label="Where booking fee was paid"
-                    >
-                      <option value="">No</option>
-                      {paymentDestinations.map((d) => (
-                        <option key={d.id} value={d.id}>
-                          {d.name}{d.account ? ` — ${d.account}` : ''}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label className={styles.label}>
-                    <span className={styles.labelText}>Receipt (optional)</span>
-                    <input
-                      type="file"
-                      accept="image/jpeg,image/png,image/gif,image/webp"
-                      className={styles.fileInput}
-                      onChange={handleEvidenceChange}
-                      disabled={uploadingEvidence}
-                    />
-                    {uploadingEvidence && <span className={styles.uploading}>Uploading…</span>}
-                    {depositEvidenceUrl && (
-                      <div className={styles.evidenceThumb}>
-                        <img src={depositEvidenceUrl} alt="Receipt" className={styles.evidenceThumbImg} />
-                        <button type="button" onClick={() => setDepositEvidenceUrl('')} className={styles.thumbRemove}>×</button>
-                      </div>
-                    )}
-                  </label>
+                  {!useNewCustomer && bookingForm.customerId && (() => {
+                    const customerBalance = getCustomerDeposit(bookingForm.customerId);
+                    const canDeduct = customerBalance >= minDeposit;
+                    const amountLeftToPay = customerBalance > 0 && customerBalance < minDeposit ? minDeposit - customerBalance : 0;
+                    return (
+                      <>
+                        {customerBalance > 0 && customerBalance < minDeposit && (
+                          <div className={styles.readOnlyField}>
+                            <span className={styles.labelText}>Amount left for customer to pay</span>
+                            <p className={styles.amountLeftValue}>{formatRupiah(amountLeftToPay)}</p>
+                            <p className={styles.depositBalanceHint} style={{ margin: 0 }}>(booking fee {formatRupiah(minDeposit)} − deposit {formatRupiah(customerBalance)})</p>
+                          </div>
+                        )}
+                        {canDeduct ? (
+                          <label className={styles.label} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                            <input
+                              type="checkbox"
+                              checked={deductFromDeposit}
+                              onChange={(e) => {
+                                setDeductFromDeposit(e.target.checked);
+                                if (e.target.checked) setDepositDestinationId('');
+                              }}
+                              aria-label="Deduct booking fee from customer deposit"
+                            />
+                            <span>
+                              Deduct booking fee from customer&apos;s deposit
+                              <span className={styles.depositBalanceHint}> (balance: {formatRupiah(customerBalance)})</span>
+                            </span>
+                          </label>
+                        ) : null}
+                        {customerBalance >= minDeposit && (
+                          <>
+                            {deductFromDeposit ? (
+                              <p className={styles.deductHint} role="status">
+                                Tell the customer: your booking is fully covered by your deposit.
+                              </p>
+                            ) : (
+                              <>
+                                <p className={styles.deductHint} role="status">
+                                  Tell the customer: we can deduct from your latest deposit.
+                                </p>
+                                <p className={styles.deductRequiredHint} role="alert">
+                                  Use customer&apos;s deposit first: check the option above to continue the booking.
+                                </p>
+                              </>
+                            )}
+                          </>
+                        )}
+                      </>
+                    );
+                  })()}
+                  {!deductFromDeposit && (
+                    <>
+                      <label className={styles.label}>
+                        <span className={styles.labelText}>Paid?</span>
+                        <select
+                          className={styles.input}
+                          value={depositDestinationId}
+                          onChange={(e) => setDepositDestinationId(e.target.value)}
+                          aria-label="Where booking fee was paid"
+                        >
+                          <option value="">No</option>
+                          {paymentDestinations.map((d) => (
+                            <option key={d.id} value={d.id}>
+                              {d.name}{d.account ? ` — ${d.account}` : ''}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <label className={styles.label}>
+                        <span className={styles.labelText}>Receipt (optional)</span>
+                        <input
+                          type="file"
+                          accept="image/jpeg,image/png,image/gif,image/webp"
+                          className={styles.fileInput}
+                          onChange={handleEvidenceChange}
+                          disabled={uploadingEvidence}
+                        />
+                        {uploadingEvidence && <span className={styles.uploading}>Uploading…</span>}
+                        {depositEvidenceUrl && (
+                          <div className={styles.evidenceThumb}>
+                            <img src={depositEvidenceUrl} alt="Receipt" className={styles.evidenceThumbImg} />
+                            <button type="button" onClick={() => setDepositEvidenceUrl('')} className={styles.thumbRemove}>×</button>
+                          </div>
+                        )}
+                      </label>
+                    </>
+                  )}
                 </>
               )}
             </section>
