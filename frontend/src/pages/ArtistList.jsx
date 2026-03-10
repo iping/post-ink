@@ -52,6 +52,7 @@ export function ArtistList() {
   const [togglingId, setTogglingId] = useState(null);
   const [savedId, setSavedId] = useState(null);
   const [page, setPage] = useState(1);
+  const [statusModalArtist, setStatusModalArtist] = useState(null);
 
   const load = () => getArtists().then(setArtists).catch((e) => setError(e.message));
 
@@ -63,14 +64,14 @@ export function ArtistList() {
   const totalPages = Math.max(1, Math.ceil(artists.length / ROWS_PER_PAGE));
   const paginatedArtists = artists.slice((page - 1) * ROWS_PER_PAGE, page * ROWS_PER_PAGE);
 
-  const handleToggleActive = async (artist) => {
-    const next = !(artist.isActive !== false);
+  const handleToggleActive = async (artist, next) => {
     setTogglingId(artist.id);
     setError(null);
     try {
       await updateArtistStatus(artist.id, next);
       setArtists((prev) => prev.map((a) => (a.id === artist.id ? { ...a, isActive: next } : a)));
       setSavedId(artist.id);
+      setStatusModalArtist(null);
       setTimeout(() => setSavedId(null), 2000);
     } catch (e) {
       setError(e.message);
@@ -106,14 +107,13 @@ export function ArtistList() {
                 <th>Speciality</th>
                 <th>Experience</th>
                 <th>Rate</th>
-                <th>Status</th>
                 <th></th>
               </tr>
             </thead>
             <tbody>
               {paginatedArtists.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className={styles.emptyCell}>
+                  <td colSpan={7} className={styles.emptyCell}>
                     No artists yet. <Link to="/manage/artists/new" className={layoutStyles.addBtn}>Add your first artist</Link>
                   </td>
                 </tr>
@@ -140,23 +140,8 @@ export function ArtistList() {
                       <td className={styles.cellSpec}>{a.speciality || '—'}</td>
                       <td className={styles.cellExp}>{a.experiences || '—'}</td>
                       <td className={layoutStyles.cellAmount}>{a.rate != null ? formatRupiah(a.rate) + ' / hr' : '—'}</td>
-                      <td className={styles.cellStatus}>
-                        <span className={a.isActive === false ? styles.badgeInactive : styles.badgeActive}>
-                          {a.isActive !== false ? 'Aktif' : 'Non-aktif'}
-                        </span>
-                        <button
-                          type="button"
-                          className={styles.toggleBtn}
-                          onClick={() => handleToggleActive(a)}
-                          disabled={togglingId === a.id}
-                          aria-label={a.isActive !== false ? 'Set non-aktif' : 'Set aktif'}
-                          title={a.isActive !== false ? 'Set non-aktif' : 'Set aktif'}
-                        >
-                          {togglingId === a.id ? '…' : (a.isActive !== false ? 'On' : 'Off')}
-                        </button>
-                        {savedId === a.id && <span className={styles.savedLabel}>Saved</span>}
-                      </td>
                       <td>
+                        <button type="button" className={layoutStyles.smBtn} onClick={() => setStatusModalArtist(a)}>Change status</button>
                         <Link to={`/manage/artists/${a.id}/edit`} className={layoutStyles.smBtn}>Edit</Link>
                         <Link to={`/manage/artists/${a.id}/availability`} className={layoutStyles.smBtn}>Availability</Link>
                         <Link to={`/manage/artists/${a.id}`} className={layoutStyles.smBtn}>View</Link>
@@ -169,6 +154,44 @@ export function ArtistList() {
           </table>
         </div>
         <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
+
+        {statusModalArtist && (
+          <div
+            className={layoutStyles.modal}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Change artist status"
+            onClick={(e) => e.target === e.currentTarget && setStatusModalArtist(null)}
+          >
+            <div className={layoutStyles.modalContent} onClick={(e) => e.stopPropagation()}>
+              <h3>Change status – {statusModalArtist.name}</h3>
+              <p className={styles.modalHelp}>
+                Current status: <strong>{statusModalArtist.isActive !== false ? 'Aktif' : 'Non-aktif'}</strong>
+              </p>
+              <div className={styles.modalActions}>
+                <button
+                  type="button"
+                  className={layoutStyles.smBtn}
+                  disabled={togglingId === statusModalArtist.id}
+                  onClick={() => handleToggleActive(statusModalArtist, true)}
+                >
+                  {togglingId === statusModalArtist.id ? '…' : 'Set Aktif'}
+                </button>
+                <button
+                  type="button"
+                  className={layoutStyles.smBtn}
+                  disabled={togglingId === statusModalArtist.id}
+                  onClick={() => handleToggleActive(statusModalArtist, false)}
+                >
+                  {togglingId === statusModalArtist.id ? '…' : 'Set Non-aktif'}
+                </button>
+                <button type="button" className={styles.modalCloseBtn} onClick={() => setStatusModalArtist(null)}>
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

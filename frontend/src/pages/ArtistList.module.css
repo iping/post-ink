@@ -102,15 +102,26 @@
 }
 
 .rowInactive {
-  background: #f5f5f5;
+  background: #e8e8e8;
 }
 .rowInactive:hover {
-  background: #efefef;
+  background: #e0e0e0;
 }
-.rowInactive .cellName .nameLink,
+.rowInactive .photoThumb {
+  filter: grayscale(1);
+  opacity: 0.85;
+}
+.rowInactive .photoPlaceholder {
+  background: #d5d5d5;
+  color: #999;
+}
+.rowInactive .cellNum,
 .rowInactive .cellSpec,
 .rowInactive .cellExp,
-.rowInactive .cellRate {
+.rowInactive .nameLink {
+  color: var(--text-secondary);
+}
+.rowInactive .cellAmount {
   color: var(--text-secondary);
 }
 
@@ -185,6 +196,9 @@
   align-items: center;
   gap: 0.4rem;
   flex-wrap: nowrap;
+  vertical-align: middle;
+  min-height: 2.5rem;
+  box-sizing: border-box;
 }
 .badgeActive {
   font-size: 0.7rem;
@@ -202,10 +216,19 @@
   background: #e5e5e5;
   color: #666;
 }
-.table .toggleBtn {
+.statusLink {
   padding: 0.2rem 0.45rem;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
+  border: none;
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+  font-weight: 500;
+  text-decoration: underline;
   border-radius: 4px;
+}
+.statusLink:hover {
+  color: var(--accent-hover);
 }
 
 .table th:last-child,
@@ -349,6 +372,35 @@
   color: var(--success, #0a7c42);
   font-weight: 600;
   margin-left: 0.25rem;
+}
+
+/* Status change modal */
+.modalHelp {
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+.modalActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+.modalCloseBtn {
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 500;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.modalCloseBtn:hover {
+  background: var(--bg-warm);
+  border-color: var(--border-light);
 }
 
 .cardLink {
