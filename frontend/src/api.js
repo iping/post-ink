@@ -167,6 +167,40 @@ export async function deleteProject(id) {
   if (!res.ok) throw new Error(await res.text());
 }
 
+// ----- Sessions (each project has minimum 1 session) -----
+export async function getSessions(params = {}) {
+  const q = new URLSearchParams(params);
+  const url = `${API}/sessions` + (q.toString() ? `?${q}` : '');
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function createSession(data) {
+  const res = await fetch(`${API}/sessions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function updateSession(id, data) {
+  const res = await fetch(`${API}/sessions/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function deleteSession(id) {
+  const res = await fetch(`${API}/sessions/${id}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error(await res.text());
+}
+
 // POST /api/uploads/preference — max 3 images, 2MB each. Returns { urls: string[] }.
 export async function uploadPreferenceImages(files) {
   const formData = new FormData();

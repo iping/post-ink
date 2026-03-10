@@ -109,21 +109,38 @@ model Booking {
   @@index([date])
 }
 
-// ----- Project (work/session per booking; one booking can have multiple projects/sessions) -----
+// ----- Project (work per booking; one booking can have multiple projects; each project has sessions) -----
 model Project {
-  id           String   @id @default(cuid())
+  id           String    @id @default(cuid())
   bookingId    String
-  booking      Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  name         String   // e.g. "Alpha"
-  pricingType  String   // "fixed" | "hourly"
-  fixedAmount  Float?   // agreed total when pricingType = fixed (admin-defined, customer agreed)
-  hourlyRate   Float?   // IDR per hour when pricingType = hourly (artist–customer agreement)
-  agreedHours  Float?   // optional: agreed hours when hourly (total = hourlyRate * agreedHours)
+  booking      Booking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  name         String    // e.g. "Alpha"
+  pricingType  String    // "fixed" | "hourly"
+  fixedAmount  Float?    // agreed total when pricingType = fixed (admin-defined, customer agreed)
+  hourlyRate   Float?    // IDR per hour when pricingType = hourly (artist–customer agreement)
+  agreedHours  Float?    // optional: agreed hours when hourly (total = hourlyRate * agreedHours)
+  notes        String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  sessions     Session[]
+
+  @@index([bookingId])
+}
+
+// ----- Session (each project has minimum 1 session; one session = one date/time block) -----
+model Session {
+  id           String   @id @default(cuid())
+  projectId    String
+  project      Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  date         String   // YYYY-MM-DD
+  startTime    String   // e.g. "09:00"
+  endTime      String   // e.g. "12:00"
+  actualHours  Float?   // optional: actual hours (for hourly billing)
   notes        String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  @@index([bookingId])
+  @@index([projectId])
 }
 
 // ----- Payment (Studio: manage payment process) -----

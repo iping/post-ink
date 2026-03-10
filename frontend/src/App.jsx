@@ -1,4 +1,4 @@
-import { Routes, Route, Link, NavLink, useNavigate, Navigate } from 'react-router-dom';
+import { Routes, Route, Link, NavLink, useNavigate, Navigate, Outlet } from 'react-router-dom';
 import './App.css';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { ManageLayout } from './components/ManageLayout';
@@ -56,18 +56,18 @@ function App() {
           {/* Login (public) */}
           <Route path="/login" element={<Login />} />
 
-          {/* Management / admin (protected) */}
-          <Route path="/manage" element={<ProtectedRoute><Studio /></ProtectedRoute>} />
-          <Route path="/manage/studio" element={<ProtectedRoute><Studio /></ProtectedRoute>} />
-          <Route path="/manage/bookings/new" element={<ProtectedRoute><BookingForm /></ProtectedRoute>} />
-          <Route path="/manage/bookings/:id" element={<ProtectedRoute><BookingDetail /></ProtectedRoute>} />
-          <Route path="/manage/bookings/:id/edit" element={<ProtectedRoute><BookingForm /></ProtectedRoute>} />
-          <Route path="/manage/artists" element={<ProtectedRoute><ManageLayout /></ProtectedRoute>}>
-            <Route index element={<Navigate to="/manage?tab=artists" replace />} />
-            <Route path="new" element={<ArtistForm />} />
-            <Route path=":id" element={<ArtistDetail />} />
-            <Route path=":id/edit" element={<ArtistForm />} />
-            <Route path=":id/availability" element={<ArtistAvailability />} />
+          {/* Management: single sidebar with pending bookings count */}
+          <Route element={<ProtectedRoute><ManageLayout /></ProtectedRoute>}>
+            <Route path="/manage" element={<Studio />} />
+            <Route path="/manage/studio" element={<Studio />} />
+            <Route path="/manage/bookings/new" element={<BookingForm />} />
+            <Route path="/manage/bookings/:id" element={<BookingDetail />} />
+            <Route path="/manage/bookings/:id/edit" element={<BookingForm />} />
+            <Route path="/manage/artists" element={<Navigate to="/manage?tab=artists" replace />} />
+            <Route path="/manage/artists/new" element={<ArtistForm />} />
+            <Route path="/manage/artists/:id" element={<ArtistDetail />} />
+            <Route path="/manage/artists/:id/edit" element={<ArtistForm />} />
+            <Route path="/manage/artists/:id/availability" element={<ArtistAvailability />} />
           </Route>
         </Routes>
       </main>

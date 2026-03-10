@@ -88,6 +88,7 @@ async function main() {
   // Clean in dependency order (children first, then parents)
   await prisma.review.deleteMany({});
   await prisma.payment.deleteMany({});
+  await prisma.session.deleteMany({});
   await prisma.project.deleteMany({});
   await prisma.booking.deleteMany({});
   await prisma.studioCommission.deleteMany({});
@@ -341,18 +342,18 @@ async function main() {
     throw new Error('Could not generate unique short code in seed');
   }
 
-  // ─── Active Bookings (pending / confirmed) spread across studios ───
+  // ─── Active Bookings (pending / confirmed) with placement and clear notes ───
   const activeBookings = [
-    { artistIdx: 0, customerIdx: 0, studioIdx: 0, days: 1, start: '10:00', end: '12:00', status: 'confirmed', amount: 5000000, notes: 'Half sleeve botanical — forearm piece with wildflowers' },
-    { artistIdx: 1, customerIdx: 1, studioIdx: 0, days: 1, start: '14:00', end: '17:00', status: 'pending', amount: 3500000, notes: 'Traditional eagle & roses chest piece' },
-    { artistIdx: 2, customerIdx: 8, studioIdx: 0, days: 2, start: '09:00', end: '12:30', status: 'confirmed', amount: 4800000, notes: 'Japanese dragon back piece — session 1 of 3' },
-    { artistIdx: 3, customerIdx: 9, studioIdx: 2, days: 3, start: '10:00', end: '13:00', status: 'pending', amount: 3200000, notes: 'Geometric forearm band with fibonacci spiral' },
-    { artistIdx: 4, customerIdx: 10, studioIdx: 1, days: 2, start: '11:00', end: '14:00', status: 'confirmed', amount: 2800000, notes: 'Watercolor phoenix on shoulder blade' },
-    { artistIdx: 5, customerIdx: 11, studioIdx: 0, days: 4, start: '09:00', end: '14:00', status: 'confirmed', amount: 9500000, notes: 'Full sleeve Polynesian tribal — session 2' },
-    { artistIdx: 6, customerIdx: 12, studioIdx: 2, days: 3, start: '09:00', end: '13:00', status: 'pending', amount: 5500000, notes: 'Photorealistic portrait of daughter' },
-    { artistIdx: 7, customerIdx: 13, studioIdx: 1, days: 5, start: '10:00', end: '14:00', status: 'confirmed', amount: 4200000, notes: 'Neo-traditional fox with floral wreath' },
-    { artistIdx: 8, customerIdx: 14, studioIdx: 0, days: 4, start: '10:00', end: '13:00', status: 'pending', amount: 3000000, notes: 'Script lettering "Strength" with ornamental frame' },
-    { artistIdx: 9, customerIdx: 2, studioIdx: 2, days: 6, start: '11:00', end: '15:00', status: 'confirmed', amount: 3800000, notes: 'Trash Polka abstract compass with red splatter' },
+    { artistIdx: 0, customerIdx: 0, studioIdx: 0, days: 1, start: '10:00', end: '12:00', status: 'confirmed', amount: 5000000, placement: 'Forearm', notes: 'Half sleeve botanical — wildflowers. Customer sent reference images.' },
+    { artistIdx: 1, customerIdx: 1, studioIdx: 0, days: 1, start: '14:00', end: '17:00', status: 'pending', amount: 3500000, placement: 'Chest', notes: 'Traditional eagle & roses. Agreed on design in consultation.' },
+    { artistIdx: 2, customerIdx: 8, studioIdx: 0, days: 2, start: '09:00', end: '12:30', status: 'confirmed', amount: 4800000, placement: 'Back', notes: 'Japanese dragon back piece — first of 3 sessions. Outline today.' },
+    { artistIdx: 3, customerIdx: 9, studioIdx: 2, days: 3, start: '10:00', end: '13:00', status: 'pending', amount: 3200000, placement: 'Forearm', notes: 'Geometric band with fibonacci spiral. Single session.' },
+    { artistIdx: 4, customerIdx: 10, studioIdx: 1, days: 2, start: '11:00', end: '14:00', status: 'confirmed', amount: 2800000, placement: 'Shoulder', notes: 'Watercolor phoenix. Deposit received via BCA.' },
+    { artistIdx: 5, customerIdx: 11, studioIdx: 0, days: 4, start: '09:00', end: '14:00', status: 'confirmed', amount: 9500000, placement: 'Arm', notes: 'Full sleeve Polynesian tribal — session 2 of 4. Shading block.' },
+    { artistIdx: 6, customerIdx: 12, studioIdx: 2, days: 3, start: '09:00', end: '13:00', status: 'pending', amount: 5500000, placement: 'Upper arm', notes: 'Photorealistic portrait. Customer will send high-res photo.' },
+    { artistIdx: 7, customerIdx: 13, studioIdx: 1, days: 5, start: '10:00', end: '14:00', status: 'confirmed', amount: 4200000, placement: 'Thigh', notes: 'Neo-traditional fox with floral wreath. Design approved.' },
+    { artistIdx: 8, customerIdx: 14, studioIdx: 0, days: 4, start: '10:00', end: '13:00', status: 'pending', amount: 3000000, placement: 'Forearm', notes: 'Script "Strength" with ornamental frame. Font chosen.' },
+    { artistIdx: 9, customerIdx: 2, studioIdx: 2, days: 6, start: '11:00', end: '15:00', status: 'confirmed', amount: 3800000, placement: 'Calf', notes: 'Trash Polka compass with red splatter. Second session for color.' },
   ];
 
   const createdActiveBookings = [];
@@ -369,6 +370,7 @@ async function main() {
         status: ab.status,
         pricingType: 'fixed',
         totalAmount: ab.amount,
+        placement: ab.placement || null,
         notes: ab.notes,
       },
     });
@@ -389,46 +391,84 @@ async function main() {
     }
   }
 
-  // ─── Projects (depend on booking + artist rate for hourly) ───
-  // Fixed-rate project for first active booking
+  // ─── Projects + Sessions (each project has min 1 session); names from booking context ───
+  // First active booking: one fixed project + first session
   if (createdActiveBookings.length > 0) {
-    await prisma.project.create({
+    const b0 = createdActiveBookings[0];
+    const artist0 = createdArtists[activeBookings[0].artistIdx];
+    const customer0 = customers[activeBookings[0].customerIdx];
+    const month0 = b0.date ? new Date(b0.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '';
+    const projectName0 = [artist0.name.split(/\s+/).map((n) => n[0]).join(''), customer0.name, month0].filter(Boolean).join(' – ');
+    const p1 = await prisma.project.create({
       data: {
-        bookingId: createdActiveBookings[0].id,
-        name: 'Alpha',
+        bookingId: b0.id,
+        name: projectName0,
         pricingType: 'fixed',
-        fixedAmount: createdActiveBookings[0].totalAmount ?? 5000000,
-        notes: 'Half sleeve botanical — agreed total',
+        fixedAmount: b0.totalAmount ?? 5000000,
+        notes: 'Half sleeve botanical — agreed total. First session: outline and base shading.',
+      },
+    });
+    await prisma.session.create({
+      data: {
+        projectId: p1.id,
+        date: b0.date,
+        startTime: b0.startTime || '09:00',
+        endTime: b0.endTime || '17:00',
+        actualHours: 2,
+        notes: 'Outline and wildflower details. Client comfortable, no touch-ups needed.',
       },
     });
   }
-  // Hourly project: second active booking gets 2 sessions (accumulative hours)
+  // Second active booking: hourly, 2 projects each with 1 session
   if (createdActiveBookings.length > 1) {
     const hourlyBooking = createdActiveBookings[1];
     const artistForHourly = createdArtists[activeBookings[1].artistIdx];
+    const customerH = customers[activeBookings[1].customerIdx];
     const rate = artistForHourly.rate ?? 500000;
+    const monthH = hourlyBooking.date ? new Date(hourlyBooking.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '';
+    const baseName = [artistForHourly.name.split(/\s+/).map((n) => n[0]).join(''), customerH.name, monthH].filter(Boolean).join(' – ');
     await prisma.booking.update({
       where: { id: hourlyBooking.id },
       data: { pricingType: 'hourly', totalAmount: null },
     });
-    await prisma.project.create({
+    const p2 = await prisma.project.create({
       data: {
         bookingId: hourlyBooking.id,
-        name: 'Session 1',
+        name: baseName + ' (Session 1)',
         pricingType: 'hourly',
         hourlyRate: rate,
         agreedHours: 2,
-        notes: 'Traditional eagle — first session',
+        notes: 'Traditional eagle — outline and black fill. Session 1 of 2.',
       },
     });
-    await prisma.project.create({
+    await prisma.session.create({
+      data: {
+        projectId: p2.id,
+        date: hourlyBooking.date,
+        startTime: hourlyBooking.startTime || '09:00',
+        endTime: hourlyBooking.endTime || '17:00',
+        actualHours: 2,
+        notes: 'Eagle outline completed. Next session: roses and color.',
+      },
+    });
+    const p3 = await prisma.project.create({
       data: {
         bookingId: hourlyBooking.id,
-        name: 'Session 2',
+        name: baseName + ' (Session 2)',
         pricingType: 'hourly',
         hourlyRate: rate,
         agreedHours: 1.5,
-        notes: 'Roses and shading',
+        notes: 'Roses and shading. Final session for this piece.',
+      },
+    });
+    await prisma.session.create({
+      data: {
+        projectId: p3.id,
+        date: hourlyBooking.date,
+        startTime: '14:00',
+        endTime: '17:00',
+        actualHours: 1.5,
+        notes: 'Roses and background shading. Client very happy.',
       },
     });
   }

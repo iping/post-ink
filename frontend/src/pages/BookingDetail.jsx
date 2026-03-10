@@ -9,6 +9,9 @@ import {
   createProject,
   updateProject,
   deleteProject,
+  createSession,
+  updateSession,
+  deleteSession,
   uploadUrl,
 } from '../api';
 import { formatRupiah, formatWithConversion, formatNumberWithDots, parseNumberInput } from '../currency';
@@ -78,6 +81,12 @@ export function BookingDetail() {
   const [editingProject, setEditingProject] = useState(null); // project id when editing, null when adding
   const [projectSubmitting, setProjectSubmitting] = useState(false);
 
+  const [sessionForm, setSessionForm] = useState({ date: '', startTime: '09:00', endTime: '17:00', actualHours: '', notes: '' });
+  const [addingSessionProjectId, setAddingSessionProjectId] = useState(null); // project id when adding session
+  const [editingSessionId, setEditingSessionId] = useState(null);
+  const [sessionSubmitting, setSessionSubmitting] = useState(false);
+  const [viewSessionId, setViewSessionId] = useState(null);
+
   const load = async () => {
     if (!id) return;
     try {
@@ -130,6 +139,7 @@ export function BookingDetail() {
       if (isEditing) {
         await updateProject(editingProject, payload);
       } else {
+        payload.firstSession = { date: booking.date, startTime: booking.startTime || '09:00', endTime: booking.endTime || '17:00' };
         await createProject(payload);
       }
       const updated = await getBooking(booking.id);
@@ -159,7 +169,96 @@ export function BookingDetail() {
     }
   };
 
-    const proceedToFirstSession = async () => {
+  const startNewSession = (projectId) => {
+    if (!booking) return;
+    setAddingSessionProjectId(projectId);
+    setEditingSessionId(null);
+    setViewSessionId(null);
+    setSessionForm({
+      date: booking.date || '',
+      startTime: booking.startTime || '09:00',
+      endTime: booking.endTime || '17:00',
+      actualHours: '',
+      notes: '',
+    });
+  };
+
+  const startEditSession = (session) => {
+    setEditingSessionId(session.id);
+    setAddingSessionProjectId(session.projectId);
+    setViewSessionId(null);
+    setSessionForm({
+      date: session.date || '',
+      startTime: session.startTime || '09:00',
+      endTime: session.endTime || '17:00',
+      actualHours: session.actualHours != null ? String(session.actualHours) : '',
+      notes: session.notes || '',
+    });
+  };
+
+  const cancelSessionEdit = () => {
+    setAddingSessionProjectId(null);
+    setEditingSessionId(null);
+    setSessionForm({ date: '', startTime: '09:00', endTime: '17:00', actualHours: '', notes: '' });
+  };
+
+  const saveSession = async (e) => {
+    e.preventDefault();
+    if (!booking) return;
+    setError(null);
+    setSessionSubmitting(true);
+    try {
+      if (editingSessionId) {
+        await updateSession(editingSessionId, {
+          date: sessionForm.date,
+          startTime: sessionForm.startTime || '09:00',
+          endTime: sessionForm.endTime || '17:00',
+          actualHours: sessionForm.actualHours ? Number(sessionForm.actualHours) : null,
+          notes: sessionForm.notes.trim() || null,
+        });
+      } else if (addingSessionProjectId) {
+        await createSession({
+          projectId: addingSessionProjectId,
+          date: sessionForm.date,
+          startTime: sessionForm.startTime || '09:00',
+          endTime: sessionForm.endTime || '17:00',
+          actualHours: sessionForm.actualHours ? Number(sessionForm.actualHours) : null,
+          notes: sessionForm.notes.trim() || null,
+        });
+      }
+      setEditingSessionId(null);
+      setAddingSessionProjectId(null);
+      setSessionForm({ date: '', startTime: '09:00', endTime: '17:00', actualHours: '', notes: '' });
+      const updated = await getBooking(booking.id);
+      setBooking(updated);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSessionSubmitting(false);
+    }
+  };
+
+  const removeSession = async (sessionId, projectSessionsCount) => {
+    if (projectSessionsCount <= 1) {
+      setError('Project must have at least one session. Add another session before removing this one.');
+      return;
+    }
+    if (!window.confirm('Remove this session?')) return;
+    setError(null);
+    try {
+      await deleteSession(sessionId);
+      const updated = await getBooking(booking.id);
+      setBooking(updated);
+      if (editingSessionId === sessionId) {
+        setEditingSessionId(null);
+        setSessionForm({ date: '', startTime: '09:00', endTime: '17:00', actualHours: '', notes: '' });
+      }
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const proceedToFirstSession = async () => {
     if (!booking || !['pending', 'confirmed'].includes(booking.status)) return;
     setError(null);
     try {
@@ -250,6 +349,10 @@ export function BookingDetail() {
   const preference = parsePreference(booking.preference);
   const artistPhotos = (() => { try { const a = JSON.parse(booking.artist?.photos || '[]'); return Array.isArray(a) ? a : []; } catch { return []; } })();
 
+  const projectsList = (booking.projects || []).slice().sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+  const hasProjects = projectsList.length > 0;
+  const currentStep = !hasProjects ? 2 : 3;
+
   return (
     <div className={formStyles.wrap}>
       <header className={formStyles.header}>
@@ -263,12 +366,26 @@ export function BookingDetail() {
 
       {error && <div className={formStyles.error} role="alert">{error}</div>}
 
+      <nav className={styles.processSteps} aria-label="Booking process">
+        <span className={styles.stepItem + ' ' + styles.stepItemDone}>
+          <span className={styles.stepNum}>1</span> Booking
+        </span>
+        <span className={styles.stepConnector} aria-hidden />
+        <span className={styles.stepItem + ' ' + (currentStep === 2 ? styles.stepItemCurrent : hasProjects ? styles.stepItemDone : '')}>
+          <span className={styles.stepNum}>2</span> Project
+        </span>
+        <span className={styles.stepConnector} aria-hidden />
+        <span className={styles.stepItem + ' ' + (currentStep === 3 ? styles.stepItemCurrent : '')}>
+          <span className={styles.stepNum}>3</span> First session
+        </span>
+      </nav>
+
       <div className={formStyles.form}>
         <div className={formStyles.onePage}>
 
           <section className={formStyles.block}>
-            <h2 className={formStyles.blockTitle}>Booking info</h2>
-            <p className={formStyles.blockDesc}>ID, date & time, artist, customer, and amounts.</p>
+            <h2 className={formStyles.blockTitle}>1. Booking info</h2>
+            <p className={formStyles.blockDesc}>Date, time, artist, customer. Continue below to add a project and first session.</p>
             <div className={styles.bookingSummary}>
               <p className={styles.bookingIdRow}>
             <strong>Booking ID:</strong>{' '}
@@ -298,10 +415,204 @@ export function BookingDetail() {
             </div>
             <div className={formStyles.actions}>
               {(booking.status === 'pending' || booking.status === 'confirmed') && (
-                <button type="button" onClick={proceedToFirstSession} className={formStyles.primaryBtn}>Proceed</button>
+                <button type="button" onClick={proceedToFirstSession} className={formStyles.primaryBtn}>Mark in progress</button>
               )}
-              <Link to={`/manage/bookings/${id}/edit`} className={formStyles.primaryBtn}>Edit booking</Link>
+              <Link to={'/manage/bookings/' + id + '/edit'} className={formStyles.secondaryBtn}>Edit booking</Link>
             </div>
+          </section>
+
+          <section className={formStyles.block}>
+            <h2 className={formStyles.blockTitle}>2. Project</h2>
+            <p className={formStyles.blockDesc}>
+              {hasProjects ? 'Project and sessions from this booking (read-only).' : 'Add a project for this booking. Each project will have at least one session (date & time).'}
+            </p>
+            {!hasProjects && (
+              <div className={styles.nextStepCard}>
+                <h2>Continue: Add first project</h2>
+                <p>Define the project (name, fixed or hourly pricing). A first session will be created from the booking date & time.</p>
+                <form onSubmit={saveProject} className={styles.downPaymentForm}>
+                  <label>Project name <span className={styles.fromBookingHint}>(from booking, not editable)</span>
+                    <input readOnly aria-readonly value={getDefaultProjectNameForNew(booking)} className={styles.readOnlyInput} />
+                  </label>
+                  <label>Pricing <select value={projectForm.pricingType} onChange={(e) => setProjectForm((f) => ({ ...f, pricingType: e.target.value }))}><option value="fixed">Fixed rate</option><option value="hourly">Hourly rate</option></select></label>
+                  {projectForm.pricingType === 'fixed' && <label>Fixed amount (IDR) <input type="number" min="0" step="1000" placeholder="e.g. 5000000" value={projectForm.fixedAmount} onChange={(e) => setProjectForm((f) => ({ ...f, fixedAmount: e.target.value }))} /></label>}
+                  {projectForm.pricingType === 'hourly' && (
+                    <>
+                      <label>Hourly rate (IDR) <input type="number" min="0" step="1000" placeholder="From artist" value={booking?.artist?.rate ?? ''} readOnly aria-readonly /></label>
+                      <label>Agreed hours (optional) <input type="number" min="0" step="0.5" placeholder="e.g. 4" value={projectForm.agreedHours} onChange={(e) => setProjectForm((f) => ({ ...f, agreedHours: e.target.value }))} /></label>
+                    </>
+                  )}
+                  <label>Notes <input value={projectForm.notes} onChange={(e) => setProjectForm((f) => ({ ...f, notes: e.target.value }))} placeholder="Optional" /></label>
+                  <div className={styles.formActions}><button type="submit" disabled={projectSubmitting} className={formStyles.primaryBtn}>{projectSubmitting ? 'Adding…' : 'Add project & first session'}</button></div>
+                </form>
+              </div>
+            )}
+            {hasProjects && (
+              <>
+                {projectsList.map((proj) => {
+                  const sessions = (proj.sessions || []).slice().sort((a, b) => a.date.localeCompare(b.date) || (a.startTime || '').localeCompare(b.startTime || ''));
+                  const isEditingOrAdding = addingSessionProjectId === proj.id || sessions.some((s) => s.id === editingSessionId && s.projectId === proj.id);
+                  const viewedSession = sessions.find((s) => s.id === viewSessionId);
+                  return (
+                    <div key={proj.id} className={styles.projectCard}>
+                      <div className={styles.projectHeader}>
+                        <div>
+                          <p className={styles.projectTitle}>
+                            <strong>{proj.name}</strong>
+                          </p>
+                          <p className={styles.projectMeta}>
+                            {proj.pricingType === 'fixed'
+                              ? `Fixed – ${formatRupiah(proj.fixedAmount)}`
+                              : `Hourly – ${formatRupiah(proj.hourlyRate)}/hr${proj.agreedHours ? ` × ${proj.agreedHours}h` : ''}`}
+                          </p>
+                          {proj.notes && <p className={styles.projectNotes}>{proj.notes}</p>}
+                        </div>
+                        <button
+                          type="button"
+                          className={styles.sessionAddBtn}
+                          onClick={() => startNewSession(proj.id)}
+                        >
+                          + New session
+                        </button>
+                      </div>
+
+                      <h3 className={formStyles.blockTitle} style={{ fontSize: '0.95rem', marginTop: '0.75rem', marginBottom: '0.5rem' }}>Sessions</h3>
+                      <div className={styles.sessionTableWrap}>
+                        <table className={styles.sessionTable}>
+                          <thead>
+                            <tr>
+                              <th>Date</th>
+                              <th>Time</th>
+                              <th>Hours</th>
+                              <th>Notes</th>
+                              <th></th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {sessions.map((sess, idx) => (
+                              <tr key={sess.id} className={editingSessionId === sess.id ? styles.sessionRowEditing : ''}>
+                                <td>
+                                  {idx === 0 && <span className={styles.firstSessionBadge}>First</span>}{' '}
+                                  <span>{sess.date}</span>
+                                </td>
+                                <td>{sess.startTime} – {sess.endTime}</td>
+                                <td>{sess.actualHours != null ? `${sess.actualHours}h` : '—'}</td>
+                                <td className={styles.sessionNotesCell}>
+                                  {sess.notes || '—'}
+                                </td>
+                                <td className={styles.sessionActions}>
+                                  <button
+                                    type="button"
+                                    className={styles.sessionSmBtn}
+                                    onClick={() => setViewSessionId(sess.id)}
+                                  >
+                                    View
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className={styles.sessionSmBtn}
+                                    onClick={() => startEditSession(sess)}
+                                  >
+                                    Edit
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className={styles.sessionSmBtnDanger}
+                                    disabled={sessions.length <= 1}
+                                    onClick={() => removeSession(sess.id, sessions.length)}
+                                  >
+                                    Delete
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+
+                      {viewedSession && (
+                        <div className={styles.sessionDetail}>
+                          <h4>Session details</h4>
+                          <p><strong>Date:</strong> {viewedSession.date}</p>
+                          <p><strong>Time:</strong> {viewedSession.startTime} – {viewedSession.endTime}</p>
+                          <p><strong>Hours:</strong> {viewedSession.actualHours != null ? `${viewedSession.actualHours}h` : '—'}</p>
+                          {viewedSession.notes && <p><strong>Notes:</strong> {viewedSession.notes}</p>}
+                        </div>
+                      )}
+
+                      {isEditingOrAdding && (
+                        <form onSubmit={saveSession} className={styles.sessionForm}>
+                          <h4 className={styles.sessionFormTitle}>
+                            {editingSessionId ? 'Edit session' : 'New session'}
+                          </h4>
+                          <div className={styles.sessionFormGrid}>
+                            <label className={formStyles.label}>
+                              <span className={formStyles.labelText}>Date</span>
+                              <input
+                                className={formStyles.input}
+                                type="date"
+                                value={sessionForm.date}
+                                onChange={(e) => setSessionForm((f) => ({ ...f, date: e.target.value }))}
+                                required
+                              />
+                            </label>
+                            <label className={formStyles.label}>
+                              <span className={formStyles.labelText}>Start time</span>
+                              <input
+                                className={formStyles.input}
+                                type="time"
+                                value={sessionForm.startTime}
+                                onChange={(e) => setSessionForm((f) => ({ ...f, startTime: e.target.value }))}
+                                required
+                              />
+                            </label>
+                            <label className={formStyles.label}>
+                              <span className={formStyles.labelText}>End time</span>
+                              <input
+                                className={formStyles.input}
+                                type="time"
+                                value={sessionForm.endTime}
+                                onChange={(e) => setSessionForm((f) => ({ ...f, endTime: e.target.value }))}
+                                required
+                              />
+                            </label>
+                            <label className={formStyles.label}>
+                              <span className={formStyles.labelText}>Actual hours (optional)</span>
+                              <input
+                                className={formStyles.input}
+                                type="number"
+                                min="0"
+                                step="0.5"
+                                value={sessionForm.actualHours}
+                                onChange={(e) => setSessionForm((f) => ({ ...f, actualHours: e.target.value }))}
+                              />
+                            </label>
+                            <label className={formStyles.label} style={{ gridColumn: '1 / -1' }}>
+                              <span className={formStyles.labelText}>Notes</span>
+                              <textarea
+                                className={formStyles.input}
+                                rows={2}
+                                value={sessionForm.notes}
+                                onChange={(e) => setSessionForm((f) => ({ ...f, notes: e.target.value }))}
+                                placeholder="Optional notes about this session"
+                              />
+                            </label>
+                          </div>
+                          <div className={styles.sessionFormActions}>
+                            <button type="submit" disabled={sessionSubmitting}>
+                              {sessionSubmitting ? 'Saving…' : 'Save session'}
+                            </button>
+                            <button type="button" onClick={cancelSessionEdit}>
+                              Cancel
+                            </button>
+                          </div>
+                        </form>
+                      )}
+                    </div>
+                  );
+                })}
+              </>
+            )}
           </section>
 
           <section className={formStyles.block}>
@@ -344,7 +655,7 @@ export function BookingDetail() {
                 <p className={styles.preferenceThumbsHint}>Click a thumbnail to view full size</p>
                 <div className={styles.preferenceThumbs}>
                   {preference.images.map((url, i) => (
-                    <button key={url} type="button" onClick={() => setLightboxUrl(url)} className={styles.thumbBtn} aria-label={`View reference ${i + 1}`}>
+                    <button key={url} type="button" onClick={() => setLightboxUrl(url)} className={styles.thumbBtn} aria-label={'View reference ' + (i + 1)}>
                       <img src={url} alt="" className={styles.thumbImg} /><span className={styles.thumbLabel}>Ref {i + 1}</span>
                     </button>
                   ))}
@@ -361,63 +672,11 @@ export function BookingDetail() {
           </section>
 
           <section className={formStyles.block}>
-            <h2 className={formStyles.blockTitle}>Projects / sessions</h2>
-            <p className={formStyles.blockDesc}>One booking can have multiple projects or sessions (e.g. hourly rate: add a project per session). Fixed = admin-defined total; Hourly = artist rate × hours per session.</p>
-            {((booking.projects || []).slice().sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))).map((proj) => (
-              <div key={proj.id} className={styles.bookingSummary} style={{ marginBottom: '1rem' }}>
-                {editingProject === proj.id ? (
-                  <form onSubmit={saveProject} className={styles.downPaymentForm}>
-                    <label>Project name * <input value={projectForm.name} onChange={(e) => setProjectForm((f) => ({ ...f, name: e.target.value }))} placeholder="e.g. Session 1" required /></label>
-                    <label>Pricing <select value={projectForm.pricingType} onChange={(e) => setProjectForm((f) => ({ ...f, pricingType: e.target.value }))}><option value="fixed">Fixed rate</option><option value="hourly">Hourly rate</option></select></label>
-                    {projectForm.pricingType === 'fixed' && <label>Fixed amount (IDR) <input type="number" min="0" step="1000" placeholder="e.g. 5000000" value={projectForm.fixedAmount} onChange={(e) => setProjectForm((f) => ({ ...f, fixedAmount: e.target.value }))} /></label>}
-                    {projectForm.pricingType === 'hourly' && (
-                      <>
-                        <label>Hourly rate (IDR) <input type="number" min="0" step="1000" placeholder="From artist profile" value={booking?.artist?.rate ?? ''} readOnly aria-readonly /></label>
-                        <label>Agreed hours (optional) <input type="number" min="0" step="0.5" placeholder="e.g. 4" value={projectForm.agreedHours} onChange={(e) => setProjectForm((f) => ({ ...f, agreedHours: e.target.value }))} /></label>
-                      </>
-                    )}
-                    <label>Notes <input value={projectForm.notes} onChange={(e) => setProjectForm((f) => ({ ...f, notes: e.target.value }))} placeholder="Optional" /></label>
-                    <div className={styles.formActions}><button type="submit" disabled={projectSubmitting}>Save</button><button type="button" onClick={() => { setEditingProject(null); setProjectForm({ name: '', pricingType: 'fixed', fixedAmount: '', hourlyRate: '', agreedHours: '', notes: '' }); }}>Cancel</button></div>
-                  </form>
-                ) : (
-                  <>
-                    <p><strong>Name:</strong> {proj.name}</p>
-                    <p><strong>Pricing:</strong> {proj.pricingType === 'fixed'
-                      ? `Fixed — ${formatRupiah(proj.fixedAmount)}`
-                      : `Hourly — ${formatRupiah(proj.hourlyRate)}/hr${proj.agreedHours ? ` × ${proj.agreedHours} hrs` : ''}`}</p>
-                    {proj.notes && <p><strong>Notes:</strong> {proj.notes}</p>}
-                    <div className={styles.formActions}>
-                      <button type="button" className={styles.smBtn} onClick={() => { setEditingProject(proj.id); setProjectForm({ name: proj.name, pricingType: proj.pricingType, fixedAmount: proj.fixedAmount ?? '', hourlyRate: proj.hourlyRate ?? '', agreedHours: proj.agreedHours ?? '', notes: proj.notes ?? '' }); }}>Edit</button>
-                      <button type="button" className={styles.smBtnDanger} onClick={() => removeProject(proj.id)}>Remove</button>
-                    </div>
-                  </>
-                )}
-              </div>
-            ))}
-            {editingProject === null && (
-              <form onSubmit={saveProject} className={styles.downPaymentForm}>
-                <h3 className={formStyles.blockTitle} style={{ fontSize: '1rem', marginTop: (booking.projects || []).length > 0 ? '1rem' : 0 }}>Add project / session</h3>
-                <label>Project name * <input value={projectForm.name || getDefaultProjectNameForNew(booking)} onChange={(e) => setProjectForm((f) => ({ ...f, name: e.target.value }))} placeholder="Auto: Artist – Customer – Month (Session N)" required /></label>
-                <label>Pricing <select value={projectForm.pricingType} onChange={(e) => setProjectForm((f) => ({ ...f, pricingType: e.target.value }))}><option value="fixed">Fixed rate (admin-defined, customer agreed)</option><option value="hourly">Hourly rate (artist–customer agreement)</option></select></label>
-                {projectForm.pricingType === 'fixed' && <label>Fixed amount (IDR) <input type="number" min="0" step="1000" placeholder="e.g. 5000000" value={projectForm.fixedAmount} onChange={(e) => setProjectForm((f) => ({ ...f, fixedAmount: e.target.value }))} /></label>}
-                {projectForm.pricingType === 'hourly' && (
-                  <>
-                    <label>Hourly rate (IDR) <input type="number" min="0" step="1000" placeholder="From artist profile" value={booking?.artist?.rate ?? ''} readOnly aria-readonly /></label>
-                    <label>Agreed hours (optional) <input type="number" min="0" step="0.5" placeholder="e.g. 4" value={projectForm.agreedHours} onChange={(e) => setProjectForm((f) => ({ ...f, agreedHours: e.target.value }))} /></label>
-                  </>
-                )}
-                <label>Notes <input value={projectForm.notes} onChange={(e) => setProjectForm((f) => ({ ...f, notes: e.target.value }))} placeholder="Optional" /></label>
-                <div className={styles.formActions}><button type="submit" disabled={projectSubmitting}>Add project</button></div>
-              </form>
-            )}
-          </section>
-
-          <section className={formStyles.block}>
             <h2 className={formStyles.blockTitle}>Payments</h2>
             <p className={formStyles.blockDesc}>Down payments and transfers for this booking.</p>
             <ul className={styles.paymentList}>
               {(booking.payments || []).map((p) => (
-                <li key={p.id}>{formatRupiah(p.amount)} – {p.method || '—'} {p.transferDestination ? `(${p.transferDestination})` : ''} – {p.type || 'payment'} – {p.status}</li>
+                <li key={p.id}>{formatRupiah(p.amount)} – {p.method || '—'} {p.transferDestination ? '(' + p.transferDestination + ')' : ''} – {p.type || 'payment'} – {p.status}</li>
               ))}
               {(booking.payments || []).length === 0 && <li>No payments yet.</li>}
             </ul>
@@ -439,7 +698,7 @@ export function BookingDetail() {
                 <label className={formStyles.label}><span className={formStyles.labelText}>Rating</span>
                   <div className={styles.starRow}>
                     {[1, 2, 3, 4, 5].map((s) => (
-                      <button key={s} type="button" className={`${styles.starBtn} ${s <= reviewForm.rating ? styles.starActive : ''}`} onClick={() => setReviewForm((f) => ({ ...f, rating: s }))}>★</button>
+                      <button key={s} type="button" className={styles.starBtn + (s <= reviewForm.rating ? ' ' + styles.starActive : '')} onClick={() => setReviewForm((f) => ({ ...f, rating: s }))}>★</button>
                     ))}
                     <span className={styles.ratingText}>{reviewForm.rating}/5</span>
                   </div>

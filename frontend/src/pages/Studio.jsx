@@ -27,6 +27,7 @@ import {
   createUser,
   updateUser,
   deleteUser,
+  getSessions,
 } from '../api';
 import { formatRupiah, formatWithConversion, formatNumberWithDots, parseNumberInput } from '../currency';
 import styles from './Studio.module.css';
@@ -116,7 +117,7 @@ export function Studio() {
 
   useEffect(() => {
     const t = searchParams.get('tab') || 'bookings';
-    if (['bookings', 'artists', 'projects', 'payments', 'commissions', 'customers', 'specialities', 'payment-destinations', 'users'].includes(t)) setTab(t);
+    if (['bookings', 'artists', 'projects', 'sessions', 'payments', 'commissions', 'customers', 'specialities', 'payment-destinations', 'users'].includes(t)) setTab(t);
   }, [searchParams]);
 
   const switchTab = (t) => {
@@ -130,6 +131,7 @@ export function Studio() {
   const [studios, setStudios] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [projects, setProjects] = useState([]);
+  const [sessions, setSessions] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -177,9 +179,9 @@ export function Studio() {
   const [bookingPage, setBookingPage] = useState(1);
   const [paymentPage, setPaymentPage] = useState(1);
   const [commissionPage, setCommissionPage] = useState(1);
+  const [sessionPage, setSessionPage] = useState(1);
   const [customerPage, setCustomerPage] = useState(1);
   const [customerHistoryModal, setCustomerHistoryModal] = useState(null);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const [bookingFilters, setBookingFilters] = useState({
     status: '',
@@ -194,6 +196,9 @@ export function Studio() {
   const bookingTotalPages = Math.max(1, Math.ceil(bookings.length / ROWS_PER_PAGE));
   const paymentTotalPages = Math.max(1, Math.ceil(payments.length / ROWS_PER_PAGE));
   const commissionTotalPages = Math.max(1, Math.ceil(commissions.length / ROWS_PER_PAGE));
+  const sessionsList = Array.isArray(sessions) ? sessions : [];
+  const sessionTotalPages = Math.max(1, Math.ceil(sessionsList.length / ROWS_PER_PAGE));
+  const paginatedSessions = sessionsList.slice((sessionPage - 1) * ROWS_PER_PAGE, sessionPage * ROWS_PER_PAGE);
   const customerTotalPages = Math.max(1, Math.ceil(customers.length / ROWS_PER_PAGE));
   const specialitiesList = Array.isArray(specialities) ? specialities : [];
   const specTotalPages = Math.max(1, Math.ceil(specialitiesList.length / ROWS_PER_PAGE));
@@ -202,10 +207,6 @@ export function Studio() {
   const destTotalPages = Math.max(1, Math.ceil(destList.length / ROWS_PER_PAGE));
 
   const paginatedBookings = bookings.slice((bookingPage - 1) * ROWS_PER_PAGE, bookingPage * ROWS_PER_PAGE);
-  const pendingBookingsCount = useMemo(
-    () => bookings.filter((b) => b.status === 'pending').length,
-    [bookings],
-  );
   const paginatedPayments = payments.slice((paymentPage - 1) * ROWS_PER_PAGE, paymentPage * ROWS_PER_PAGE);
   const paginatedCommissions = commissions.slice((commissionPage - 1) * ROWS_PER_PAGE, commissionPage * ROWS_PER_PAGE);
   const paginatedCustomers = customers.slice((customerPage - 1) * ROWS_PER_PAGE, customerPage * ROWS_PER_PAGE);
@@ -272,6 +273,7 @@ export function Studio() {
       getBookings(bookingParams),
       getPayments(),
       getProjects(),
+      getSessions(),
       getCommissions(),
       getArtists(),
       getCustomers(),
@@ -280,10 +282,11 @@ export function Studio() {
       getPaymentDestinations(),
       getUsers(),
     ])
-      .then(([b, p, pr, co, a, c, s, sp, pd, u]) => {
+      .then(([b, p, pr, sess, co, a, c, s, sp, pd, u]) => {
         setBookings(b);
         setPayments(p);
         setProjects(Array.isArray(pr) ? pr : []);
+        setSessions(Array.isArray(sess) ? sess : []);
         setCommissions(co);
         setArtists(a);
         setCustomers(c);
@@ -327,16 +330,6 @@ export function Studio() {
     if (!window.confirm('Delete this booking?')) return;
     try {
       await deleteBooking(id);
-      load();
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
-  const proceedBooking = async (b) => {
-    if (!['pending', 'confirmed'].includes(b.status)) return;
-    try {
-      await updateBooking(b.id, { status: 'in_progress' });
       load();
     } catch (err) {
       setError(err.message);
@@ -560,48 +553,11 @@ export function Studio() {
   if (loading) return <div className={styles.loading}>Loading studio…</div>;
 
   return (
-    <div className={styles.wrap}>
-      <aside className={`${styles.sidebar} ${sidebarCollapsed ? styles.sidebarCollapsed : ''}`} aria-label="Studio menu">
-        <div className={styles.sidebarHeader}>
-          <button
-            type="button"
-            className={styles.burgerBtn}
-            onClick={() => setSidebarCollapsed((v) => !v)}
-            aria-expanded={!sidebarCollapsed}
-            aria-label={sidebarCollapsed ? 'Open menu' : 'Minimize menu'}
-          >
-            <span className={styles.burgerLine} />
-            <span className={styles.burgerLine} />
-            <span className={styles.burgerLine} />
-          </button>
-          {!sidebarCollapsed && (
-            <>
-              <h1 className={styles.sidebarTitle}>Studio Management</h1>
-              <p className={styles.sidebarSubtitle}>Manage your studio</p>
-            </>
-          )}
-        </div>
-        <nav className={styles.sideNav} aria-label="Admin sections">
-          <button type="button" data-short="B" title="Bookings" className={tab === 'bookings' ? styles.sideNavActive : ''} onClick={() => switchTab('bookings')}>
-            Bookings
-            {pendingBookingsCount > 0 && <span className={styles.sideNavBadge} aria-label={`${pendingBookingsCount} pending`}>{pendingBookingsCount}</span>}
-          </button>
-          <button type="button" data-short="A" title="Tattoo Artist" className={tab === 'artists' ? styles.sideNavActive : ''} onClick={() => switchTab('artists')}>Tattoo Artist</button>
-          <button type="button" data-short="Pr" title="Projects" className={tab === 'projects' ? styles.sideNavActive : ''} onClick={() => switchTab('projects')}>Projects</button>
-          <button type="button" data-short="P" title="Payments" className={tab === 'payments' ? styles.sideNavActive : ''} onClick={() => switchTab('payments')}>Payments</button>
-          <button type="button" data-short="C" title="Commission" className={tab === 'commissions' ? styles.sideNavActive : ''} onClick={() => switchTab('commissions')}>Commission</button>
-          <button type="button" data-short="U" title="Customers" className={tab === 'customers' ? styles.sideNavActive : ''} onClick={() => switchTab('customers')}>Customers</button>
-          <button type="button" data-short="S" title="Specialities" className={tab === 'specialities' ? styles.sideNavActive : ''} onClick={() => switchTab('specialities')}>Specialities</button>
-          <button type="button" data-short="Pay" title="Payment options" className={tab === 'payment-destinations' ? styles.sideNavActive : ''} onClick={() => switchTab('payment-destinations')}>Payment options</button>
-          <button type="button" data-short="Us" title="Users" className={tab === 'users' ? styles.sideNavActive : ''} onClick={() => switchTab('users')}>Users</button>
-        </nav>
-      </aside>
+    <>
+      {error && <div className={styles.error} role="alert">{error}</div>}
 
-      <main className={styles.main}>
-        {error && <div className={styles.error} role="alert">{error}</div>}
-
-        <div className={styles.adminCard}>
-          <div className={styles.adminContent}>
+      <div className={styles.adminCard}>
+        <div className={styles.adminContent}>
       {tab === 'bookings' && (
         <section className={styles.section}>
           <div className={styles.sectionHead}>
@@ -695,7 +651,7 @@ export function Studio() {
                   <th>Artist</th>
                   <th>Customer</th>
                   <th>Deposit</th>
-                  <th>Total</th>
+                  <th>Project Amount</th>
                   <th>Paid</th>
                   <th>Remaining</th>
                   <th>Project</th>
@@ -742,13 +698,12 @@ export function Studio() {
                         <td>{b.createdBy ?? '—'}</td>
                         <td>{createdStr}</td>
                         <td>
-                          <Link to={`/manage/bookings/${b.id}`} className={styles.smBtn}>Detail</Link>
-                          <Link to={`/manage/bookings/${b.id}/edit`} className={styles.smBtn}>Edit</Link>
-                          {(b.status === 'pending' || b.status === 'confirmed') && (
-                            <button type="button" onClick={() => proceedBooking(b)} className={styles.smBtn}>Proceed</button>
-                          )}
-                          <button type="button" onClick={() => removeBooking(b.id)} className={styles.smBtnDanger}>Delete</button>
-                          {commission && <span className={styles.commissionBadge} title="Commission set">{commission.commissionPercent}%</span>}
+                          <span className={styles.tableActions}>
+                            <Link to={`/manage/bookings/${b.id}`} className={styles.smBtn}>Detail</Link>
+                            <Link to={`/manage/bookings/${b.id}/edit`} className={styles.smBtn}>Edit</Link>
+                            <button type="button" onClick={() => removeBooking(b.id)} className={styles.smBtnDanger}>Delete</button>
+                            {commission && <span className={styles.commissionBadge} title="Commission set">{commission.commissionPercent}%</span>}
+                          </span>
                         </td>
                       </tr>
                     );
@@ -819,6 +774,71 @@ export function Studio() {
               </tbody>
             </table>
           </div>
+        </section>
+      )}
+
+      {tab === 'sessions' && (
+        <section className={styles.section}>
+          <div className={styles.sectionHead}>
+            <div>
+              <h2>Sessions</h2>
+              <span className={styles.countHint}>
+                {sessionsList.length === 0 ? 'No sessions' : `Showing ${(sessionPage - 1) * ROWS_PER_PAGE + 1}–${Math.min(sessionPage * ROWS_PER_PAGE, sessionsList.length)} of ${sessionsList.length}`}
+              </span>
+            </div>
+          </div>
+          <div className={styles.tableWrap}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Time</th>
+                  <th>Project</th>
+                  <th>Booking</th>
+                  <th>Artist</th>
+                  <th>Customer</th>
+                  <th>Actual hrs</th>
+                  <th>Notes</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedSessions.length === 0 ? (
+                  <tr>
+                    <td colSpan={9}>No sessions yet. Add sessions from a booking detail page.</td>
+                  </tr>
+                ) : (
+                  paginatedSessions.map((sess) => {
+                    const proj = sess.project;
+                    const b = proj?.booking;
+                    const timeStr = [sess.startTime, sess.endTime].filter(Boolean).join(' – ') || '—';
+                    return (
+                      <tr key={sess.id}>
+                        <td>{sess.date ?? '—'}</td>
+                        <td>{timeStr}</td>
+                        <td className={styles.cellEmphasis}>{proj?.name ?? '—'}</td>
+                        <td>
+                          {b ? (
+                            <Link to={`/manage/bookings/${b.id}`} className={styles.link}>
+                              {b.date} {b.startTime}
+                            </Link>
+                          ) : '—'}
+                        </td>
+                        <td>{b?.artist?.name ?? '—'}</td>
+                        <td>{b?.customer?.name ?? '—'}</td>
+                        <td>{sess.actualHours != null ? String(sess.actualHours) : '—'}</td>
+                        <td>{sess.notes ?? '—'}</td>
+                        <td>
+                          {b && <Link to={`/manage/bookings/${b.id}`} className={styles.smBtn}>Booking</Link>}
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+          <Pagination currentPage={sessionPage} totalPages={sessionTotalPages} onPageChange={setSessionPage} />
         </section>
       )}
 
@@ -1459,8 +1479,7 @@ export function Studio() {
         </div>
       )}
         </div>
-        </div>
-      </main>
-    </div>
+      </div>
+    </>
   );
 }

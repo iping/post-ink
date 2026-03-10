@@ -20,6 +20,7 @@ import { uploadsRouter } from './routes/uploads.js';
 import { authRouter } from './routes/auth.js';
 import { usersRouter } from './routes/users.js';
 import { projectsRouter } from './routes/projects.js';
+import { sessionsRouter } from './routes/sessions.js';
 import { paymentDestinationsRouter } from './routes/payment-destinations.js';
 
 const app = express();
@@ -35,6 +36,7 @@ app.use('/api/artists/:artistId/availability', availabilityRouter);
 app.use('/api/artists', artistsRouter);
 app.use('/api/bookings', bookingsRouter);
 app.use('/api/projects', projectsRouter);
+app.use('/api/sessions', sessionsRouter);
 app.use('/api/payments', paymentsRouter);
 app.use('/api/customers', customersRouter);
 app.use('/api/studios', studiosRouter);

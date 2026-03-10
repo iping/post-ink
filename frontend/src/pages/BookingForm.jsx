@@ -18,6 +18,7 @@ import {
 import { AvailabilityCalendar } from '../components/AvailabilityCalendar';
 import { formatRupiah, formatNumberWithDots, parseNumberInput } from '../currency';
 import styles from './BookingForm.module.css';
+import layoutStyles from './Studio.module.css';
 
 const BOOKING_STATUSES = ['draft', 'pending', 'confirmed', 'in_progress', 'completed', 'cancelled'];
 
@@ -377,17 +378,18 @@ export function BookingForm() {
   if (loading) return <div className={styles.loading}>Loading…</div>;
 
   return (
-    <div className={styles.wrap}>
-      <header className={styles.header}>
-        <Link to="/manage?tab=bookings" className={styles.backLink}>
-          ← Back to Bookings
-        </Link>
-        <h1 className={styles.pageTitle}>{isEdit ? 'Edit booking' : 'New booking'}</h1>
-      </header>
+    <div className={layoutStyles.adminCard}>
+      <div className={layoutStyles.adminContent}>
+        <header className={styles.header}>
+          <Link to="/manage?tab=bookings" className={styles.backLink}>
+            ← Back to Bookings
+          </Link>
+          <h1 className={styles.pageTitle}>{isEdit ? 'Edit booking' : 'New booking'}</h1>
+        </header>
 
-      {error && <div className={styles.error} role="alert">{error}</div>}
+        {error && <div className={styles.error} role="alert">{error}</div>}
 
-      <form onSubmit={handleSubmit} className={styles.form}>
+        <form onSubmit={handleSubmit} className={styles.form}>
         <div className={styles.onePage}>
 
           <section className={styles.block}>
@@ -863,6 +865,7 @@ export function BookingForm() {
           </button>
         </div>
       </form>
+      </div>
     </div>
   );
 }

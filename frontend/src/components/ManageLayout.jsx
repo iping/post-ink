@@ -1,13 +1,26 @@
-import { useState } from 'react';
-import { Link, NavLink, Outlet } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
+import { getBookings } from '../api';
 import styles from '../pages/Studio.module.css';
 
 /**
- * Shared layout for management pages: sidebar + main content.
- * Used for /manage/artists/* so artist management has the same side menu as Studio.
+ * Single shared layout for all management pages: one sidebar (with pending bookings count) + main content.
  */
 export function ManageLayout() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [pendingBookingsCount, setPendingBookingsCount] = useState(0);
+  const location = useLocation();
+
+  useEffect(() => {
+    getBookings()
+      .then((list) => setPendingBookingsCount((list || []).filter((b) => b.status === 'pending').length))
+      .catch(() => setPendingBookingsCount(0));
+  }, [location.pathname]);
+
+  const onBookingsSection =
+    location.pathname === '/manage' ||
+    location.pathname === '/manage/studio' ||
+    location.pathname.startsWith('/manage/bookings/');
 
   return (
     <div className={styles.wrap}>
@@ -32,11 +45,23 @@ export function ManageLayout() {
           )}
         </div>
         <nav className={styles.sideNav} aria-label="Admin sections">
-          <NavLink to="/manage" end className={({ isActive }) => `${styles.sideNavLink} ${isActive ? styles.sideNavActive : ''}`} data-short="B" title="Bookings">
+          <NavLink
+            to="/manage"
+            end
+            className={() => `${styles.sideNavLink} ${onBookingsSection ? styles.sideNavActive : ''}`}
+            data-short="B"
+            title="Bookings"
+          >
             Bookings
+            {pendingBookingsCount > 0 && (
+              <span className={styles.sideNavBadge} aria-label={`${pendingBookingsCount} pending`}>
+                {pendingBookingsCount}
+              </span>
+            )}
           </NavLink>
-          <Link to="/manage?tab=artists" className={styles.sideNavLink} data-short="A" title="Tattoo Artist">Tattoo Artist</Link>
           <Link to="/manage?tab=projects" className={styles.sideNavLink} data-short="Pr" title="Projects">Projects</Link>
+          <Link to="/manage?tab=sessions" className={styles.sideNavLink} data-short="Se" title="Session">Session</Link>
+          <Link to="/manage?tab=artists" className={styles.sideNavLink} data-short="A" title="Tattoo Artist">Tattoo Artist</Link>
           <Link to="/manage?tab=payments" className={styles.sideNavLink} data-short="P" title="Payments">Payments</Link>
           <Link to="/manage?tab=commissions" className={styles.sideNavLink} data-short="C" title="Commission">Commission</Link>
           <Link to="/manage?tab=customers" className={styles.sideNavLink} data-short="U" title="Customers">Customers</Link>

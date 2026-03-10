@@ -52,7 +52,7 @@ bookingsRouter.get('/', async (req, res) => {
       : [{ date: 'desc' }, { startTime: 'desc' }];
     let bookings = await prisma.booking.findMany({
       where,
-      include: { artist: true, customer: true, studio: true, payments: true, review: true, projects: true },
+      include: { artist: true, customer: true, studio: true, payments: true, review: true, projects: { include: { sessions: true } } },
       orderBy: orderLatest,
     });
     for (const b of bookings) {
@@ -79,7 +79,7 @@ bookingsRouter.get('/:id', async (req, res) => {
   try {
     const booking = await prisma.booking.findUnique({
       where: { id: req.params.id },
-      include: { artist: true, customer: true, studio: true, payments: true, review: true, projects: true },
+      include: { artist: true, customer: true, studio: true, payments: true, review: true, projects: { include: { sessions: true } } },
     });
     if (!booking) return res.status(404).json({ error: 'Booking not found' });
     const paidTotal = (booking.payments || []).filter((p) => p.status === 'completed').reduce((s, p) => s + p.amount, 0);

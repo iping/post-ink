@@ -11,7 +11,7 @@ projectsRouter.get('/', async (req, res) => {
     const where = bookingId ? { bookingId } : {};
     const projects = await prisma.project.findMany({
       where,
-      include: { booking: { include: { artist: true, customer: true, studio: true } } },
+      include: { booking: { include: { artist: true, customer: true, studio: true } }, sessions: true },
       orderBy: { createdAt: 'desc' },
     });
     res.json(projects);
@@ -25,7 +25,7 @@ projectsRouter.get('/:id', async (req, res) => {
   try {
     const project = await prisma.project.findUnique({
       where: { id: req.params.id },
-      include: { booking: { include: { artist: true, customer: true, studio: true } } },
+      include: { booking: { include: { artist: true, customer: true, studio: true } }, sessions: true },
     });
     if (!project) return res.status(404).json({ error: 'Project not found' });
     res.json(project);
@@ -34,10 +34,10 @@ projectsRouter.get('/:id', async (req, res) => {
   }
 });
 
-// POST /api/projects — create (bookingId required; one booking can have many projects/sessions)
+// POST /api/projects — create (bookingId required); creates project + first session (every project has min 1 session)
 projectsRouter.post('/', async (req, res) => {
   try {
-    const { bookingId, name, pricingType, fixedAmount, hourlyRate, agreedHours, notes } = req.body;
+    const { bookingId, name, pricingType, fixedAmount, hourlyRate, agreedHours, notes, firstSession } = req.body;
     if (!bookingId || !name || !pricingType) {
       return res.status(400).json({ error: 'bookingId, name, and pricingType required' });
     }
@@ -59,11 +59,42 @@ projectsRouter.post('/', async (req, res) => {
       data.agreedHours = agreedHours != null ? Number(agreedHours) : null;
       data.fixedAmount = null;
     }
+    const booking = await prisma.booking.findUnique({ where: { id: bookingId } });
+    if (!booking) return res.status(400).json({ error: 'Booking not found' });
     const project = await prisma.project.create({
       data,
-      include: { booking: { include: { artist: true, customer: true, studio: true } } },
+      include: { booking: { include: { artist: true, customer: true, studio: true } }, sessions: true },
     });
-    res.status(201).json(project);
+    const sessionPayload = firstSession && typeof firstSession === 'object'
+      ? {
+          date: firstSession.date || booking.date,
+          startTime: firstSession.startTime ?? booking.startTime ?? '09:00',
+          endTime: firstSession.endTime ?? booking.endTime ?? '17:00',
+          actualHours: firstSession.actualHours != null ? Number(firstSession.actualHours) : null,
+          notes: firstSession.notes?.trim() || null,
+        }
+      : {
+          date: booking.date,
+          startTime: booking.startTime || '09:00',
+          endTime: booking.endTime || '17:00',
+          actualHours: null,
+          notes: null,
+        };
+    const first = await prisma.session.create({
+      data: {
+        projectId: project.id,
+        date: sessionPayload.date,
+        startTime: sessionPayload.startTime,
+        endTime: sessionPayload.endTime,
+        actualHours: sessionPayload.actualHours,
+        notes: sessionPayload.notes,
+      },
+    });
+    const projectWithSessions = await prisma.project.findUnique({
+      where: { id: project.id },
+      include: { booking: { include: { artist: true, customer: true, studio: true } }, sessions: true },
+    });
+    res.status(201).json(projectWithSessions);
   } catch (e) {
     if (e.code === 'P2003') return res.status(400).json({ error: 'Booking not found' });
     res.status(500).json({ error: e.message });
@@ -103,7 +134,7 @@ projectsRouter.patch('/:id', async (req, res) => {
     const project = await prisma.project.update({
       where: { id: req.params.id },
       data,
-      include: { booking: { include: { artist: true, customer: true, studio: true } } },
+      include: { booking: { include: { artist: true, customer: true, studio: true } }, sessions: true },
     });
     res.json(project);
   } catch (e) {
