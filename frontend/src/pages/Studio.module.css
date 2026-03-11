@@ -441,11 +441,9 @@
   color: var(--text);
 }
 
-/* Numeric columns: right-align */
+/* Numeric columns: right-align (No., key amounts) */
 .table th:nth-child(1),
 .table td:nth-child(1),
-.table th:nth-child(6),
-.table td:nth-child(6),
 .table th:nth-child(7),
 .table td:nth-child(7),
 .table th:nth-child(8),

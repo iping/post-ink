@@ -1,5 +1,5 @@
 {
-  "exportedAt": "2026-03-10T11:35:03.932Z",
+  "exportedAt": "2026-03-11T10:17:16.752Z",
   "specialities": [
     {
       "id": "cmmkcq4cm00042fs2vn0lhhiy",
@@ -19076,6 +19076,69 @@
       "projects": []
     },
     {
+      "id": "cmmlunoy60001glp0sip220o1",
+      "shortCode": "NN8WN",
+      "artistId": "cmmkcq4se01qy2fs2pt687xqk",
+      "customerId": "cmmkcq51s02v72fs2x2yqkdzl",
+      "studioId": "cmmkcq51o02v32fs2r9h1mate",
+      "date": "2026-03-12",
+      "startTime": "10:00",
+      "endTime": "11:00",
+      "status": "pending",
+      "pricingType": "fixed",
+      "totalAmount": null,
+      "placement": "Forearm",
+      "preference": "{\"text\":\"BW\",\"images\":[]}",
+      "notes": "test",
+      "createdAt": "2026-03-11T09:41:45.101Z",
+      "updatedAt": "2026-03-11T09:41:45.101Z",
+      "artist": {
+        "id": "cmmkcq4se01qy2fs2pt687xqk",
+        "name": "Arief Gunawan",
+        "shortDescription": "Photorealistic portrait specialist with a background in fine arts. Arief transforms photographs into breathtaking skin art, from celebrity likenesses to beloved family members and pets.",
+        "experiences": "9 years",
+        "speciality": "Portrait, Realism, Black & Grey, Surrealism",
+        "rate": 1100000,
+        "photos": "[\"https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=600&h=600&fit=crop&crop=face\",\"https://images.unsplash.com/photo-1522556189639-b150ed9c4330?w=600&h=600&fit=crop&crop=face\"]",
+        "portfolio": "[\"https://images.unsplash.com/photo-1590246815117-0b5fc4e3e5b4?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1542556398-95fb5b9f9b48?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=500&h=500&fit=crop\"]",
+        "isActive": true,
+        "createdAt": "2026-03-10T08:31:59.678Z",
+        "updatedAt": "2026-03-10T08:31:59.678Z"
+      },
+      "customer": {
+        "id": "cmmkcq51s02v72fs2x2yqkdzl",
+        "name": "Budi Santoso",
+        "email": "budi@example.com",
+        "phone": "+62 811-2233-4455",
+        "createdAt": "2026-03-10T08:32:00.017Z",
+        "updatedAt": "2026-03-10T08:32:00.017Z"
+      },
+      "studio": {
+        "id": "cmmkcq51o02v32fs2r9h1mate",
+        "name": "Black Lotus Tattoo",
+        "address": "Jl. Petitenget No. 12, Seminyak, Bali",
+        "createdAt": "2026-03-10T08:32:00.012Z",
+        "updatedAt": "2026-03-10T08:32:00.012Z"
+      },
+      "payments": [
+        {
+          "id": "cmmlunoyu0003glp0jm6ghhg7",
+          "bookingId": "cmmlunoy60001glp0sip220o1",
+          "amount": 1100000,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "down_payment",
+          "method": "From deposit",
+          "transferDestination": null,
+          "evidenceUrl": null,
+          "createdAt": "2026-03-11T09:41:45.125Z",
+          "updatedAt": "2026-03-11T09:41:45.125Z"
+        }
+      ],
+      "review": null,
+      "projects": []
+    },
+    {
       "id": "cmmkcq53o02vr2fs29nthbjlw",
       "shortCode": "OKWC2",
       "artistId": "cmmkcq4ig00ku2fs2z7f50tcv",
@@ -22152,6 +22215,19 @@
       "evidenceUrl": null,
       "createdAt": "2026-03-10T10:46:16.140Z",
       "updatedAt": "2026-03-10T10:46:16.140Z"
+    },
+    {
+      "id": "cmmlunoyu0003glp0jm6ghhg7",
+      "bookingId": "cmmlunoy60001glp0sip220o1",
+      "amount": 1100000,
+      "currency": "IDR",
+      "status": "completed",
+      "type": "down_payment",
+      "method": "From deposit",
+      "transferDestination": null,
+      "evidenceUrl": null,
+      "createdAt": "2026-03-11T09:41:45.125Z",
+      "updatedAt": "2026-03-11T09:41:45.125Z"
     }
   ],
   "paymentDestinations": [

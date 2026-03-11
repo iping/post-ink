@@ -646,25 +646,21 @@ export function Studio() {
               <thead>
                 <tr>
                   <th>No.</th>
+                  <th>Customer</th>
+                  <th>Artist</th>
+                  <th>Studio</th>
                   <th>Date</th>
                   <th>Time</th>
-                  <th>Artist</th>
-                  <th>Customer</th>
-                  <th>Deposit</th>
-                  <th>Project Amount</th>
                   <th>Paid</th>
                   <th>Remaining</th>
-                  <th>Project</th>
                   <th>Status</th>
-                  <th>Created by</th>
-                  <th>Created at</th>
                   <th></th>
                 </tr>
               </thead>
               <tbody>
                 {paginatedBookings.length === 0 ? (
                   <tr>
-                    <td colSpan={14}>
+                    <td colSpan={11}>
                       {bookings.length === 0 && (bookingFilters.status || bookingFilters.artistId || bookingFilters.studioId || bookingFilters.customerId || bookingFilters.from || bookingFilters.to)
                         ? 'No bookings match your filters. Click Reset to clear filters.'
                         : 'No bookings yet. Create one above.'}
@@ -680,23 +676,19 @@ export function Studio() {
                     return (
                       <tr key={b.id}>
                         <td>{rowNum}</td>
+                        <td className={styles.cellEmphasis}>{b.customer?.name || '—'}</td>
+                        <td className={styles.cellEmphasis}>{b.artist?.name || '—'}</td>
+                        <td>{b.studio?.name || '—'}</td>
                         <td className={styles.cellDate}>{b.date}</td>
                         <td className={styles.cellTime}>{b.startTime} – {b.endTime}</td>
-                        <td className={styles.cellEmphasis}>{b.artist?.name || '—'}</td>
-                        <td className={styles.cellEmphasis}>{b.customer?.name || '—'}</td>
-                        <td className={styles.cellAmount}>{formatRupiah(bookingDeposit)}</td>
-                        <td className={styles.cellAmount}>{formatRupiah(b.totalAmount)}</td>
                         <td className={styles.cellAmount}>{formatRupiah(b.paidTotal)}</td>
                         <td className={b.remainingAmount != null && b.remainingAmount > 0 ? `${styles.remainingDue} ${styles.cellAmount}` : styles.cellAmount}>
                           {formatRupiah(b.remainingAmount)}
                         </td>
-                        <td>{(b.projects?.length ?? 0) > 0 ? (b.projects?.length === 1 ? b.projects[0].name : `${b.projects?.length} projects`) : '—'}</td>
                         <td>
                           <span className={styles[`status_${b.status}`]}>{b.status}</span>
                           {b.review && <span className={styles.reviewBadge} title={`Reviewed: ${b.review.rating}/5`}>★ {b.review.rating}</span>}
                         </td>
-                        <td>{b.createdBy ?? '—'}</td>
-                        <td>{createdStr}</td>
                         <td>
                           <span className={styles.tableActions}>
                             <Link to={`/manage/bookings/${b.id}`} className={styles.smBtn}>Detail</Link>
