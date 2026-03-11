@@ -19,6 +19,7 @@ import { AvailabilityCalendar } from '../components/AvailabilityCalendar';
 import { formatRupiah, formatNumberWithDots, parseNumberInput } from '../currency';
 import styles from './BookingForm.module.css';
 import layoutStyles from './Studio.module.css';
+import artistStyles from './ArtistForm.module.css';
 
 const BOOKING_STATUSES = ['draft', 'pending', 'confirmed', 'in_progress', 'completed', 'cancelled'];
 
@@ -91,6 +92,7 @@ export function BookingForm() {
   const [payments, setPayments] = useState([]);
   const [estimationMode, setEstimationMode] = useState('unlimited'); // 'unlimited' | 'rate'
   const [estimationAmount, setEstimationAmount] = useState('');
+  const [firstDepositAmount, setFirstDepositAmount] = useState(''); // editable first deposit; must be >= artist 1h rate
   useEffect(() => {
     Promise.all([getArtists({ activeOnly: true }), getCustomers(), getStudios(), getPaymentDestinations({ activeOnly: 'true' }), getPayments()])
       .then(([a, c, s, pd, pm]) => {
@@ -147,6 +149,14 @@ export function BookingForm() {
         .catch((e) => setError(e.message));
     }
   }, [isEdit, id]);
+
+  // When artist changes, pre-fill first deposit with artist's 1h rate
+  useEffect(() => {
+    if (isEdit) return;
+    const artist = artists.find((a) => a.id === bookingForm.artistId);
+    const rate = artist?.rate != null ? Number(artist.rate) : null;
+    setFirstDepositAmount(rate != null ? String(rate) : '');
+  }, [bookingForm.artistId, isEdit, artists]);
 
   const handleStudioChange = (studioId) => {
     setBookingForm((f) => ({ ...f, studioId, artistId: '', date: '', startTime: '', endTime: '' }));
@@ -237,14 +247,18 @@ export function BookingForm() {
       setError(asDraft ? 'Add at least one artist in Manage → Artists to save a draft.' : 'Select studio and artist, then date and time.');
       return;
     }
-    if (!asDraft && payload.customerId && minDeposit > 0) {
+    if (!asDraft && firstDepositInvalid) {
+      setError(`First deposit must be at least the artist's 1h rate (${formatRupiah(minDeposit)}).`);
+      return;
+    }
+    if (!asDraft && payload.customerId && chosenDeposit > 0) {
       const customerBalance = getCustomerDeposit(payload.customerId);
-      if (customerBalance >= minDeposit && !deductFromDeposit) {
+      if (customerBalance >= chosenDeposit && !deductFromDeposit) {
         setError('Please use the customer\'s deposit first. Check "Deduct booking fee from customer\'s deposit" to continue the booking.');
         return;
       }
-      if (deductFromDeposit && customerBalance < minDeposit) {
-        setError(`Customer deposit (${formatRupiah(customerBalance)}) is less than booking fee (${formatRupiah(minDeposit)}). Uncheck "Deduct from deposit" or choose another customer.`);
+      if (deductFromDeposit && customerBalance < chosenDeposit) {
+        setError(`Customer deposit (${formatRupiah(customerBalance)}) is less than booking fee (${formatRupiah(chosenDeposit)}). Uncheck "Deduct from deposit" or choose another customer.`);
         return;
       }
     }
@@ -255,7 +269,7 @@ export function BookingForm() {
       } else {
         const created = await createBooking(payload);
         if (created?.id) {
-          const depositAmt = minDeposit;
+          const depositAmt = chosenDeposit;
           if (depositAmt > 0) {
             if (deductFromDeposit) {
               try {
@@ -346,6 +360,10 @@ export function BookingForm() {
 
   const selectedArtist = artists.find((a) => a.id === bookingForm.artistId);
   const minDeposit = selectedArtist?.rate != null ? Number(selectedArtist.rate) : 0;
+  // Effective first deposit: editable, but must be >= artist's 1h rate
+  const chosenDepositNum = firstDepositAmount !== '' ? Number(firstDepositAmount) : minDeposit;
+  const chosenDeposit = chosenDepositNum >= minDeposit ? chosenDepositNum : minDeposit;
+  const firstDepositInvalid = firstDepositAmount !== '' && chosenDepositNum < minDeposit;
 
   /** Deposit total (completed down_payment) for a customer, for dropdown display */
   const getCustomerDeposit = (customerId) => {
@@ -378,243 +396,276 @@ export function BookingForm() {
   if (loading) return <div className={styles.loading}>Loading…</div>;
 
   return (
-    <div className={layoutStyles.adminCard}>
-      <div className={layoutStyles.adminContent}>
-        <header className={styles.header}>
-          <Link to="/manage?tab=bookings" className={styles.backLink}>
-            ← Back to Bookings
-          </Link>
-          <h1 className={styles.pageTitle}>{isEdit ? 'Edit booking' : 'New booking'}</h1>
-        </header>
+    <div className={artistStyles.page}>
+      <div className={artistStyles.topBar}>
+        <Link to={isEdit ? `/manage/bookings/${id}` : '/manage?tab=bookings'} className={artistStyles.backBtn}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6" /></svg>
+          {isEdit ? 'Back to Booking' : 'All Bookings'}
+        </Link>
+        <div className={artistStyles.topBarRight}>
+          <span className={artistStyles.badge}>{isEdit ? 'Editing' : 'New Booking'}</span>
+        </div>
+      </div>
 
-        {error && <div className={styles.error} role="alert">{error}</div>}
+      <div className={artistStyles.hero}>
+        <h1>{isEdit ? 'Edit Booking' : 'Add New Booking'}</h1>
+        <p className={artistStyles.heroSub}>
+          {isEdit
+            ? 'Update booking details, schedule, and payment.'
+            : 'Select artist, schedule, and customer to create a new booking.'}
+        </p>
+      </div>
 
-        <form onSubmit={handleSubmit} className={styles.form}>
-        <div className={styles.onePage}>
+      {error && (
+        <div className={artistStyles.error} role="alert">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" /></svg>
+          {error}
+        </div>
+      )}
 
-          <section className={styles.block}>
-            <h2 className={styles.blockTitle}>Studio & artist</h2>
-            <label className={styles.label}>
-              <span className={styles.labelText}>Studio</span>
-              <select
-                className={styles.input}
-                value={bookingForm.studioId}
-                onChange={(e) => handleStudioChange(e.target.value)}
-                aria-label="Select studio"
-              >
-                <option value="">Select studio</option>
-                {studios.map((s) => (
-                  <option key={s.id} value={s.id}>{s.name}</option>
-                ))}
-              </select>
-            </label>
-            <label className={styles.label}>
-              <span className={styles.labelText}>Tattoo artist</span>
-              {bookingForm.artistId && !artists.some((a) => a.id === bookingForm.artistId) && (
-                <p className={styles.helper} role="status">Selected artist is no longer available. Please choose an active artist.</p>
+      <form onSubmit={handleSubmit} className={artistStyles.form}>
+        <div className={artistStyles.grid}>
+          <div className={artistStyles.col}>
+            {/* Step 1: Customer */}
+            <div className={artistStyles.card}>
+              <div className={artistStyles.cardHead}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
+                <h2>Customer</h2>
+              </div>
+              <div className={styles.radioRow}>
+                <label className={styles.radioLabel}>
+                  <input
+                    type="radio"
+                    name="customerSource"
+                    checked={!useNewCustomer}
+                    onChange={() => { setUseNewCustomer(false); setError(null); }}
+                  />
+                  <span>Select from list</span>
+                </label>
+                <label className={styles.radioLabel}>
+                  <input
+                    type="radio"
+                    name="customerSource"
+                    checked={useNewCustomer}
+                    onChange={() => { setUseNewCustomer(true); setError(null); }}
+                  />
+                  <span>New customer</span>
+                </label>
+              </div>
+              {!useNewCustomer && (
+                <label className={styles.label}>
+                  <span className={styles.labelText}>Customer</span>
+                  <select
+                    className={styles.input}
+                    value={bookingForm.customerId}
+                    onChange={(e) => {
+                      setBookingForm((f) => ({ ...f, customerId: e.target.value }));
+                      setDeductFromDeposit(false);
+                    }}
+                  >
+                    <option value="">— No customer —</option>
+                    {customers.map((c) => {
+                      const deposit = getCustomerDeposit(c.id);
+                      return (
+                        <option key={c.id} value={c.id}>
+                          {c.name} — Deposit: {formatRupiah(deposit)}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </label>
               )}
-              <select
-                className={styles.input}
-                value={artists.some((a) => a.id === bookingForm.artistId) ? bookingForm.artistId : ''}
-                onChange={(e) => handleArtistChange(e.target.value)}
-                aria-label="Select artist"
-              >
-                <option value="">Select artist</option>
-                {artists.map((a) => (
-                  <option key={a.id} value={a.id}>{a.name}</option>
-                ))}
-              </select>
-            </label>
-            {bookingForm.artistId && (() => {
-              const a = artists.find((x) => x.id === bookingForm.artistId);
-              if (!a) return null;
-              const photos = safeParseJson(a.photos);
-              const skillTags = (a.speciality || '').split(',').map((s) => s.trim()).filter(Boolean);
-              return (
-                <div className={styles.artistCard} aria-label="Selected artist">
-                  <div className={styles.artistCardMedia}>
-                    {photos[0] ? (
-                      <img src={uploadUrl(photos[0])} alt={a.name} className={styles.artistCardPhoto} />
-                    ) : (
-                      <div className={styles.artistCardPlaceholder}>No photo</div>
-                    )}
-                    {photos.length > 1 && (
-                      <div className={styles.artistCardThumbs}>
-                        {photos.slice(1, 4).map((url, i) => (
-                          <img key={i} src={uploadUrl(url)} alt="" className={styles.artistCardThumb} aria-hidden />
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  <div className={styles.artistCardInfo}>
-                    <p className={styles.artistCardName}>{a.name}</p>
-                    {a.shortDescription && (
-                      <p className={styles.artistCardDesc}>{a.shortDescription}</p>
-                    )}
-                    {skillTags.length > 0 && (
-                      <div className={styles.artistCardTags}>
-                        {skillTags.map((tag) => (
-                          <span key={tag} className={styles.artistCardTag}>{tag}</span>
-                        ))}
-                      </div>
-                    )}
-                    <div className={styles.artistCardMeta}>
-                      {a.experiences && <span>{a.experiences}</span>}
-                      {a.rate != null && (
-                        <span>Rate: {formatRupiah(a.rate)}/hour</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })()}
-          </section>
+              {useNewCustomer && (
+                <fieldset className={styles.fieldset}>
+                  <legend className={styles.legend}>New customer</legend>
+                  <label className={styles.label}>
+                    <span className={styles.labelText}>Name</span>
+                    <input
+                      className={styles.input}
+                      placeholder="Full name"
+                      value={newCustomer.name}
+                      onChange={(e) => setNewCustomer((n) => ({ ...n, name: e.target.value }))}
+                    />
+                  </label>
+                  <label className={styles.label}>
+                    <span className={styles.labelText}>Email</span>
+                    <input
+                      className={styles.input}
+                      type="email"
+                      placeholder="email@example.com"
+                      value={newCustomer.email}
+                      onChange={(e) => setNewCustomer((n) => ({ ...n, email: e.target.value }))}
+                    />
+                  </label>
+                  <label className={styles.label}>
+                    <span className={styles.labelText}>Phone</span>
+                    <input
+                      className={styles.input}
+                      placeholder="+62 ..."
+                      value={newCustomer.phone}
+                      onChange={(e) => setNewCustomer((n) => ({ ...n, phone: e.target.value }))}
+                    />
+                  </label>
+                </fieldset>
+              )}
+            </div>
 
-          <section className={styles.block}>
-            <h2 className={styles.blockTitle}>Date & time</h2>
-            <p className={styles.blockDesc}>Pick a date, then choose a slot from availability or enter a custom time.</p>
-            <div className={styles.calendarSection}>
-              <AvailabilityCalendar
-                artistId={bookingForm.artistId}
-                selectedDate={bookingForm.date}
-                onSelectDate={handleCalendarDateSelect}
-                onSelectSlot={handleSlotSelect}
-                selectedSlot={useCustomTime ? null : selectedSlot}
-              />
-            </div>
-            <div className={styles.timeSourceRow}>
-              <label className={styles.radioLabel}>
-                <input
-                  type="radio"
-                  name="timeSource"
-                  checked={!useCustomTime}
-                  onChange={() => { setUseCustomTime(false); setSelectedSlot(null); }}
-                />
-                <span>From availability slots</span>
-              </label>
-              <label className={styles.radioLabel}>
-                <input
-                  type="radio"
-                  name="timeSource"
-                  checked={useCustomTime}
-                  onChange={() => { setUseCustomTime(true); setSelectedSlot(null); }}
-                />
-                <span>Custom time</span>
-              </label>
-            </div>
-            {useCustomTime && bookingForm.date && (
-              <div className={styles.customTimeRow}>
-                <label className={styles.label}>
-                  <span className={styles.labelText}>Start time</span>
-                  <input
-                    type="time"
-                    className={styles.input}
-                    value={bookingForm.startTime || '09:00'}
-                    onChange={(e) => setBookingForm((f) => ({ ...f, startTime: e.target.value }))}
-                  />
-                </label>
-                <label className={styles.label}>
-                  <span className={styles.labelText}>End time</span>
-                  <input
-                    type="time"
-                    className={styles.input}
-                    value={bookingForm.endTime || '17:00'}
-                    onChange={(e) => setBookingForm((f) => ({ ...f, endTime: e.target.value }))}
-                  />
-                </label>
+            {/* Step 2: Studio & artist */}
+            <div className={artistStyles.card}>
+              <div className={artistStyles.cardHead}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                <h2>Studio &amp; artist</h2>
               </div>
-            )}
-            {bookingForm.date && bookingForm.startTime && (
-              <div className={styles.selectedInfo}>
-                <span>Selected: <strong>{bookingForm.date}</strong></span>
-                <span>Time: <strong>{bookingForm.startTime} – {bookingForm.endTime}</strong>{useCustomTime && ' (custom)'}</span>
-              </div>
-            )}
-          </section>
-
-          <section className={styles.block}>
-            <h2 className={styles.blockTitle}>Customer</h2>
-            <div className={styles.radioRow}>
-              <label className={styles.radioLabel}>
-                <input
-                  type="radio"
-                  name="customerSource"
-                  checked={!useNewCustomer}
-                  onChange={() => { setUseNewCustomer(false); setError(null); }}
-                />
-                <span>Select from list</span>
-              </label>
-              <label className={styles.radioLabel}>
-                <input
-                  type="radio"
-                  name="customerSource"
-                  checked={useNewCustomer}
-                  onChange={() => { setUseNewCustomer(true); setError(null); }}
-                />
-                <span>New customer</span>
-              </label>
-            </div>
-            {!useNewCustomer && (
               <label className={styles.label}>
-                <span className={styles.labelText}>Customer</span>
+                <span className={styles.labelText}>Studio</span>
                 <select
                   className={styles.input}
-                  value={bookingForm.customerId}
-                  onChange={(e) => {
-                    setBookingForm((f) => ({ ...f, customerId: e.target.value }));
-                    setDeductFromDeposit(false);
-                  }}
+                  value={bookingForm.studioId}
+                  onChange={(e) => handleStudioChange(e.target.value)}
+                  aria-label="Select studio"
                 >
-                  <option value="">— No customer —</option>
-                  {customers.map((c) => {
-                    const deposit = getCustomerDeposit(c.id);
-                    return (
-                      <option key={c.id} value={c.id}>
-                        {c.name} — Deposit: {formatRupiah(deposit)}
-                      </option>
-                    );
-                  })}
+                  <option value="">Select studio</option>
+                  {studios.map((s) => (
+                    <option key={s.id} value={s.id}>{s.name}</option>
+                  ))}
                 </select>
               </label>
-            )}
-            {useNewCustomer && (
-              <fieldset className={styles.fieldset}>
-                <legend className={styles.legend}>New customer</legend>
-                <label className={styles.label}>
-                  <span className={styles.labelText}>Name</span>
-                  <input
-                    className={styles.input}
-                    placeholder="Full name"
-                    value={newCustomer.name}
-                    onChange={(e) => setNewCustomer((n) => ({ ...n, name: e.target.value }))}
-                  />
-                </label>
-                <label className={styles.label}>
-                  <span className={styles.labelText}>Email</span>
-                  <input
-                    className={styles.input}
-                    type="email"
-                    placeholder="email@example.com"
-                    value={newCustomer.email}
-                    onChange={(e) => setNewCustomer((n) => ({ ...n, email: e.target.value }))}
-                  />
-                </label>
-                <label className={styles.label}>
-                  <span className={styles.labelText}>Phone</span>
-                  <input
-                    className={styles.input}
-                    placeholder="+62 ..."
-                    value={newCustomer.phone}
-                    onChange={(e) => setNewCustomer((n) => ({ ...n, phone: e.target.value }))}
-                  />
-                </label>
-              </fieldset>
-            )}
-          </section>
+              <label className={styles.label}>
+                <span className={styles.labelText}>Tattoo artist</span>
+                {bookingForm.artistId && !artists.some((a) => a.id === bookingForm.artistId) && (
+                  <p className={styles.helper} role="status">Selected artist is no longer available. Please choose an active artist.</p>
+                )}
+                <select
+                  className={styles.input}
+                  value={artists.some((a) => a.id === bookingForm.artistId) ? bookingForm.artistId : ''}
+                  onChange={(e) => handleArtistChange(e.target.value)}
+                  aria-label="Select artist"
+                >
+                  <option value="">Select artist</option>
+                  {artists.map((a) => (
+                    <option key={a.id} value={a.id}>{a.name}</option>
+                  ))}
+                </select>
+              </label>
+              {bookingForm.artistId && (() => {
+                const a = artists.find((x) => x.id === bookingForm.artistId);
+                if (!a) return null;
+                const photos = safeParseJson(a.photos);
+                const skillTags = (a.speciality || '').split(',').map((s) => s.trim()).filter(Boolean);
+                return (
+                  <div className={styles.artistCard} aria-label="Selected artist">
+                    <div className={styles.artistCardMedia}>
+                      {photos[0] ? (
+                        <img src={uploadUrl(photos[0])} alt={a.name} className={styles.artistCardPhoto} />
+                      ) : (
+                        <div className={styles.artistCardPlaceholder}>No photo</div>
+                      )}
+                      {photos.length > 1 && (
+                        <div className={styles.artistCardThumbs}>
+                          {photos.slice(1, 4).map((url, i) => (
+                            <img key={i} src={uploadUrl(url)} alt="" className={styles.artistCardThumb} aria-hidden />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <div className={styles.artistCardInfo}>
+                      <p className={styles.artistCardName}>{a.name}</p>
+                      {a.shortDescription && (
+                        <p className={styles.artistCardDesc}>{a.shortDescription}</p>
+                      )}
+                      {skillTags.length > 0 && (
+                        <div className={styles.artistCardTags}>
+                          {skillTags.map((tag) => (
+                            <span key={tag} className={styles.artistCardTag}>{tag}</span>
+                          ))}
+                        </div>
+                      )}
+                      <div className={styles.artistCardMeta}>
+                        {a.experiences && <span>{a.experiences}</span>}
+                        {a.rate != null && (
+                          <span>Rate: {formatRupiah(a.rate)}/hour</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
 
-          <section className={styles.block}>
-            <h2 className={styles.blockTitle}>Project Details</h2>
-            <label className={styles.label}>
+            {/* Step 3: Date & time */}
+            <div className={artistStyles.card}>
+              <div className={artistStyles.cardHead}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
+                <h2>Date &amp; time</h2>
+              </div>
+              <p className={artistStyles.cardHint}>Pick a date, then choose a slot from availability or enter a custom time.</p>
+              <div className={styles.calendarSection}>
+                <AvailabilityCalendar
+                  artistId={bookingForm.artistId}
+                  selectedDate={bookingForm.date}
+                  onSelectDate={handleCalendarDateSelect}
+                  onSelectSlot={handleSlotSelect}
+                  selectedSlot={useCustomTime ? null : selectedSlot}
+                />
+              </div>
+              <div className={styles.timeSourceRow}>
+                <label className={styles.radioLabel}>
+                  <input
+                    type="radio"
+                    name="timeSource"
+                    checked={!useCustomTime}
+                    onChange={() => { setUseCustomTime(false); setSelectedSlot(null); }}
+                  />
+                  <span>From availability slots</span>
+                </label>
+                <label className={styles.radioLabel}>
+                  <input
+                    type="radio"
+                    name="timeSource"
+                    checked={useCustomTime}
+                    onChange={() => { setUseCustomTime(true); setSelectedSlot(null); }}
+                  />
+                  <span>Custom time</span>
+                </label>
+              </div>
+              {useCustomTime && bookingForm.date && (
+                <div className={styles.customTimeRow}>
+                  <label className={styles.label}>
+                    <span className={styles.labelText}>Start time</span>
+                    <input
+                      type="time"
+                      className={styles.input}
+                      value={bookingForm.startTime || '09:00'}
+                      onChange={(e) => setBookingForm((f) => ({ ...f, startTime: e.target.value }))}
+                    />
+                  </label>
+                  <label className={styles.label}>
+                    <span className={styles.labelText}>End time</span>
+                    <input
+                      type="time"
+                      className={styles.input}
+                      value={bookingForm.endTime || '17:00'}
+                      onChange={(e) => setBookingForm((f) => ({ ...f, endTime: e.target.value }))}
+                    />
+                  </label>
+                </div>
+              )}
+              {bookingForm.date && bookingForm.startTime && (
+                <div className={styles.selectedInfo}>
+                  <span>Selected: <strong>{bookingForm.date}</strong></span>
+                  <span>Time: <strong>{bookingForm.startTime} – {bookingForm.endTime}</strong>{useCustomTime && ' (custom)'}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className={artistStyles.col}>
+            <div className={artistStyles.card}>
+              <div className={artistStyles.cardHead}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4" /><path d="M12 8h.01" /></svg>
+                <h2>Project details</h2>
+              </div>
+              <label className={styles.label}>
               <span className={styles.labelText}>Where should the tattoo be placed?</span>
               <select
                 className={styles.input}
@@ -696,11 +747,14 @@ export function BookingForm() {
                 rows={2}
               />
             </label>
-          </section>
+            </div>
 
-          {!isEdit && (
-            <section className={styles.block} aria-label="Agreed price and first deposit">
-              <h2 className={styles.blockTitle}>Project Estimation Price and Deposit</h2>
+            {!isEdit && (
+            <div className={artistStyles.card} aria-label="Agreed price and first deposit">
+              <div className={artistStyles.cardHead}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
+                <h2>Project estimation &amp; deposit</h2>
+              </div>
               <div className={styles.label}>
                 <span className={styles.labelText}>Project estimation (amount)</span>
                 <div className={styles.estimationOptions} role="radiogroup" aria-label="Estimation mode">
@@ -741,25 +795,42 @@ export function BookingForm() {
                   />
                 </label>
               )}
-              <div className={styles.readOnlyField}>
+              <label className={styles.label}>
                 <span className={styles.labelText}>First deposit (1h rate, fixed)</span>
-                <p className={styles.readOnlyValue}>
-                  {bookingForm.artistId && minDeposit > 0 ? formatRupiah(minDeposit) : '—'}
-                </p>
-              </div>
-              {bookingForm.artistId && minDeposit > 0 && (
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  className={styles.input}
+                  placeholder={minDeposit > 0 ? `Min. ${formatNumberWithDots(minDeposit)}` : 'e.g. 500.000'}
+                  value={formatNumberWithDots(firstDepositAmount)}
+                  onChange={(e) => setFirstDepositAmount(parseNumberInput(e.target.value))}
+                  aria-invalid={firstDepositInvalid}
+                  aria-describedby={firstDepositInvalid ? 'first-deposit-err' : minDeposit > 0 ? 'first-deposit-min' : undefined}
+                />
+                {minDeposit > 0 && (
+                  <span id="first-deposit-min" className={styles.helper}>
+                    Minimum: artist&apos;s 1h rate — {formatRupiah(minDeposit)}
+                  </span>
+                )}
+                {firstDepositInvalid && (
+                  <p id="first-deposit-err" className={styles.deductRequiredHint} role="alert">
+                    Must be at least the artist&apos;s 1h rate ({formatRupiah(minDeposit)}).
+                  </p>
+                )}
+              </label>
+              {bookingForm.artistId && chosenDeposit > 0 && (
                 <>
                   {!useNewCustomer && bookingForm.customerId && (() => {
                     const customerBalance = getCustomerDeposit(bookingForm.customerId);
-                    const canDeduct = customerBalance >= minDeposit;
-                    const amountLeftToPay = customerBalance > 0 && customerBalance < minDeposit ? minDeposit - customerBalance : 0;
+                    const canDeduct = customerBalance >= chosenDeposit;
+                    const amountLeftToPay = customerBalance > 0 && customerBalance < chosenDeposit ? chosenDeposit - customerBalance : 0;
                     return (
                       <>
-                        {customerBalance > 0 && customerBalance < minDeposit && (
+                        {customerBalance > 0 && customerBalance < chosenDeposit && (
                           <div className={styles.readOnlyField}>
                             <span className={styles.labelText}>Amount left for customer to pay</span>
                             <p className={styles.amountLeftValue}>{formatRupiah(amountLeftToPay)}</p>
-                            <p className={styles.depositBalanceHint} style={{ margin: 0 }}>(booking fee {formatRupiah(minDeposit)} − deposit {formatRupiah(customerBalance)})</p>
+                            <p className={styles.depositBalanceHint} style={{ margin: 0 }}>(booking fee {formatRupiah(chosenDeposit)} − deposit {formatRupiah(customerBalance)})</p>
                           </div>
                         )}
                         {canDeduct ? (
@@ -779,7 +850,7 @@ export function BookingForm() {
                             </span>
                           </label>
                         ) : null}
-                        {customerBalance >= minDeposit && (
+                        {customerBalance >= chosenDeposit && (
                           <>
                             {deductFromDeposit ? (
                               <p className={styles.deductHint} role="status">
@@ -839,33 +910,38 @@ export function BookingForm() {
                   )}
                 </>
               )}
-            </section>
-          )}
+            </div>
+            )}
 
+          </div>
         </div>
 
-        <div className={styles.actions}>
-          {isEdit && (
-            <>
-              <button type="button" onClick={handleSaveDraft} className={styles.secondaryBtn}>Save as draft</button>
-              <Link to="/manage?tab=bookings" className={styles.tertiaryBtn}>Cancel</Link>
-            </>
-          )}
-          <button
-            type="submit"
-            disabled={
-              !bookingForm.artistId ||
-              !bookingForm.date ||
-              !bookingForm.startTime ||
-              (bookingForm.pricingType === 'fixed' && !isEdit && estimationMode === 'rate' && !(Number(estimationAmount) > 0 || (selectedArtist?.rate != null && Number(selectedArtist.rate) > 0)))
-            }
-            className={styles.primaryBtn}
-          >
-            Save booking
-          </button>
+        <div className={artistStyles.actionBar}>
+          <div className={artistStyles.actionLeft}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>
+            <span>Booking is saved when you click {isEdit ? 'Save' : 'Create'}.</span>
+          </div>
+          <div className={artistStyles.actionBtns}>
+            {isEdit && (
+              <button type="button" onClick={handleSaveDraft} className={artistStyles.cancelBtn}>Save as draft</button>
+            )}
+            <button type="button" onClick={() => navigate('/manage?tab=bookings')} className={artistStyles.cancelBtn}>Cancel</button>
+            <button
+              type="submit"
+              disabled={
+                !bookingForm.artistId ||
+                !bookingForm.date ||
+                !bookingForm.startTime ||
+                firstDepositInvalid ||
+                (bookingForm.pricingType === 'fixed' && !isEdit && estimationMode === 'rate' && !(Number(estimationAmount) > 0 || (selectedArtist?.rate != null && Number(selectedArtist.rate) > 0)))
+              }
+              className={artistStyles.submitBtn}
+            >
+              {isEdit ? 'Save booking' : 'Create booking'}
+            </button>
+          </div>
         </div>
       </form>
-      </div>
     </div>
   );
 }

@@ -8,7 +8,7 @@ export const customersRouter = Router();
 customersRouter.get('/', async (req, res) => {
   try {
     const customers = await prisma.customer.findMany({
-      orderBy: { name: 'asc' },
+      orderBy: { createdAt: 'desc' },
     });
     res.json(customers);
   } catch (e) {

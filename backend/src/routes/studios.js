@@ -8,7 +8,7 @@ export const studiosRouter = Router();
 studiosRouter.get('/', async (req, res) => {
   try {
     const studios = await prisma.tattooStudio.findMany({
-      orderBy: { name: 'asc' },
+      orderBy: { createdAt: 'desc' },
     });
     res.json(studios);
   } catch (e) {

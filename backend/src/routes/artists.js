@@ -32,7 +32,7 @@ artistsRouter.get('/', async (req, res) => {
     const activeOnly = req.query.activeOnly === 'true';
     const artists = await prisma.tattooArtist.findMany({
       where: activeOnly ? { isActive: true } : undefined,
-      orderBy: { updatedAt: 'desc' },
+      orderBy: { createdAt: 'desc' },
       include: {
         availability: true,
         reviews: {

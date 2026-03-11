@@ -47,13 +47,13 @@ bookingsRouter.get('/', async (req, res) => {
       if (from) where.date.gte = from;
       if (to) where.date.lte = to;
     }
-    const orderLatest = sort === 'oldest'
-      ? [{ date: 'asc' }, { startTime: 'asc' }]
-      : [{ date: 'desc' }, { startTime: 'desc' }];
+    const orderByCreation = sort === 'oldest'
+      ? [{ createdAt: 'asc' }]
+      : [{ createdAt: 'desc' }];
     let bookings = await prisma.booking.findMany({
       where,
       include: { artist: true, customer: true, studio: true, payments: true, review: true, projects: { include: { sessions: true } } },
-      orderBy: orderLatest,
+      orderBy: orderByCreation,
     });
     for (const b of bookings) {
       if (!b.shortCode) {

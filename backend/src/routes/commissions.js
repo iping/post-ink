@@ -14,7 +14,7 @@ commissionsRouter.get('/', async (req, res) => {
     const list = await prisma.studioCommission.findMany({
       where,
       include: { studio: true, artist: true },
-      orderBy: [{ studio: { name: 'asc' } }, { artist: { name: 'asc' } }],
+      orderBy: { createdAt: 'desc' },
     });
     res.json(list);
   } catch (e) {

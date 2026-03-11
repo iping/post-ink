@@ -59,6 +59,13 @@ export function ManageLayout() {
               </span>
             )}
           </NavLink>
+          {!sidebarCollapsed && (
+            <div className={styles.sideNavSub} aria-label="Booking actions">
+              <Link to="/manage/bookings/new" className={styles.sideNavSubLink} title="New booking">
+                <span>+ New booking</span>
+              </Link>
+            </div>
+          )}
           <Link to="/manage?tab=projects" className={styles.sideNavLink} data-short="Pr" title="Projects">Projects</Link>
           <Link to="/manage?tab=sessions" className={styles.sideNavLink} data-short="Se" title="Session">Session</Link>
           <Link to="/manage?tab=artists" className={styles.sideNavLink} data-short="A" title="Tattoo Artist">Tattoo Artist</Link>

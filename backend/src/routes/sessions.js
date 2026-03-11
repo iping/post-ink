@@ -12,7 +12,7 @@ sessionsRouter.get('/', async (req, res) => {
     const sessions = await prisma.session.findMany({
       where,
       include: { project: { include: { booking: { include: { artist: true, customer: true } } } } },
-      orderBy: [{ date: 'asc' }, { startTime: 'asc' }],
+      orderBy: { createdAt: 'desc' },
     });
     res.json(sessions);
   } catch (e) {

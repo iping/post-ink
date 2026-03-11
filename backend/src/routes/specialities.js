@@ -6,7 +6,7 @@ export const specialitiesRouter = Router();
 
 specialitiesRouter.get('/', async (req, res) => {
   try {
-    const list = await prisma.speciality.findMany({ orderBy: { name: 'asc' } });
+    const list = await prisma.speciality.findMany({ orderBy: { createdAt: 'desc' } });
     res.json(list);
   } catch (e) {
     res.status(500).json({ error: e.message });

@@ -16,7 +16,7 @@ const defaultPasswordHash = async (plain) => {
 usersRouter.get('/', async (req, res) => {
   try {
     const users = await prisma.user.findMany({
-      orderBy: { createdAt: 'asc' },
+      orderBy: { createdAt: 'desc' },
       select: { id: true, email: true, name: true, role: true, createdAt: true, updatedAt: true },
     });
     res.json(users);

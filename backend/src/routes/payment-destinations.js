@@ -12,7 +12,7 @@ paymentDestinationsRouter.get('/', async (req, res) => {
     const where = activeOnly === 'true' ? { isActive: true } : {};
     const list = await prisma.paymentDestination.findMany({
       where,
-      orderBy: [{ type: 'asc' }, { name: 'asc' }],
+      orderBy: { createdAt: 'desc' },
     });
     res.json(list);
   } catch (e) {
