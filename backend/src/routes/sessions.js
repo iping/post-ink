@@ -63,16 +63,33 @@ sessionsRouter.post('/', async (req, res) => {
   }
 });
 
-// PATCH /api/sessions/:id
+const SESSION_STATUSES = ['scheduled', 'in_progress', 'paused', 'completed'];
+
+// PATCH /api/sessions/:id — update fields and/or transition status (start/pause/stop)
 sessionsRouter.patch('/:id', async (req, res) => {
   try {
-    const { date, startTime, endTime, actualHours, notes } = req.body;
+    const { date, startTime, endTime, actualHours, notes, status } = req.body;
     const data = {};
     if (date !== undefined) data.date = String(date).trim();
     if (startTime !== undefined) data.startTime = String(startTime).trim();
     if (endTime !== undefined) data.endTime = String(endTime).trim();
     if (actualHours !== undefined) data.actualHours = actualHours == null ? null : Number(actualHours);
     if (notes !== undefined) data.notes = notes?.trim() || null;
+
+    if (status !== undefined && SESSION_STATUSES.includes(status)) {
+      data.status = status;
+      const now = new Date();
+      if (status === 'in_progress') {
+        data.startedAt = now;
+        data.pausedAt = null; // resume clears pausedAt
+      } else if (status === 'paused') {
+        data.pausedAt = now;
+      } else if (status === 'completed') {
+        data.completedAt = now;
+        data.pausedAt = data.pausedAt ?? null;
+      }
+    }
+
     const session = await prisma.session.update({
       where: { id: req.params.id },
       data,

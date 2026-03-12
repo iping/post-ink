@@ -127,16 +127,20 @@ model Project {
 
 // ----- Session (each project has minimum 1 session; one session = one date/time block) -----
 model Session {
-  id           String   @id // 6-digit numeric, set in app
+  id           String    @id // 6-digit numeric, set in app
   projectId    String
-  project      Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  date         String   // YYYY-MM-DD
-  startTime    String   // e.g. "09:00"
-  endTime      String   // e.g. "12:00"
-  actualHours  Float?   // optional: actual hours (for hourly billing)
+  project      Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  date         String    // YYYY-MM-DD
+  startTime    String    // e.g. "09:00"
+  endTime      String    // e.g. "12:00"
+  actualHours  Float?    // optional: actual hours (for hourly billing)
   notes        String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  status       String    @default("scheduled") // scheduled | in_progress | paused | completed
+  startedAt    DateTime? // when user clicked Start session
+  pausedAt     DateTime? // when user clicked Pause
+  completedAt  DateTime? // when user clicked Stop
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   @@index([projectId])
 }

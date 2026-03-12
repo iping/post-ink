@@ -49,7 +49,7 @@
 
 .header nav a {
   color: var(--muted);
-  font-size: 0.88rem;
+  font-size: 0.95rem;
   font-weight: 500;
   padding: 0.45rem 0.9rem;
   border-radius: var(--radius);

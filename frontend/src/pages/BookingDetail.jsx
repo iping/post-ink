@@ -3,6 +3,9 @@ import { useParams, Link } from 'react-router-dom';
 import {
   getBooking,
   getCommissions,
+  createProject,
+  createSession,
+  updateSession,
   uploadUrl,
 } from '../api';
 import { formatRupiah, formatWithConversion } from '../currency';
@@ -28,6 +31,10 @@ export function BookingDetail() {
   const [error, setError] = useState(null);
   const [copiedId, setCopiedId] = useState(false);
   const [lightboxUrl, setLightboxUrl] = useState(null);
+   const [creatingProject, setCreatingProject] = useState(false);
+  const [creatingSessionFor, setCreatingSessionFor] = useState(null);
+  const [sessionDrafts, setSessionDrafts] = useState({});
+  const [sessionActionId, setSessionActionId] = useState(null); // id of session we're start/pause/stopping
 
   const load = async () => {
     if (!id) return;
@@ -66,6 +73,111 @@ export function BookingDetail() {
     });
   };
 
+  const handleCreateProject = async () => {
+    if (!booking) return;
+    setError(null);
+    setCreatingProject(true);
+    try {
+      const pricingType = booking.pricingType === 'hourly' ? 'hourly' : 'fixed';
+      const payload = {
+        bookingId: booking.id,
+        name: booking.projectName || `Project – ${booking.customer?.name || booking.artist?.name || 'Customer'}`,
+        pricingType,
+        fixedAmount: pricingType === 'fixed' ? booking.totalAmount : null,
+        hourlyRate: pricingType === 'hourly' ? (booking.artist?.rate ?? null) : null,
+        agreedHours: null,
+        notes: booking.notes || null,
+        firstSession: {
+          date: booking.date,
+          startTime: booking.startTime || '09:00',
+          endTime: booking.endTime || '17:00',
+          actualHours: null,
+          notes: null,
+        },
+      };
+      await createProject(payload);
+      await load();
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setCreatingProject(false);
+    }
+  };
+
+  const handleSessionFieldChange = (projectId, field, value) => {
+    setSessionDrafts((prev) => ({
+      ...prev,
+      [projectId]: {
+        date: prev[projectId]?.date || '',
+        startTime: prev[projectId]?.startTime || '',
+        endTime: prev[projectId]?.endTime || '',
+        notes: prev[projectId]?.notes || '',
+        actualHours: prev[projectId]?.actualHours || '',
+        [field]: value,
+      },
+    }));
+  };
+
+  const handleAddSession = async (projectId) => {
+    if (!booking) return;
+    const draft = sessionDrafts[projectId] || {};
+    if (!draft.date) {
+      setError('Session date is required.');
+      return;
+    }
+    setError(null);
+    setCreatingSessionFor(projectId);
+    try {
+      await createSession({
+        projectId,
+        date: draft.date,
+        startTime: draft.startTime || booking.startTime || '09:00',
+        endTime: draft.endTime || booking.endTime || '17:00',
+        actualHours: draft.actualHours ? Number(draft.actualHours) : null,
+        notes: draft.notes || null,
+      });
+      await load();
+      setSessionDrafts((prev) => {
+        const next = { ...prev };
+        delete next[projectId];
+        return next;
+      });
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setCreatingSessionFor(null);
+    }
+  };
+
+  const handleSessionStatus = async (sessionId, newStatus) => {
+    setError(null);
+    setSessionActionId(sessionId);
+    try {
+      await updateSession(sessionId, { status: newStatus });
+      await load();
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setSessionActionId(null);
+    }
+  };
+
+  const formatSessionTime = (d) => {
+    if (!d) return '—';
+    const date = new Date(d);
+    return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  };
+
+  const formatDurationMinutes = (minutes) => {
+    if (!minutes || minutes <= 0) return null;
+    const total = Math.round(minutes);
+    const hours = Math.floor(total / 60);
+    const mins = total % 60;
+    if (hours && mins) return `${hours}h ${mins}m`;
+    if (hours) return `${hours}h`;
+    return `${mins}m`;
+  };
+
   if (loading) return <div className={artistStyles.page}><div className={layoutStyles.loading}>Loading…</div></div>;
   if (!booking) return <div className={artistStyles.page}><div className={artistStyles.error}>Booking not found.</div></div>;
 
@@ -83,6 +195,7 @@ export function BookingDetail() {
   }
   const preference = parsePreference(booking.preference);
   const artistPhotos = (() => { try { const a = JSON.parse(booking.artist?.photos || '[]'); return Array.isArray(a) ? a : []; } catch { return []; } })();
+  const projects = Array.isArray(booking.projects) ? booking.projects : [];
 
   return (
     <div className={artistStyles.page}>
@@ -213,6 +326,225 @@ export function BookingDetail() {
                 </div>
               ) : (
                 <p className={artistStyles.cardHint}>No artist assigned.</p>
+              )}
+            </div>
+
+            {/* Project & sessions card */}
+            <div className={artistStyles.card}>
+              <div className={artistStyles.cardHead}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M4 4h16v4H4z" /><path d="M4 10h10v4H4z" /><path d="M4 16h7v4H4z" /></svg>
+                <h2>Project &amp; sessions</h2>
+              </div>
+              {projects.length === 0 ? (
+                <>
+                  <p className={artistStyles.cardHint}>
+                    This booking does not have a project yet. Create a project to track multiple tattoo sessions (visits)
+                    under one long‑running work, like a full back piece.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleCreateProject}
+                    className={layoutStyles.addBtn}
+                    disabled={creatingProject}
+                  >
+                    {creatingProject ? 'Creating project…' : 'Create project from this booking'}
+                  </button>
+                </>
+              ) : (
+                <div className={styles.projectSection}>
+                  {projects.map((p) => {
+                    const draft = sessionDrafts[p.id] || { date: '', startTime: '', endTime: '', actualHours: '', notes: '' };
+                    const sessions = Array.isArray(p.sessions) ? [...p.sessions].sort((a, b) => (a.date + a.startTime).localeCompare(b.date + b.startTime)) : [];
+                    const totalActiveMinutes = sessions.reduce((mins, s) => {
+                      if (!s.startedAt) return mins;
+                      const start = new Date(s.startedAt);
+                      const end = s.completedAt ? new Date(s.completedAt) : new Date();
+                      const diffMs = end - start;
+                      if (!Number.isFinite(diffMs) || diffMs <= 0) return mins;
+                      return mins + diffMs / 60000;
+                    }, 0);
+                    const totalDurationLabel = formatDurationMinutes(totalActiveMinutes);
+                    return (
+                      <div key={p.id} className={styles.projectCard}>
+                        <div className={styles.projectHeader}>
+                          <div>
+                            <h3 className={styles.projectTitle}>{p.name}</h3>
+                            <p className={styles.projectMeta}>
+                              {p.pricingType === 'hourly'
+                                ? `Hourly project${p.hourlyRate ? ` · Rate ${formatRupiah(p.hourlyRate)}/hour` : ''}`
+                                : `Fixed project${p.fixedAmount ? ` · ${formatRupiah(p.fixedAmount)}` : ''}`}
+                            </p>
+                            {totalDurationLabel && (
+                              <p className={styles.projectDuration}>
+                                Total active time: <strong>{totalDurationLabel}</strong>
+                              </p>
+                            )}
+                          </div>
+                          <span className={styles.projectBadge}>{sessions.length} session{sessions.length !== 1 ? 's' : ''}</span>
+                        </div>
+                        {p.notes && <p className={styles.projectNotes}>{p.notes}</p>}
+                        {sessions.length === 0 ? (
+                          <p className={artistStyles.cardHint}>No sessions yet for this project.</p>
+                        ) : (
+                          <table className={styles.sessionTable}>
+                            <thead>
+                              <tr>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Hours</th>
+                                <th>Status</th>
+                                <th>Notes</th>
+                                <th className={styles.sessionActionsCol}>Action</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {sessions.map((s) => {
+                                const status = s.status || 'scheduled';
+                                const isBusy = sessionActionId === s.id;
+                                return (
+                                  <tr key={s.id} className={status === 'in_progress' ? styles.sessionRowActive : ''}>
+                                    <td>{s.date}</td>
+                                    <td>{s.startTime} – {s.endTime}</td>
+                                    <td>{s.actualHours != null ? s.actualHours : '—'}</td>
+                                    <td>
+                                      <span className={styles[`sessionStatus_${status}`]} aria-label={`Status: ${status}`}>
+                                        {status === 'scheduled' && 'Scheduled'}
+                                        {status === 'in_progress' && 'In progress'}
+                                        {status === 'paused' && 'Paused'}
+                                        {status === 'completed' && 'Completed'}
+                                      </span>
+                                      {s.startedAt && status !== 'scheduled' && (
+                                        <span className={styles.sessionTimeHint}>Started {formatSessionTime(s.startedAt)}</span>
+                                      )}
+                                      {s.completedAt && (
+                                        <span className={styles.sessionTimeHint}>Ended {formatSessionTime(s.completedAt)}</span>
+                                      )}
+                                    </td>
+                                    <td>{s.notes || '—'}</td>
+                                    <td className={styles.sessionActionsCell}>
+                                      {status === 'scheduled' && (
+                                        <button
+                                          type="button"
+                                          className={styles.startSessionBtn}
+                                          onClick={() => handleSessionStatus(s.id, 'in_progress')}
+                                          disabled={isBusy}
+                                        >
+                                          <span className={styles.startSessionIcon} aria-hidden>▶</span>
+                                          {isBusy ? 'Starting…' : 'Start session'}
+                                        </button>
+                                      )}
+                                      {status === 'in_progress' && (
+                                        <div className={styles.sessionControlGroup}>
+                                          <button
+                                            type="button"
+                                            className={styles.pauseSessionBtn}
+                                            onClick={() => handleSessionStatus(s.id, 'paused')}
+                                            disabled={isBusy}
+                                          >
+                                            {isBusy ? '…' : 'Pause'}
+                                          </button>
+                                          <button
+                                            type="button"
+                                            className={styles.stopSessionBtn}
+                                            onClick={() => handleSessionStatus(s.id, 'completed')}
+                                            disabled={isBusy}
+                                          >
+                                            {isBusy ? '…' : 'Stop'}
+                                          </button>
+                                        </div>
+                                      )}
+                                      {status === 'paused' && (
+                                        <div className={styles.sessionControlGroup}>
+                                          <button
+                                            type="button"
+                                            className={styles.resumeSessionBtn}
+                                            onClick={() => handleSessionStatus(s.id, 'in_progress')}
+                                            disabled={isBusy}
+                                          >
+                                            {isBusy ? '…' : 'Resume'}
+                                          </button>
+                                          <button
+                                            type="button"
+                                            className={styles.stopSessionBtn}
+                                            onClick={() => handleSessionStatus(s.id, 'completed')}
+                                            disabled={isBusy}
+                                          >
+                                            {isBusy ? '…' : 'Stop'}
+                                          </button>
+                                        </div>
+                                      )}
+                                      {status === 'completed' && (
+                                        <span className={styles.sessionCompletedLabel}>Recorded</span>
+                                      )}
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        )}
+                        <div className={styles.sessionForm}>
+                          <h4 className={styles.sessionFormTitle}>Add session</h4>
+                          <div className={styles.sessionFormRow}>
+                            <label className={styles.sessionField}>
+                              <span>Date</span>
+                              <input
+                                type="date"
+                                value={draft.date}
+                                onChange={(e) => handleSessionFieldChange(p.id, 'date', e.target.value)}
+                              />
+                            </label>
+                            <label className={styles.sessionField}>
+                              <span>Start</span>
+                              <input
+                                type="time"
+                                value={draft.startTime}
+                                onChange={(e) => handleSessionFieldChange(p.id, 'startTime', e.target.value)}
+                              />
+                            </label>
+                            <label className={styles.sessionField}>
+                              <span>End</span>
+                              <input
+                                type="time"
+                                value={draft.endTime}
+                                onChange={(e) => handleSessionFieldChange(p.id, 'endTime', e.target.value)}
+                              />
+                            </label>
+                          </div>
+                          <div className={styles.sessionFormRow}>
+                            <label className={styles.sessionField}>
+                              <span>Hours (optional)</span>
+                              <input
+                                type="number"
+                                step="0.5"
+                                min="0"
+                                value={draft.actualHours}
+                                onChange={(e) => handleSessionFieldChange(p.id, 'actualHours', e.target.value)}
+                              />
+                            </label>
+                            <label className={`${styles.sessionField} ${styles.sessionFieldWide}`}>
+                              <span>Notes (optional)</span>
+                              <input
+                                type="text"
+                                value={draft.notes}
+                                onChange={(e) => handleSessionFieldChange(p.id, 'notes', e.target.value)}
+                                placeholder="What was done in this session?"
+                              />
+                            </label>
+                          </div>
+                          <button
+                            type="button"
+                            className={layoutStyles.addBtn}
+                            onClick={() => handleAddSession(p.id)}
+                            disabled={creatingSessionFor === p.id}
+                          >
+                            {creatingSessionFor === p.id ? 'Saving session…' : 'Save session'}
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               )}
             </div>
 

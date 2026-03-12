@@ -270,7 +270,7 @@
 .main {
   flex: 1;
   min-width: 0;
-  padding: 1.5rem 1.75rem 3rem;
+  padding: 2rem 2.25rem 3.5rem;
   overflow-x: auto;
 }
 
@@ -283,7 +283,8 @@
 }
 
 .adminContent {
-  padding: 1.5rem 1.5rem 2rem;
+  padding: 2rem 2rem 2.5rem;
+  font-size: 0.95rem;
 }
 
 .error {
@@ -345,19 +346,19 @@
 .sectionHead h2 {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 1.15rem;
+  font-size: 1.4rem;
   font-weight: 700;
   color: var(--text);
 }
 
 .addBtn {
-  padding: 0.5rem 1.1rem;
+  padding: 0.7rem 1.4rem;
   background: var(--accent);
   color: #fff;
   border: none;
   border-radius: var(--radius);
   font-weight: 600;
-  font-size: 0.875rem;
+  font-size: 0.95rem;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
@@ -371,13 +372,13 @@
 /* ----- Bookings dashboard (first-login overview) ----- */
 .dashboardRow {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-  gap: 0.75rem;
-  margin-bottom: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .dashboardCard {
-  padding: 0.7rem 0.85rem;
+  padding: 1rem 1.1rem;
   border-radius: var(--radius);
   border: 1px solid var(--border);
   background: var(--surface);
@@ -398,20 +399,20 @@
 }
 
 .dashboardLabel {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--text-secondary);
 }
 
 .dashboardValue {
-  font-size: 1.1rem;
+  font-size: 1.4rem;
   font-weight: 700;
   color: var(--text);
 }
 
 .dashboardSub {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: var(--muted);
 }
 
@@ -426,7 +427,7 @@
 .chartCard {
   flex: 1;
   min-width: 260px;
-  padding: 0.9rem 1rem;
+  padding: 1.1rem 1.2rem;
   border-radius: var(--radius);
   border: 1px solid var(--border);
   background: var(--surface);
@@ -673,10 +674,10 @@
 
 .tableWrap {
   overflow-x: auto;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-light);
   border-radius: 8px;
   background: var(--surface);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  box-shadow: none;
 }
 
 .table {
@@ -687,15 +688,15 @@
 
 .table th,
 .table td {
-  padding: 0.5rem 0.65rem;
+  padding: 0.75rem 0.85rem;
   text-align: left;
   border-bottom: 1px solid var(--border);
   vertical-align: middle;
-  font-size: 0.8125rem;
+  font-size: 0.9rem;
 }
 
 .table th {
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   color: var(--text-secondary);
   font-weight: 600;
   text-transform: uppercase;

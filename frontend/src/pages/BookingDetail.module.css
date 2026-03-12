@@ -418,6 +418,273 @@
   color: var(--text-secondary);
 }
 
+/* Project & sessions */
+.projectSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-top: 0.5rem;
+}
+
+.projectCard {
+  padding: 1.1rem 1.25rem;
+  border-radius: 14px;
+  border: 1px solid var(--border-light);
+  background: var(--surface);
+}
+
+.projectHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.projectTitle {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 650;
+  color: var(--text);
+}
+
+.projectMeta {
+  margin: 0.15rem 0 0;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+.projectDuration {
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.projectBadge {
+  font-size: 0.82rem;
+  padding: 0.25rem 0.8rem;
+  border-radius: 999px;
+  background: var(--bg-warm);
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.projectNotes {
+  margin: 0.3rem 0 0.7rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.sessionTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.4rem 0 0.9rem;
+  font-size: 0.9rem;
+}
+
+.sessionTable th,
+.sessionTable td {
+  padding: 0.55rem 0.5rem;
+  border-bottom: 1px solid var(--border-light);
+  text-align: left;
+}
+
+.sessionTable th {
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.sessionForm {
+  border-top: 1px solid var(--border);
+  padding-top: 0.7rem;
+  margin-top: 0.5rem;
+}
+
+.sessionFormTitle {
+  margin: 0 0 0.6rem;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+}
+
+.sessionFormRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.6rem;
+  margin-bottom: 0.6rem;
+}
+
+.sessionField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+  min-width: 100px;
+  flex: 1;
+}
+
+.sessionFieldWide {
+  flex: 2;
+}
+
+.sessionField span {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.sessionField input {
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  padding: 0.45rem 0.6rem;
+  font-size: 0.88rem;
+  background: var(--bg);
+}
+
+/* Session status & controls */
+.sessionActionsCol {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.sessionActionsCell {
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.sessionRowActive {
+  background: rgba(232, 90, 42, 0.08);
+}
+
+.sessionStatus_scheduled {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.sessionStatus_in_progress {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.sessionStatus_paused {
+  color: #b8860b;
+  font-weight: 600;
+}
+
+.sessionStatus_completed {
+  color: var(--success, #0d7a4a);
+  font-weight: 600;
+}
+
+.sessionTimeHint {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-top: 0.1rem;
+}
+
+/* Eye-catching Start session button */
+.startSessionBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, var(--accent) 0%, #e85a2a 100%);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(232, 90, 42, 0.4);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.startSessionBtn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(232, 90, 42, 0.5);
+}
+
+.startSessionBtn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.startSessionBtn:disabled {
+  opacity: 0.8;
+  cursor: not-allowed;
+}
+
+.startSessionIcon {
+  font-size: 0.85em;
+  line-height: 1;
+}
+
+.sessionControlGroup {
+  display: inline-flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.pauseSessionBtn {
+  padding: 0.35rem 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #b8860b;
+  background: rgba(184, 134, 11, 0.15);
+  border: 1px solid rgba(184, 134, 11, 0.4);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.pauseSessionBtn:hover:not(:disabled) {
+  background: rgba(184, 134, 11, 0.25);
+}
+
+.stopSessionBtn {
+  padding: 0.35rem 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--danger, #c53030);
+  background: rgba(197, 48, 48, 0.1);
+  border: 1px solid rgba(197, 48, 48, 0.35);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.stopSessionBtn:hover:not(:disabled) {
+  background: rgba(197, 48, 48, 0.2);
+}
+
+.resumeSessionBtn {
+  padding: 0.35rem 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-dim);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.resumeSessionBtn:hover:not(:disabled) {
+  background: rgba(255, 120, 80, 0.25);
+}
+
+.pauseSessionBtn:disabled,
+.stopSessionBtn:disabled,
+.resumeSessionBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.sessionCompletedLabel {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--success, #0d7a4a);
+}
+
 .actions {
   margin-bottom: 1rem;
 }
