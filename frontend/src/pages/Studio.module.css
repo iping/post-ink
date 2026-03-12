@@ -368,6 +368,246 @@
   background: var(--accent-hover);
 }
 
+/* ----- Bookings dashboard (first-login overview) ----- */
+.dashboardRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.dashboardCard {
+  padding: 0.7rem 0.85rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.dashboardCardClickable {
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition), transform var(--transition);
+}
+
+.dashboardCardClickable:hover {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.dashboardLabel {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+}
+
+.dashboardValue {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.dashboardSub {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+/* Simple charts */
+.chartRow {
+  margin-bottom: 1.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.chartCard {
+  flex: 1;
+  min-width: 260px;
+  padding: 0.9rem 1rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.chartHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+}
+
+.chartTitle {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+}
+
+.chartSubtitle {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.chartBars {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.4rem;
+  height: 120px;
+}
+
+.chartBar {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.chartBarFillWrapper {
+  flex: 1;
+  width: 100%;
+  border-radius: 999px;
+  background: var(--bg-warm);
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+}
+
+.chartBarFill {
+  width: 100%;
+  background: var(--accent);
+  border-radius: 999px 999px 0 0;
+  transition: height 0.2s ease;
+}
+
+.chartBarLabel {
+  font-size: 0.75rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* Artist leaderboard */
+.leaderboardCard {
+  flex: 1;
+  min-width: 260px;
+  padding: 0.9rem 1rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.leaderboardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.6rem;
+}
+
+.leaderboardToggle {
+  display: inline-flex;
+  padding: 0.15rem;
+  border-radius: 999px;
+  background: var(--bg-warm);
+}
+
+.leaderboardToggleBtn {
+  border: none;
+  border-radius: 999px;
+  padding: 0.25rem 0.7rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--muted);
+  background: transparent;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition);
+}
+
+.leaderboardToggleBtnActive {
+  background: var(--surface);
+  color: var(--accent);
+}
+
+.leaderboardList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.leaderboardItem {
+  padding: 0.45rem 0;
+}
+
+.leaderboardMeta {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.25rem;
+}
+
+.leaderboardRank {
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 999px;
+  background: var(--bg-warm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.leaderboardText {
+  flex: 1;
+  min-width: 0;
+}
+
+.leaderboardName {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.leaderboardSmall {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.leaderboardValue {
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.leaderboardBarTrack {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--bg-warm);
+  overflow: hidden;
+}
+
+.leaderboardBarFill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent), #ff9f7c);
+  transition: width 0.25s ease;
+}
+
 /* ----- Filters ----- */
 .filterBar {
   display: flex;

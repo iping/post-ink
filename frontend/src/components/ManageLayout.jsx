@@ -17,10 +17,14 @@ export function ManageLayout() {
       .catch(() => setPendingBookingsCount(0));
   }, [location.pathname]);
 
+  const search = new URLSearchParams(location.search);
+  const currentTab = search.get('tab') || 'dashboard';
+
+  const onDashboardSection =
+    location.pathname === '/manage' && currentTab === 'dashboard';
+
   const onBookingsSection =
-    location.pathname === '/manage' ||
-    location.pathname === '/manage/studio' ||
-    location.pathname.startsWith('/manage/bookings/');
+    currentTab === 'bookings' || location.pathname.startsWith('/manage/bookings/');
 
   return (
     <div className={styles.wrap}>
@@ -48,17 +52,20 @@ export function ManageLayout() {
           <NavLink
             to="/manage"
             end
-            className={() => `${styles.sideNavLink} ${onBookingsSection ? styles.sideNavActive : ''}`}
-            data-short="B"
-            title="Bookings"
+            className={() => `${styles.sideNavLink} ${onDashboardSection ? styles.sideNavActive : ''}`}
+            data-short="D"
+            title="Dashboard"
           >
-            Bookings
+            Dashboard
             {pendingBookingsCount > 0 && (
               <span className={styles.sideNavBadge} aria-label={`${pendingBookingsCount} pending`}>
                 {pendingBookingsCount}
               </span>
             )}
           </NavLink>
+          <Link to="/manage?tab=bookings" className={styles.sideNavLink} data-short="B" title="Bookings">
+            Bookings
+          </Link>
           {!sidebarCollapsed && (
             <div className={styles.sideNavSub} aria-label="Booking actions">
               <Link to="/manage/bookings/new" className={styles.sideNavSubLink} title="New booking">

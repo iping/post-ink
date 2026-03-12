@@ -139,13 +139,16 @@ function artistTagColor(artistId) {
 
 export function Studio() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const tabParam = searchParams.get('tab') || 'bookings';
+  const tabParam = searchParams.get('tab') || 'dashboard';
   const [tab, setTab] = useState(tabParam);
   const [createdToast, setCreatedToast] = useState(false);
+  const [artistLeaderboardMetric, setArtistLeaderboardMetric] = useState('orders');
 
   useEffect(() => {
-    const t = searchParams.get('tab') || 'bookings';
-    if (['bookings', 'artists', 'payments', 'commissions', 'customers', 'specialities', 'payment-destinations', 'users'].includes(t)) setTab(t);
+    const t = searchParams.get('tab') || 'dashboard';
+    if (['dashboard', 'bookings', 'artists', 'payments', 'commissions', 'customers', 'specialities', 'payment-destinations', 'users'].includes(t)) {
+      setTab(t);
+    }
   }, [searchParams]);
 
   useEffect(() => {
@@ -160,7 +163,7 @@ export function Studio() {
 
   const switchTab = (t) => {
     setTab(t);
-    setSearchParams(t === 'bookings' ? {} : { tab: t }, { replace: true });
+    setSearchParams(t === 'dashboard' ? {} : { tab: t }, { replace: true });
   };
   const [payments, setPayments] = useState([]);
   const [commissions, setCommissions] = useState([]);
@@ -262,6 +265,71 @@ export function Studio() {
   const paginatedSpecialities = specialitiesList.slice((specPage - 1) * ROWS_PER_PAGE, specPage * ROWS_PER_PAGE);
   const paginatedDests = destList.slice((destPage - 1) * ROWS_PER_PAGE, destPage * ROWS_PER_PAGE);
 
+  // High-level metrics for dashboard
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const totalBookings = bookings.length;
+  const totalPaidBookings = bookings.filter((b) => b.status === 'Paid').length;
+  const totalUnpaidBookings = bookings.filter((b) => b.status === 'Unpaid').length;
+  const todayBookings = bookings.filter((b) => b.date === todayStr).length;
+  const upcomingBookings = bookings.filter((b) => b.date > todayStr).length;
+  const totalCustomers = customers.length;
+  const totalArtists = artists.length;
+  const totalRevenue = payments
+    .filter((p) => p.status === 'completed')
+    .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+
+  // Artist performance (orders + revenue)
+  const artistStats = useMemo(() => {
+    if (!Array.isArray(artists) || artists.length === 0) return [];
+    return artists.map((a) => {
+      const orders = bookings.filter((b) => b.artistId === a.id).length;
+      const revenue = payments
+        .filter(
+          (p) =>
+            p.status === 'completed' &&
+            p.booking &&
+            (p.booking.artistId === a.id || p.booking.artist?.id === a.id),
+        )
+        .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+      return {
+        id: a.id,
+        name: a.name || 'Unknown artist',
+        orders,
+        revenue,
+      };
+    });
+  }, [artists, bookings, payments]);
+
+  const maxArtistOrders = Math.max(1, ...artistStats.map((a) => a.orders || 0));
+  const maxArtistRevenue = Math.max(1, ...artistStats.map((a) => a.revenue || 0));
+
+  const artistLeaderboard = useMemo(() => {
+    const sorted = [...artistStats];
+    if (artistLeaderboardMetric === 'revenue') {
+      sorted.sort((a, b) => (b.revenue - a.revenue) || (b.orders - a.orders));
+    } else {
+      sorted.sort((a, b) => (b.orders - a.orders) || (b.revenue - a.revenue));
+    }
+    return sorted;
+  }, [artistStats, artistLeaderboardMetric]);
+
+  // Bookings per day for the last 7 days (for simple chart)
+  const bookingsByDay = (() => {
+    const daysBack = 6;
+    const result = [];
+    const today = new Date();
+    for (let i = daysBack; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      const dateStr = d.toISOString().slice(0, 10);
+      const label = d.toLocaleDateString('en-GB', { weekday: 'short' });
+      const count = bookings.filter((b) => b.date === dateStr).length;
+      result.push({ date: dateStr, label, count });
+    }
+    return result;
+  })();
+  const maxBookingsPerDay = Math.max(1, ...bookingsByDay.map((d) => d.count));
+
   const getCustomerBookings = (customerId) => bookings.filter((b) => b.customerId === customerId);
   const getLatestBooking = (customerId) => {
     const list = getCustomerBookings(customerId).sort((a, b) => {
@@ -333,13 +401,6 @@ export function Studio() {
   useEffect(() => {
     load();
   }, []);
-
-  useEffect(() => {
-    const t = searchParams.get('tab') || 'bookings';
-    if (['bookings', 'artists', 'payments', 'commissions', 'customers', 'specialities', 'payment-destinations', 'users'].includes(t)) {
-      setTab(t);
-    }
-  }, [searchParams]);
 
   const getCommissionFor = (artistId, studioId) =>
     commissions.find((c) => c.artistId === artistId && c.studioId === studioId);
@@ -582,6 +643,148 @@ export function Studio() {
 
       <div className={styles.adminCard}>
         <div className={styles.adminContent}>
+      {tab === 'dashboard' && (
+        <section className={styles.section}>
+          <div className={styles.sectionHead}>
+            <div>
+              <h2>Dashboard</h2>
+              <span className={styles.countHint}>Overview of bookings, revenue, and customers</span>
+            </div>
+          </div>
+          <div className={styles.dashboardRow}>
+            <div className={styles.dashboardCard}>
+              <span className={styles.dashboardLabel}>Total bookings</span>
+              <span className={styles.dashboardValue}>{totalBookings}</span>
+              <span className={styles.dashboardSub}>
+                {todayBookings} today · {upcomingBookings} upcoming
+              </span>
+            </div>
+            <button
+              type="button"
+              className={`${styles.dashboardCard} ${styles.dashboardCardClickable}`}
+              onClick={() => { switchTab('bookings'); setBookingSearch('Paid'); setBookingPage(1); }}
+            >
+              <span className={styles.dashboardLabel}>Paid bookings</span>
+              <span className={styles.dashboardValue}>{totalPaidBookings}</span>
+              <span className={styles.dashboardSub}>Go to table filtered by Paid</span>
+            </button>
+            <button
+              type="button"
+              className={`${styles.dashboardCard} ${styles.dashboardCardClickable}`}
+              onClick={() => { switchTab('bookings'); setBookingSearch('Unpaid'); setBookingPage(1); }}
+            >
+              <span className={styles.dashboardLabel}>Unpaid bookings</span>
+              <span className={styles.dashboardValue}>{totalUnpaidBookings}</span>
+              <span className={styles.dashboardSub}>Go to table filtered by Unpaid</span>
+            </button>
+            <div className={styles.dashboardCard}>
+              <span className={styles.dashboardLabel}>Total revenue</span>
+              <span className={styles.dashboardValue}>{formatRupiah(totalRevenue)}</span>
+              <span className={styles.dashboardSub}>Completed payments</span>
+            </div>
+            <div className={styles.dashboardCard}>
+              <span className={styles.dashboardLabel}>Customers</span>
+              <span className={styles.dashboardValue}>{totalCustomers}</span>
+              <span className={styles.dashboardSub}>Active profiles</span>
+            </div>
+            <div className={styles.dashboardCard}>
+              <span className={styles.dashboardLabel}>Artists</span>
+              <span className={styles.dashboardValue}>{totalArtists}</span>
+              <span className={styles.dashboardSub}>Tattoo artists in studio</span>
+            </div>
+          </div>
+          <div className={styles.chartRow}>
+            <div className={styles.chartCard}>
+              <div className={styles.chartHeader}>
+                <span className={styles.chartTitle}>Bookings last 7 days</span>
+                <span className={styles.chartSubtitle}>Daily count</span>
+              </div>
+              <div className={styles.chartBars}>
+                {bookingsByDay.map((d) => (
+                  <div key={d.date} className={styles.chartBar}>
+                    <div className={styles.chartBarFillWrapper}>
+                      <div
+                        className={styles.chartBarFill}
+                        style={{ height: `${(d.count / maxBookingsPerDay) * 100 || 0}%` }}
+                        title={`${d.count} bookings on ${d.date}`}
+                      />
+                    </div>
+                    <span className={styles.chartBarLabel}>{d.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          {artistStats.length > 0 && (
+            <div className={styles.chartRow}>
+              <div className={styles.leaderboardCard}>
+                <div className={styles.leaderboardHeader}>
+                  <div>
+                    <span className={styles.chartTitle}>Artist performance</span>
+                    <span className={styles.chartSubtitle}>Top contributors by orders and revenue</span>
+                  </div>
+                  <div
+                    className={styles.leaderboardToggle}
+                    role="tablist"
+                    aria-label="Artist leaderboard metric"
+                  >
+                    <button
+                      type="button"
+                      className={`${styles.leaderboardToggleBtn} ${artistLeaderboardMetric === 'orders' ? styles.leaderboardToggleBtnActive : ''}`}
+                      onClick={() => setArtistLeaderboardMetric('orders')}
+                      role="tab"
+                      aria-selected={artistLeaderboardMetric === 'orders'}
+                    >
+                      By orders
+                    </button>
+                    <button
+                      type="button"
+                      className={`${styles.leaderboardToggleBtn} ${artistLeaderboardMetric === 'revenue' ? styles.leaderboardToggleBtnActive : ''}`}
+                      onClick={() => setArtistLeaderboardMetric('revenue')}
+                      role="tab"
+                      aria-selected={artistLeaderboardMetric === 'revenue'}
+                    >
+                      By revenue
+                    </button>
+                  </div>
+                </div>
+                <ol className={styles.leaderboardList}>
+                  {artistLeaderboard.slice(0, 6).map((a, index) => {
+                    const value = artistLeaderboardMetric === 'revenue' ? a.revenue : a.orders;
+                    const max = artistLeaderboardMetric === 'revenue' ? maxArtistRevenue : maxArtistOrders;
+                    const width = max ? (value / max) * 100 : 0;
+                    return (
+                      <li key={a.id} className={styles.leaderboardItem}>
+                        <div className={styles.leaderboardMeta}>
+                          <span className={styles.leaderboardRank}>{index + 1}</span>
+                          <div className={styles.leaderboardText}>
+                            <span className={styles.leaderboardName}>{a.name}</span>
+                            <span className={styles.leaderboardSmall}>
+                              {a.orders} orders · {formatRupiah(a.revenue)}
+                            </span>
+                          </div>
+                          <span className={styles.leaderboardValue}>
+                            {artistLeaderboardMetric === 'revenue'
+                              ? formatRupiah(a.revenue)
+                              : `${a.orders} orders`}
+                          </span>
+                        </div>
+                        <div className={styles.leaderboardBarTrack}>
+                          <div
+                            className={styles.leaderboardBarFill}
+                            style={{ width: `${width || 0}%` }}
+                          />
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ol>
+              </div>
+            </div>
+          )}
+        </section>
+      )}
+
       {tab === 'bookings' && (
         <section className={styles.section}>
           <div className={styles.sectionHead}>
