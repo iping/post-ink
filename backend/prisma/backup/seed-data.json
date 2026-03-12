@@ -1,5 +1,5 @@
 {
-  "exportedAt": "2026-03-12T09:27:43.659Z",
+  "exportedAt": "2026-03-12T19:54:00.642Z",
   "specialities": [
     {
       "id": "cmmn63x1g0004hlltta7jofnc",
@@ -18835,7 +18835,20 @@
           "updatedAt": "2026-03-12T08:27:15.070Z"
         }
       ],
-      "projects": []
+      "projects": [
+        {
+          "id": "221147",
+          "bookingId": "cmmn7fqi80005g6o0b4jqufrk",
+          "name": "Karin Wolff – Oscar Setiawan – 1",
+          "pricingType": "fixed",
+          "fixedAmount": null,
+          "hourlyRate": null,
+          "agreedHours": null,
+          "notes": null,
+          "createdAt": "2026-03-12T19:09:22.745Z",
+          "updatedAt": "2026-03-12T19:09:22.745Z"
+        }
+      ]
     },
     {
       "id": "cmmn6f4sk0009lgs0c359518x",
@@ -21717,6 +21730,18 @@
       "notes": "Roses and shading. Final session for this piece.",
       "createdAt": "2026-03-12T07:50:05.605Z",
       "updatedAt": "2026-03-12T07:50:05.605Z"
+    },
+    {
+      "id": "221147",
+      "bookingId": "cmmn7fqi80005g6o0b4jqufrk",
+      "name": "Karin Wolff – Oscar Setiawan – 1",
+      "pricingType": "fixed",
+      "fixedAmount": null,
+      "hourlyRate": null,
+      "agreedHours": null,
+      "notes": null,
+      "createdAt": "2026-03-12T19:09:22.745Z",
+      "updatedAt": "2026-03-12T19:09:22.745Z"
     }
   ],
   "sessions": [
@@ -21728,6 +21753,10 @@
       "endTime": "12:00",
       "actualHours": 2,
       "notes": "Outline and wildflower details. Client comfortable, no touch-ups needed.",
+      "status": "scheduled",
+      "startedAt": null,
+      "pausedAt": null,
+      "completedAt": null,
       "createdAt": "2026-03-12T07:50:05.602Z",
       "updatedAt": "2026-03-12T07:50:05.602Z",
       "project": {
@@ -21751,6 +21780,10 @@
       "endTime": "17:00",
       "actualHours": 2,
       "notes": "Eagle outline completed. Next session: roses and color.",
+      "status": "scheduled",
+      "startedAt": null,
+      "pausedAt": null,
+      "completedAt": null,
       "createdAt": "2026-03-12T07:50:05.605Z",
       "updatedAt": "2026-03-12T07:50:05.605Z",
       "project": {
@@ -21774,6 +21807,10 @@
       "endTime": "17:00",
       "actualHours": 1.5,
       "notes": "Roses and background shading. Client very happy.",
+      "status": "scheduled",
+      "startedAt": null,
+      "pausedAt": null,
+      "completedAt": null,
       "createdAt": "2026-03-12T07:50:05.606Z",
       "updatedAt": "2026-03-12T07:50:05.606Z",
       "project": {
@@ -21787,6 +21824,33 @@
         "notes": "Roses and shading. Final session for this piece.",
         "createdAt": "2026-03-12T07:50:05.605Z",
         "updatedAt": "2026-03-12T07:50:05.605Z"
+      }
+    },
+    {
+      "id": "453135",
+      "projectId": "221147",
+      "date": "2026-03-27",
+      "startTime": "18:00",
+      "endTime": "19:00",
+      "actualHours": null,
+      "notes": null,
+      "status": "completed",
+      "startedAt": "2026-03-12T19:25:13.538Z",
+      "pausedAt": null,
+      "completedAt": "2026-03-12T19:41:19.565Z",
+      "createdAt": "2026-03-12T19:09:22.753Z",
+      "updatedAt": "2026-03-12T19:41:19.566Z",
+      "project": {
+        "id": "221147",
+        "bookingId": "cmmn7fqi80005g6o0b4jqufrk",
+        "name": "Karin Wolff – Oscar Setiawan – 1",
+        "pricingType": "fixed",
+        "fixedAmount": null,
+        "hourlyRate": null,
+        "agreedHours": null,
+        "notes": null,
+        "createdAt": "2026-03-12T19:09:22.745Z",
+        "updatedAt": "2026-03-12T19:09:22.745Z"
       }
     }
   ],
