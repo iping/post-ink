@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { generateNumericId } from '../utils/id.js';
 
 const prisma = new PrismaClient();
 export const customersRouter = Router();
@@ -20,8 +21,9 @@ customersRouter.get('/', async (req, res) => {
 customersRouter.post('/', async (req, res) => {
   try {
     const { name, email, phone } = req.body;
+    const id = await generateNumericId(prisma, 'customer');
     const customer = await prisma.customer.create({
-      data: { name, email: email || null, phone: phone || null },
+      data: { id, name, email: email || null, phone: phone || null },
     });
     res.status(201).json(customer);
   } catch (e) {

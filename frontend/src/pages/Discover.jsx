@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getArtists, getAvailability, getReviews, uploadUrl } from '../api';
+import { getArtists, getAvailability, uploadUrl } from '../api';
 import { formatRupiah, formatWithConversion } from '../currency';
 import styles from './Discover.module.css';
 
@@ -34,7 +34,6 @@ export function Discover() {
   const [selectedArtist, setSelectedArtist] = useState(null);
   const [availability, setAvailability] = useState([]);
   const [loadingAvail, setLoadingAvail] = useState(false);
-  const [artistReviews, setArtistReviews] = useState([]);
   const [lightboxImg, setLightboxImg] = useState(null);
 
   useEffect(() => {
@@ -63,22 +62,16 @@ export function Discover() {
   const openProfile = async (artist) => {
     setSelectedArtist(artist);
     setLoadingAvail(true);
-    setArtistReviews([]);
     try {
       const today = new Date();
       const from = today.toISOString().slice(0, 10);
       const future = new Date(today);
       future.setDate(future.getDate() + 30);
       const to = future.toISOString().slice(0, 10);
-      const [slots, reviews] = await Promise.all([
-        getAvailability(artist.id, from, to),
-        getReviews({ artistId: artist.id }),
-      ]);
+      const slots = await getAvailability(artist.id, from, to);
       setAvailability(slots.filter((s) => s.isAvailable));
-      setArtistReviews(reviews);
     } catch {
       setAvailability([]);
-      setArtistReviews([]);
     } finally {
       setLoadingAvail(false);
     }
@@ -87,7 +80,6 @@ export function Discover() {
   const closeProfile = () => {
     setSelectedArtist(null);
     setAvailability([]);
-    setArtistReviews([]);
   };
 
   const availByDate = {};
@@ -155,8 +147,6 @@ export function Discover() {
           {filtered.map((a) => {
             const photos = safeParse(a.photos);
             const portfolio = safeParse(a.portfolio);
-            const revs = a.reviews || [];
-            const avg = revs.length > 0 ? Math.round((revs.reduce((s, r) => s + r.rating, 0) / revs.length) * 10) / 10 : null;
             return (
               <article key={a.id} className={styles.card} onClick={() => openProfile(a)}>
                 <div className={styles.cardImg}>
@@ -173,13 +163,6 @@ export function Discover() {
                 </div>
                 <div className={styles.cardContent}>
                   <h3>{a.name}</h3>
-                  {avg != null && (
-                    <div className={styles.cardRating}>
-                      <span className={styles.cardStars}>{'★'.repeat(Math.round(avg))}</span>
-                      <span className={styles.cardRatingNum}>{avg}</span>
-                      <span className={styles.cardReviewCount}>({revs.length})</span>
-                    </div>
-                  )}
                   {a.speciality && (
                     <div className={styles.tags}>
                       {a.speciality.split(',').map((s) => (
@@ -309,41 +292,6 @@ export function Discover() {
                 </div>
               )}
             </section>
-
-            {artistReviews.length > 0 && (
-              <section className={styles.reviewsSection}>
-                <h3>Reviews ({artistReviews.length})</h3>
-                {(() => {
-                  const avg = Math.round((artistReviews.reduce((s, r) => s + r.rating, 0) / artistReviews.length) * 10) / 10;
-                  return (
-                    <div className={styles.reviewSummary}>
-                      <span className={styles.reviewAvgNum}>{avg}</span>
-                      <span className={styles.reviewStars}>{'★'.repeat(Math.round(avg))}{'☆'.repeat(5 - Math.round(avg))}</span>
-                      <span className={styles.reviewCount}>{artistReviews.length} review{artistReviews.length !== 1 ? 's' : ''}</span>
-                    </div>
-                  );
-                })()}
-                <div className={styles.reviewList}>
-                  {artistReviews.slice(0, 5).map((r) => (
-                    <div key={r.id} className={styles.reviewItem}>
-                      <div className={styles.reviewItemHeader}>
-                        <span className={styles.reviewerBubble}>{(r.customer?.name || 'A')[0].toUpperCase()}</span>
-                        <div className={styles.reviewerMeta}>
-                          <span className={styles.reviewerLabel}>{r.customer?.name || 'Anonymous'}</span>
-                          <span className={styles.reviewItemStars}>{'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}</span>
-                        </div>
-                      </div>
-                      {r.comment && <p className={styles.reviewItemText}>{r.comment}</p>}
-                    </div>
-                  ))}
-                  {artistReviews.length > 5 && (
-                    <p className={styles.moreReviews}>
-                      + {artistReviews.length - 5} more review{artistReviews.length - 5 !== 1 ? 's' : ''}
-                    </p>
-                  )}
-                </div>
-              </section>
-            )}
 
             <div className={styles.profileCta}>
               <div className={styles.ctaCard}>

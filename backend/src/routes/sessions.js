@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { generateNumericId } from '../utils/id.js';
 
 const prisma = new PrismaClient();
 export const sessionsRouter = Router();
@@ -41,7 +42,9 @@ sessionsRouter.post('/', async (req, res) => {
     if (!projectId || !date) {
       return res.status(400).json({ error: 'projectId and date required' });
     }
+    const id = await generateNumericId(prisma, 'session');
     const data = {
+      id,
       projectId,
       date: String(date).trim(),
       startTime: (startTime != null && String(startTime).trim()) ? String(startTime).trim() : '09:00',

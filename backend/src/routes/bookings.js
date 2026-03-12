@@ -52,7 +52,7 @@ bookingsRouter.get('/', async (req, res) => {
       : [{ createdAt: 'desc' }];
     let bookings = await prisma.booking.findMany({
       where,
-      include: { artist: true, customer: true, studio: true, payments: true, review: true, projects: { include: { sessions: true } } },
+      include: { artist: true, customer: true, studio: true, payments: true, projects: { include: { sessions: true } } },
       orderBy: orderByCreation,
     });
     for (const b of bookings) {
@@ -79,7 +79,7 @@ bookingsRouter.get('/:id', async (req, res) => {
   try {
     const booking = await prisma.booking.findUnique({
       where: { id: req.params.id },
-      include: { artist: true, customer: true, studio: true, payments: true, review: true, projects: { include: { sessions: true } } },
+      include: { artist: true, customer: true, studio: true, payments: true, projects: { include: { sessions: true } } },
     });
     if (!booking) return res.status(404).json({ error: 'Booking not found' });
     const paidTotal = (booking.payments || []).filter((p) => p.status === 'completed').reduce((s, p) => s + p.amount, 0);
@@ -94,7 +94,7 @@ bookingsRouter.get('/:id', async (req, res) => {
 // POST /api/bookings
 bookingsRouter.post('/', async (req, res) => {
   try {
-    const { artistId, customerId, studioId, date, startTime, endTime, status, notes, totalAmount, placement, preference, pricingType } = req.body;
+    const { artistId, customerId, studioId, date, startTime, endTime, status, notes, totalAmount, placement, preference, pricingType, projectName } = req.body;
     const shortCode = await ensureUniqueShortCode();
     const data = {
       shortCode,
@@ -104,11 +104,12 @@ bookingsRouter.post('/', async (req, res) => {
       date,
       startTime: startTime || '09:00',
       endTime: endTime || '17:00',
-      status: status || 'pending',
+      status: (status === 'Paid' || status === 'Unpaid') ? status : 'Unpaid',
       notes: notes || null,
       totalAmount: totalAmount != null ? Number(totalAmount) : null,
       placement: placement || null,
       preference: preference || null,
+      projectName: projectName || null,
     };
     if (pricingType === 'fixed' || pricingType === 'hourly') data.pricingType = pricingType;
     const booking = await prisma.booking.create({
@@ -139,11 +140,12 @@ bookingsRouter.patch('/:id', async (req, res) => {
     if (body.date != null) data.date = body.date;
     if (body.startTime != null) data.startTime = body.startTime;
     if (body.endTime != null) data.endTime = body.endTime;
-    if (body.status != null) data.status = body.status;
+    if (body.status === 'Paid' || body.status === 'Unpaid') data.status = body.status;
     if (body.notes !== undefined) data.notes = body.notes || null;
     if (body.totalAmount !== undefined) data.totalAmount = body.totalAmount == null ? null : Number(body.totalAmount);
     if (body.placement !== undefined) data.placement = body.placement || null;
     if (body.preference !== undefined) data.preference = body.preference || null;
+    if (body.projectName !== undefined) data.projectName = body.projectName || null;
     if (body.pricingType === 'fixed' || body.pricingType === 'hourly') data.pricingType = body.pricingType;
     const booking = await prisma.booking.update({
       where: { id: req.params.id },

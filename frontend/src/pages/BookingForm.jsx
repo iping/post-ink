@@ -21,7 +21,7 @@ import styles from './BookingForm.module.css';
 import layoutStyles from './Studio.module.css';
 import artistStyles from './ArtistForm.module.css';
 
-const BOOKING_STATUSES = ['draft', 'pending', 'confirmed', 'in_progress', 'completed', 'cancelled'];
+const BOOKING_STATUSES = ['Unpaid', 'Paid'];
 
 const MAX_PREFERENCE_IMAGES = 3;
 const MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2MB
@@ -70,13 +70,14 @@ export function BookingForm() {
     date: '',
     startTime: '09:00',
     endTime: '17:00',
-    status: 'draft',
+    status: 'Unpaid',
     pricingType: 'fixed', // 'fixed' = final transaction refers to totalAmount; 'hourly' = total from projects (accumulative)
     totalAmount: '',
     placement: '',
     placementOther: '',
     preference: '',
     preferenceImages: [],
+    projectName: '',
     notes: '',
   });
   const [selectedSlot, setSelectedSlot] = useState(null);
@@ -90,7 +91,7 @@ export function BookingForm() {
   const [uploadingEvidence, setUploadingEvidence] = useState(false);
   const [paymentDestinations, setPaymentDestinations] = useState([]);
   const [payments, setPayments] = useState([]);
-  const [estimationMode, setEstimationMode] = useState('unlimited'); // 'unlimited' | 'rate'
+  const [estimationMode, setEstimationMode] = useState('rate'); // 'rate' = Fixed rate, 'unlimited' = Hourly rate
   const [estimationAmount, setEstimationAmount] = useState('');
   const [firstDepositAmount, setFirstDepositAmount] = useState(''); // editable first deposit; must be >= artist 1h rate
   useEffect(() => {
@@ -136,15 +137,17 @@ export function BookingForm() {
             date: b.date,
             startTime: b.startTime,
             endTime: b.endTime,
-            status: b.status,
+            status: (b.status === 'Paid' || b.status === 'Unpaid') ? b.status : 'Unpaid',
             pricingType: b.pricingType === 'hourly' ? 'hourly' : 'fixed',
             totalAmount: b.totalAmount ?? '',
             placement: placementInList ? b.placement : (b.placement ? 'Other' : ''),
             placementOther: placementInList ? '' : (b.placement || ''),
             preference: preferenceText,
             preferenceImages,
+            projectName: b.projectName ?? '',
             notes: b.notes || '',
           });
+          setEstimationMode(b.pricingType === 'hourly' ? 'unlimited' : 'rate');
         })
         .catch((e) => setError(e.message));
     }
@@ -157,6 +160,17 @@ export function BookingForm() {
     const rate = artist?.rate != null ? Number(artist.rate) : null;
     setFirstDepositAmount(rate != null ? String(rate) : '');
   }, [bookingForm.artistId, isEdit, artists]);
+
+  // Default project name: Artist – Customer – index (1 for new, id prefix for edit)
+  const defaultProjectName = (() => {
+    const artist = artists.find((a) => a.id === bookingForm.artistId);
+    const customer = customers.find((c) => c.id === bookingForm.customerId);
+    const artistName = artist?.name?.trim() || 'Artist';
+    const customerName = customer?.name?.trim() || 'Customer';
+    const index = isEdit && id ? id.slice(0, 8) : '1';
+    return `${artistName} – ${customerName} – ${index}`;
+  })();
+  const projectNameDisplay = bookingForm.projectName.trim() !== '' ? bookingForm.projectName : defaultProjectName;
 
   const handleStudioChange = (studioId) => {
     setBookingForm((f) => ({ ...f, studioId, artistId: '', date: '', startTime: '', endTime: '' }));
@@ -207,6 +221,7 @@ export function BookingForm() {
             })
           : null,
       notes: bookingForm.notes?.trim() || null,
+      projectName: (bookingForm.projectName?.trim() || defaultProjectName) || null,
     };
   };
 
@@ -308,9 +323,9 @@ export function BookingForm() {
               }
             }
           }
-          navigate(`/manage/bookings/${created.id}`);
+          navigate('/manage?tab=bookings&created=1');
         } else {
-          navigate('/manage?tab=bookings');
+          navigate('/manage?tab=bookings&created=1');
         }
       }
     } catch (err) {
@@ -750,76 +765,117 @@ export function BookingForm() {
             </div>
 
             {!isEdit && (
-            <div className={artistStyles.card} aria-label="Agreed price and first deposit">
-              <div className={artistStyles.cardHead}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
-                <h2>Project estimation &amp; deposit</h2>
+            <div className={styles.estimationCard} aria-label="Agreed price and first deposit">
+              <header className={styles.estimationCardHeader}>
+                <div className={styles.estimationCardIcon}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
+                </div>
+                <div>
+                  <h2 className={styles.estimationCardTitle}>Project estimation &amp; deposit</h2>
+                  <p className={styles.estimationCardDesc}>Set pricing type, total amount, and first payment.</p>
+                </div>
+              </header>
+
+              <div className={styles.estimationField}>
+                <label className={styles.estimationFieldLabel} htmlFor="booking-project-name">Project name</label>
+                <div className={styles.estimationInputWrap}>
+                  <input
+                    id="booking-project-name"
+                    type="text"
+                    className={styles.estimationInput}
+                    placeholder={defaultProjectName}
+                    value={bookingForm.projectName}
+                    onChange={(e) => setBookingForm((f) => ({ ...f, projectName: e.target.value }))}
+                    aria-describedby="booking-project-name-hint"
+                  />
+                </div>
+                <span id="booking-project-name-hint" className={styles.estimationFieldHint}>
+                  Default: Artist – Customer – 1 (or booking id when editing)
+                </span>
               </div>
-              <div className={styles.label}>
-                <span className={styles.labelText}>Project estimation (amount)</span>
-                <div className={styles.estimationOptions} role="radiogroup" aria-label="Estimation mode">
-                  <label className={`${styles.estimationOption} ${estimationMode === 'unlimited' ? styles.estimationOptionActive : ''}`}>
+
+              <div className={styles.estimationSegmentWrap}>
+                <span className={styles.estimationSegmentLabel}>Project type</span>
+                <div className={styles.estimationSegment} role="radiogroup" aria-label="Estimation mode">
+                  <label className={`${styles.estimationSegmentOption} ${estimationMode === 'unlimited' ? styles.estimationSegmentOptionActive : ''}`}>
                     <input
                       type="radio"
                       name="estimationMode"
                       value="unlimited"
                       checked={estimationMode === 'unlimited'}
-                      onChange={() => setEstimationMode('unlimited')}
+                      onChange={() => {
+                        setEstimationMode('unlimited');
+                        setBookingForm((f) => ({ ...f, pricingType: 'hourly' }));
+                      }}
                       className={styles.estimationRadio}
                     />
-                    <span>Hourly Rate</span>
+                    <span>Hourly rate</span>
                   </label>
-                  <label className={`${styles.estimationOption} ${estimationMode === 'rate' ? styles.estimationOptionActive : ''}`}>
+                  <label className={`${styles.estimationSegmentOption} ${estimationMode === 'rate' ? styles.estimationSegmentOptionActive : ''}`}>
                     <input
                       type="radio"
                       name="estimationMode"
                       value="rate"
                       checked={estimationMode === 'rate'}
-                      onChange={() => setEstimationMode('rate')}
+                      onChange={() => {
+                        setEstimationMode('rate');
+                        setBookingForm((f) => ({ ...f, pricingType: 'fixed' }));
+                      }}
                       className={styles.estimationRadio}
                     />
-                    <span>Fix Rate</span>
+                    <span>Fixed rate</span>
                   </label>
                 </div>
               </div>
-              {estimationMode === 'rate' && (
-                <label className={styles.label}>
-                  <span className={styles.labelText}>Amount (IDR)</span>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    className={styles.input}
-                    placeholder={minDeposit > 0 ? `e.g. ${formatNumberWithDots(minDeposit)}` : 'e.g. 500.000'}
-                    value={formatNumberWithDots(estimationAmount)}
-                    onChange={(e) => setEstimationAmount(parseNumberInput(e.target.value))}
-                  />
-                </label>
-              )}
-              <label className={styles.label}>
-                <span className={styles.labelText}>First deposit (1h rate, fixed)</span>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  className={styles.input}
-                  placeholder={minDeposit > 0 ? `Min. ${formatNumberWithDots(minDeposit)}` : 'e.g. 500.000'}
-                  value={formatNumberWithDots(firstDepositAmount)}
-                  onChange={(e) => setFirstDepositAmount(parseNumberInput(e.target.value))}
-                  aria-invalid={firstDepositInvalid}
-                  aria-describedby={firstDepositInvalid ? 'first-deposit-err' : minDeposit > 0 ? 'first-deposit-min' : undefined}
-                />
-                {minDeposit > 0 && (
-                  <span id="first-deposit-min" className={styles.helper}>
-                    Minimum: artist&apos;s 1h rate — {formatRupiah(minDeposit)}
-                  </span>
+
+              <div className={styles.estimationFields}>
+                {estimationMode === 'rate' && (
+                  <div className={styles.estimationField}>
+                    <label className={styles.estimationFieldLabel} htmlFor="booking-estimation-amount">Project amount (IDR)</label>
+                    <div className={styles.estimationInputWrap}>
+                      <span className={styles.estimationInputPrefix}>Rp</span>
+                      <input
+                        id="booking-estimation-amount"
+                        type="text"
+                        inputMode="numeric"
+                        className={styles.estimationInput}
+                        placeholder={minDeposit > 0 ? formatNumberWithDots(minDeposit) : 'e.g. 500.000'}
+                        value={formatNumberWithDots(estimationAmount)}
+                        onChange={(e) => setEstimationAmount(parseNumberInput(e.target.value))}
+                      />
+                    </div>
+                  </div>
                 )}
-                {firstDepositInvalid && (
-                  <p id="first-deposit-err" className={styles.deductRequiredHint} role="alert">
-                    Must be at least the artist&apos;s 1h rate ({formatRupiah(minDeposit)}).
-                  </p>
-                )}
-              </label>
+                <div className={styles.estimationField}>
+                  <label className={styles.estimationFieldLabel} htmlFor="booking-first-deposit">First deposit</label>
+                  <div className={styles.estimationInputWrap}>
+                    <span className={styles.estimationInputPrefix}>Rp</span>
+                    <input
+                      id="booking-first-deposit"
+                      type="text"
+                      inputMode="numeric"
+                      className={`${styles.estimationInput} ${firstDepositInvalid ? styles.estimationInputInvalid : ''}`}
+                      placeholder={minDeposit > 0 ? `Min. ${formatNumberWithDots(minDeposit)}` : 'e.g. 500.000'}
+                      value={formatNumberWithDots(firstDepositAmount)}
+                      onChange={(e) => setFirstDepositAmount(parseNumberInput(e.target.value))}
+                      aria-invalid={firstDepositInvalid}
+                      aria-describedby={firstDepositInvalid ? 'first-deposit-err' : minDeposit > 0 ? 'first-deposit-min' : undefined}
+                    />
+                  </div>
+                  {minDeposit > 0 && !firstDepositInvalid && (
+                    <span id="first-deposit-min" className={styles.estimationFieldHint}>
+                      Minimum: 1h artist rate — {formatRupiah(minDeposit)}
+                    </span>
+                  )}
+                  {firstDepositInvalid && (
+                    <p id="first-deposit-err" className={styles.estimationFieldError} role="alert">
+                      Deposit must be at least {formatRupiah(minDeposit)} (artist 1h rate).
+                    </p>
+                  )}
+                </div>
+              </div>
               {bookingForm.artistId && chosenDeposit > 0 && (
-                <>
+                <div className={styles.estimationCardExtra}>
                   {!useNewCustomer && bookingForm.customerId && (() => {
                     const customerBalance = getCustomerDeposit(bookingForm.customerId);
                     const canDeduct = customerBalance >= chosenDeposit;
@@ -908,7 +964,7 @@ export function BookingForm() {
                       </label>
                     </>
                   )}
-                </>
+                </div>
               )}
             </div>
             )}

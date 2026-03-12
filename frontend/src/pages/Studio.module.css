@@ -297,6 +297,37 @@
   font-weight: 500;
 }
 
+.toast {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: var(--success, #16a34a);
+  color: #fff;
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 1000;
+}
+
+.toastIcon {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.table .cellNotes {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.85rem;
+  color: var(--text-muted, #666);
+}
+
 /* ----- Section (per-tab content) ----- */
 .section {
   margin: 0;
@@ -348,6 +379,21 @@
   background: var(--bg-warm);
   border: 1px solid var(--border);
   border-radius: var(--radius);
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 200px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.875rem;
+}
+
+.searchInput::placeholder {
+  color: var(--text-secondary);
 }
 
 .filterSelect,
@@ -487,12 +533,8 @@
   padding-right: 0.5rem;
 }
 
-.status_draft { color: var(--muted); font-weight: 600; }
-.status_pending { color: #c49a2e; font-weight: 600; }
-.status_confirmed { color: var(--info); font-weight: 600; }
-.status_in_progress { color: #2e7d32; font-weight: 700; }
-.status_completed { color: var(--success); font-weight: 600; }
-.status_cancelled { color: var(--muted); font-weight: 500; }
+.status_Paid { color: var(--success); font-weight: 600; }
+.status_Unpaid { color: #c49a2e; font-weight: 600; }
 .status_refunded { color: var(--muted); font-weight: 500; }
 
 .smBtn,
@@ -537,9 +579,54 @@
   white-space: nowrap;
 }
 
+.table .cellId {
+  width: 1%;
+  white-space: nowrap;
+}
+
 .table .cellTime {
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
+}
+
+.cellCustomerArtist {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.5rem;
+}
+
+.cellCustomerName {
+  display: block;
+  font-weight: 600;
+  color: var(--text);
+  width: 100%;
+}
+
+.artistTag {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cellSchedule {
+  white-space: nowrap;
+}
+
+.cellSchedule .cellDate {
+  font-weight: 600;
+}
+
+.cellSchedule .cellTime {
+  font-weight: 500;
+  color: var(--text-secondary);
 }
 
 .cellLatest {

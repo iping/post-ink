@@ -35,9 +35,6 @@ artistsRouter.get('/', async (req, res) => {
       orderBy: { createdAt: 'desc' },
       include: {
         availability: true,
-        reviews: {
-          select: { rating: true },
-        },
       },
     });
     res.json(artists);
@@ -53,13 +50,6 @@ artistsRouter.get('/:id', async (req, res) => {
       where: { id: req.params.id },
       include: {
         availability: { orderBy: [{ date: 'asc' }, { startTime: 'asc' }] },
-        reviews: {
-          orderBy: { createdAt: 'desc' },
-          include: {
-            customer: { select: { id: true, name: true } },
-            booking: { select: { date: true, notes: true } },
-          },
-        },
       },
     });
     if (!artist) return res.status(404).json({ error: 'Artist not found' });

@@ -17,7 +17,6 @@ async function importAll() {
   execSync('npx prisma migrate deploy', { cwd: backendDir, stdio: 'inherit' });
 
   // Clear existing data (order matters for FK constraints)
-  await prisma.review.deleteMany({});
   await prisma.payment.deleteMany({});
   await prisma.booking.deleteMany({});
   await prisma.studioCommission.deleteMany({});
@@ -70,11 +69,6 @@ async function importAll() {
     await prisma.studioCommission.create({ data: strip(cm) });
   }
   console.log(`  ${data.commissions.length} commissions`);
-
-  for (const r of data.reviews) {
-    await prisma.review.create({ data: strip(r) });
-  }
-  console.log(`  ${data.reviews.length} reviews`);
 
   console.log('Import complete!');
 }

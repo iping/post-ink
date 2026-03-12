@@ -17,7 +17,6 @@ async function exportAll() {
     bookings: await prisma.booking.findMany({ orderBy: { createdAt: 'asc' } }),
     payments: await prisma.payment.findMany({ orderBy: { createdAt: 'asc' } }),
     commissions: await prisma.studioCommission.findMany({ orderBy: { createdAt: 'asc' } }),
-    reviews: await prisma.review.findMany({ orderBy: { createdAt: 'asc' } }),
   };
 
   const outPath = path.join(__dirname, 'seed-data.json');
@@ -32,7 +31,6 @@ async function exportAll() {
   console.log(`  ${data.bookings.length} bookings`);
   console.log(`  ${data.payments.length} payments`);
   console.log(`  ${data.commissions.length} commissions`);
-  console.log(`  ${data.reviews.length} reviews`);
 }
 
 exportAll()

@@ -86,7 +86,6 @@ async function main() {
   execSync('npx prisma migrate deploy', { cwd: backendDir, stdio: 'inherit' });
 
   // Clean in dependency order (children first, then parents)
-  await prisma.review.deleteMany({});
   await prisma.payment.deleteMany({});
   await prisma.session.deleteMany({});
   await prisma.project.deleteMany({});
@@ -289,6 +288,19 @@ async function main() {
     prisma.tattooStudio.create({ data: { name: 'Sacred Skin Collective', address: 'Jl. Braga No. 88, Bandung' } }),
   ]);
 
+  // 6-digit numeric IDs for Customer, Project, Session (schema requires app-set id)
+  const usedNumericIds = { customer: new Set(), project: new Set(), session: new Set() };
+  function genNumericId(model) {
+    for (let attempt = 0; attempt < 100; attempt++) {
+      const id = String(100000 + Math.floor(Math.random() * 900000));
+      if (!usedNumericIds[model].has(id)) {
+        usedNumericIds[model].add(id);
+        return id;
+      }
+    }
+    throw new Error(`Could not generate unique 6-digit id for ${model}`);
+  }
+
   // ─── 15 Customers ───
   const customerData = [
     { name: 'Andi Pratama', email: 'andi@example.com', phone: '+62 812-3456-7890' },
@@ -308,7 +320,7 @@ async function main() {
     { name: 'Oscar Setiawan', email: 'oscar@example.com', phone: '+62 878-6677-8899' },
   ];
   const customers = await Promise.all(
-    customerData.map((c) => prisma.customer.create({ data: c })),
+    customerData.map((c) => prisma.customer.create({ data: { id: genNumericId('customer'), ...c } })),
   );
 
   const futureDate = (daysAhead) => {
@@ -342,22 +354,23 @@ async function main() {
     throw new Error('Could not generate unique short code in seed');
   }
 
-  // ─── Active Bookings (pending / confirmed) with placement and clear notes ───
+  // ─── Active Bookings: Paid = has payment evidence; Unpaid = not yet paid ───
   const activeBookings = [
-    { artistIdx: 0, customerIdx: 0, studioIdx: 0, days: 1, start: '10:00', end: '12:00', status: 'confirmed', amount: 5000000, placement: 'Forearm', notes: 'Half sleeve botanical — wildflowers. Customer sent reference images.' },
-    { artistIdx: 1, customerIdx: 1, studioIdx: 0, days: 1, start: '14:00', end: '17:00', status: 'pending', amount: 3500000, placement: 'Chest', notes: 'Traditional eagle & roses. Agreed on design in consultation.' },
-    { artistIdx: 2, customerIdx: 8, studioIdx: 0, days: 2, start: '09:00', end: '12:30', status: 'confirmed', amount: 4800000, placement: 'Back', notes: 'Japanese dragon back piece — first of 3 sessions. Outline today.' },
-    { artistIdx: 3, customerIdx: 9, studioIdx: 2, days: 3, start: '10:00', end: '13:00', status: 'pending', amount: 3200000, placement: 'Forearm', notes: 'Geometric band with fibonacci spiral. Single session.' },
-    { artistIdx: 4, customerIdx: 10, studioIdx: 1, days: 2, start: '11:00', end: '14:00', status: 'confirmed', amount: 2800000, placement: 'Shoulder', notes: 'Watercolor phoenix. Deposit received via BCA.' },
-    { artistIdx: 5, customerIdx: 11, studioIdx: 0, days: 4, start: '09:00', end: '14:00', status: 'confirmed', amount: 9500000, placement: 'Arm', notes: 'Full sleeve Polynesian tribal — session 2 of 4. Shading block.' },
-    { artistIdx: 6, customerIdx: 12, studioIdx: 2, days: 3, start: '09:00', end: '13:00', status: 'pending', amount: 5500000, placement: 'Upper arm', notes: 'Photorealistic portrait. Customer will send high-res photo.' },
-    { artistIdx: 7, customerIdx: 13, studioIdx: 1, days: 5, start: '10:00', end: '14:00', status: 'confirmed', amount: 4200000, placement: 'Thigh', notes: 'Neo-traditional fox with floral wreath. Design approved.' },
-    { artistIdx: 8, customerIdx: 14, studioIdx: 0, days: 4, start: '10:00', end: '13:00', status: 'pending', amount: 3000000, placement: 'Forearm', notes: 'Script "Strength" with ornamental frame. Font chosen.' },
-    { artistIdx: 9, customerIdx: 2, studioIdx: 2, days: 6, start: '11:00', end: '15:00', status: 'confirmed', amount: 3800000, placement: 'Calf', notes: 'Trash Polka compass with red splatter. Second session for color.' },
+    { artistIdx: 0, customerIdx: 0, studioIdx: 0, days: 1, start: '10:00', end: '12:00', hasPayment: true, amount: 5000000, placement: 'Forearm', preference: 'Reference: wildflower sleeve from Pinterest. Want similar fine-line style, pastel tones.', notes: 'Half sleeve botanical — wildflowers. Customer sent reference images.' },
+    { artistIdx: 1, customerIdx: 1, studioIdx: 0, days: 1, start: '14:00', end: '17:00', hasPayment: false, amount: 3500000, placement: 'Chest', preference: 'Eagle and roses, American traditional. Reference photo attached.', notes: 'Traditional eagle & roses. Agreed on design in consultation.' },
+    { artistIdx: 2, customerIdx: 8, studioIdx: 0, days: 2, start: '09:00', end: '12:30', hasPayment: true, amount: 4800000, placement: 'Back', preference: 'Japanese dragon with waves. Full back, irezumi style.', notes: 'Japanese dragon back piece — first of 3 sessions. Outline today.' },
+    { artistIdx: 3, customerIdx: 9, studioIdx: 2, days: 3, start: '10:00', end: '13:00', hasPayment: false, amount: 3200000, placement: 'Forearm', preference: 'Geometric band, fibonacci spiral. Black only.', notes: 'Geometric band with fibonacci spiral. Single session.' },
+    { artistIdx: 4, customerIdx: 10, studioIdx: 1, days: 2, start: '11:00', end: '14:00', hasPayment: true, amount: 2800000, placement: 'Upper arm', preference: 'Watercolor phoenix, vibrant reds and oranges.', notes: 'Watercolor phoenix. Deposit received via BCA.' },
+    { artistIdx: 5, customerIdx: 11, studioIdx: 0, days: 4, start: '09:00', end: '14:00', hasPayment: true, amount: 9500000, placement: 'Arm', preference: 'Polynesian + Dayak motifs. Full sleeve.', notes: 'Full sleeve Polynesian tribal — session 2 of 4. Shading block.' },
+    { artistIdx: 6, customerIdx: 12, studioIdx: 2, days: 3, start: '09:00', end: '13:00', hasPayment: false, amount: 5500000, placement: 'Upper arm', preference: 'Photorealistic portrait — will send high-res photo.', notes: 'Photorealistic portrait. Customer will send high-res photo.' },
+    { artistIdx: 7, customerIdx: 13, studioIdx: 1, days: 5, start: '10:00', end: '14:00', hasPayment: true, amount: 4200000, placement: 'Thigh', preference: 'Neo-trad fox with floral wreath. Design approved.', notes: 'Neo-traditional fox with floral wreath. Design approved.' },
+    { artistIdx: 8, customerIdx: 14, studioIdx: 0, days: 4, start: '10:00', end: '13:00', hasPayment: false, amount: 3000000, placement: 'Forearm', preference: 'Script "Strength" with ornamental frame. Font: Old English.', notes: 'Script "Strength" with ornamental frame. Font chosen.' },
+    { artistIdx: 9, customerIdx: 2, studioIdx: 2, days: 6, start: '11:00', end: '15:00', hasPayment: true, amount: 3800000, placement: 'Calf', preference: 'Trash Polka compass, red and black. Reference sent.', notes: 'Trash Polka compass with red splatter. Second session for color.' },
   ];
 
   const createdActiveBookings = [];
   for (const ab of activeBookings) {
+    const prefStr = ab.preference ? JSON.stringify({ text: ab.preference }) : null;
     const booking = await prisma.booking.create({
       data: {
         shortCode: uniqueShortCode(),
@@ -367,16 +380,17 @@ async function main() {
         date: futureDate(ab.days),
         startTime: ab.start,
         endTime: ab.end,
-        status: ab.status,
+        status: 'Unpaid',
         pricingType: 'fixed',
         totalAmount: ab.amount,
         placement: ab.placement || null,
+        preference: prefStr,
         notes: ab.notes,
       },
     });
     createdActiveBookings.push(booking);
 
-    if (ab.status === 'confirmed') {
+    if (ab.hasPayment) {
       await prisma.payment.create({
         data: {
           bookingId: booking.id,
@@ -387,6 +401,10 @@ async function main() {
           transferDestination: pick(['BCA 1234567890', 'Mandiri 0987654321', 'BNI 5566778899', null]),
           status: 'completed',
         },
+      });
+      await prisma.booking.update({
+        where: { id: booking.id },
+        data: { status: 'Paid' },
       });
     }
   }
@@ -401,6 +419,7 @@ async function main() {
     const projectName0 = [artist0.name.split(/\s+/).map((n) => n[0]).join(''), customer0.name, month0].filter(Boolean).join(' – ');
     const p1 = await prisma.project.create({
       data: {
+        id: genNumericId('project'),
         bookingId: b0.id,
         name: projectName0,
         pricingType: 'fixed',
@@ -410,6 +429,7 @@ async function main() {
     });
     await prisma.session.create({
       data: {
+        id: genNumericId('session'),
         projectId: p1.id,
         date: b0.date,
         startTime: b0.startTime || '09:00',
@@ -433,6 +453,7 @@ async function main() {
     });
     const p2 = await prisma.project.create({
       data: {
+        id: genNumericId('project'),
         bookingId: hourlyBooking.id,
         name: baseName + ' (Session 1)',
         pricingType: 'hourly',
@@ -443,6 +464,7 @@ async function main() {
     });
     await prisma.session.create({
       data: {
+        id: genNumericId('session'),
         projectId: p2.id,
         date: hourlyBooking.date,
         startTime: hourlyBooking.startTime || '09:00',
@@ -453,6 +475,7 @@ async function main() {
     });
     const p3 = await prisma.project.create({
       data: {
+        id: genNumericId('project'),
         bookingId: hourlyBooking.id,
         name: baseName + ' (Session 2)',
         pricingType: 'hourly',
@@ -463,6 +486,7 @@ async function main() {
     });
     await prisma.session.create({
       data: {
+        id: genNumericId('session'),
         projectId: p3.id,
         date: hourlyBooking.date,
         startTime: '14:00',
@@ -475,9 +499,9 @@ async function main() {
 
   // ─── Cancelled Bookings ───
   const cancelledBookings = [
-    { artistIdx: 1, customerIdx: 3, studioIdx: 0, daysAgo: 5, start: '14:00', end: '17:00', amount: 4000000, notes: 'Traditional anchor — customer rescheduled' },
-    { artistIdx: 4, customerIdx: 6, studioIdx: 1, daysAgo: 8, start: '11:00', end: '14:00', amount: 2500000, notes: 'Watercolor butterfly — cancelled by customer' },
-    { artistIdx: 8, customerIdx: 10, studioIdx: 0, daysAgo: 12, start: '14:00', end: '17:00', amount: 2800000, notes: 'Chicano lettering — customer no-show' },
+    { artistIdx: 1, customerIdx: 3, studioIdx: 0, daysAgo: 5, start: '14:00', end: '17:00', amount: 4000000, placement: 'Forearm', notes: 'Traditional anchor — customer rescheduled' },
+    { artistIdx: 4, customerIdx: 6, studioIdx: 1, daysAgo: 8, start: '11:00', end: '14:00', amount: 2500000, placement: 'Shoulder', notes: 'Watercolor butterfly — cancelled by customer' },
+    { artistIdx: 8, customerIdx: 10, studioIdx: 0, daysAgo: 12, start: '14:00', end: '17:00', amount: 2800000, placement: 'Forearm', notes: 'Chicano lettering — customer no-show' },
   ];
 
   for (const cb of cancelledBookings) {
@@ -490,9 +514,10 @@ async function main() {
         date: pastDate(cb.daysAgo),
         startTime: cb.start,
         endTime: cb.end,
-        status: 'cancelled',
+        status: 'Unpaid',
         pricingType: 'fixed',
         totalAmount: cb.amount,
+        placement: cb.placement || null,
         notes: cb.notes,
       },
     });
@@ -506,9 +531,9 @@ async function main() {
 
   // ─── Completed Bookings with Reviews (spread across all 10 artists & 3 studios) ───
   const completedBookings = [
-    { artistIdx: 0, customerIdx: 2, studioIdx: 0, daysAgo: 14, start: '09:00', end: '12:00', amount: 4500000, notes: 'Delicate peony sleeve — inner forearm', rating: 5, comment: 'Maya is incredibly talented! The fine-line work is so precise and beautiful. She took the time to understand exactly what I wanted and the result exceeded my expectations.' },
-    { artistIdx: 0, customerIdx: 3, studioIdx: 0, daysAgo: 28, start: '13:00', end: '16:00', amount: 3800000, notes: 'Geometric mandala with botanical elements', rating: 5, comment: 'Absolutely stunning work. Maya has such a steady hand and the level of detail is remarkable.' },
-    { artistIdx: 0, customerIdx: 4, studioIdx: 0, daysAgo: 45, start: '10:00', end: '13:00', amount: 5200000, notes: 'Minimalist wildflower bouquet — ribcage', rating: 4, comment: 'Beautiful work, very delicate and exactly the style I was looking for. The end result is perfect.' },
+    { artistIdx: 0, customerIdx: 2, studioIdx: 0, daysAgo: 14, start: '09:00', end: '12:00', amount: 4500000, placement: 'Forearm', preference: 'Peony sleeve reference from Instagram. Fine-line, delicate.', notes: 'Delicate peony sleeve — inner forearm', rating: 5, comment: 'Maya is incredibly talented! The fine-line work is so precise and beautiful. She took the time to understand exactly what I wanted and the result exceeded my expectations.' },
+    { artistIdx: 0, customerIdx: 3, studioIdx: 0, daysAgo: 28, start: '13:00', end: '16:00', amount: 3800000, placement: 'Back', preference: 'Mandala with leaves and flowers.', notes: 'Geometric mandala with botanical elements', rating: 5, comment: 'Absolutely stunning work. Maya has such a steady hand and the level of detail is remarkable.' },
+    { artistIdx: 0, customerIdx: 4, studioIdx: 0, daysAgo: 45, start: '10:00', end: '13:00', amount: 5200000, placement: 'Ribs', preference: 'Wildflower bouquet, minimalist style.', notes: 'Minimalist wildflower bouquet — ribcage', rating: 4, comment: 'Beautiful work, very delicate and exactly the style I was looking for. The end result is perfect.' },
     { artistIdx: 1, customerIdx: 0, studioIdx: 0, daysAgo: 7, start: '10:00', end: '14:00', amount: 6000000, notes: 'Traditional panther on thigh', rating: 5, comment: 'Jake is the GOAT of traditional tattooing. Bold lines, perfect color saturation. The panther looks like it\'s about to jump off my skin!' },
     { artistIdx: 1, customerIdx: 5, studioIdx: 0, daysAgo: 21, start: '14:00', end: '18:00', amount: 7500000, notes: 'Neo-traditional rose and dagger — full forearm', rating: 4, comment: 'Really solid work. Jake knows his craft and the colors are vibrant.' },
     { artistIdx: 1, customerIdx: 6, studioIdx: 0, daysAgo: 35, start: '11:00', end: '15:00', amount: 5500000, notes: 'American traditional eagle chest piece', rating: 5, comment: 'Incredible experience from start to finish. Jake\'s design was even better than what I had in mind.' },
@@ -535,8 +560,9 @@ async function main() {
     { artistIdx: 9, customerIdx: 14, studioIdx: 2, daysAgo: 32, start: '12:00', end: '16:00', amount: 3200000, notes: 'Mixed media compass with newspaper texture', rating: 5, comment: 'Unlike any tattoo I\'ve ever seen. The newspaper texture and red accents make it look like a living collage on my arm.' },
   ];
 
-  let reviewCount = 0;
-  for (const cb of completedBookings) {
+  for (let idx = 0; idx < completedBookings.length; idx++) {
+    const cb = completedBookings[idx];
+    const preference = cb.preference ? JSON.stringify({ text: cb.preference }) : null;
     const booking = await prisma.booking.create({
       data: {
         shortCode: uniqueShortCode(),
@@ -546,15 +572,17 @@ async function main() {
         date: pastDate(cb.daysAgo),
         startTime: cb.start,
         endTime: cb.end,
-        status: 'completed',
+        status: 'Paid',
         pricingType: 'fixed',
         totalAmount: cb.amount,
+        placement: cb.placement || null,
+        preference,
         notes: cb.notes,
       },
     });
 
     // Full payment for completed bookings (some with split down_payment + final)
-    if (reviewCount % 3 === 0) {
+    if (idx % 3 === 0) {
       const dp = Math.round(cb.amount * 0.3);
       await prisma.payment.create({
         data: { bookingId: booking.id, amount: dp, currency: 'IDR', method: pick(METHODS), type: 'down_payment', transferDestination: pick(['BCA 1234567890', 'Mandiri 0987654321', 'BNI 5566778899']), status: 'completed' },
@@ -567,17 +595,6 @@ async function main() {
         data: { bookingId: booking.id, amount: cb.amount, currency: 'IDR', method: pick(METHODS), type: 'final', status: 'completed' },
       });
     }
-
-    await prisma.review.create({
-      data: {
-        bookingId: booking.id,
-        artistId: createdArtists[cb.artistIdx].id,
-        customerId: customers[cb.customerIdx].id,
-        rating: cb.rating,
-        comment: cb.comment,
-      },
-    });
-    reviewCount++;
   }
 
   // ─── Commission agreements (across studios) ───
@@ -599,7 +616,7 @@ async function main() {
   const totalBookings = activeBookings.length + cancelledBookings.length + completedBookings.length;
   const totalProjects = await prisma.project.count();
   const totalPayments = await prisma.payment.count();
-  console.log(`Seed complete: ${createdArtists.length} artists, ${studios.length} studios, ${customers.length} customers, ${totalBookings} bookings, ${totalProjects} projects, ${totalPayments} payments, ${reviewCount} reviews.`);
+  console.log(`Seed complete: ${createdArtists.length} artists, ${studios.length} studios, ${customers.length} customers, ${totalBookings} bookings, ${totalProjects} projects, ${totalPayments} payments.`);
   console.log('Default login: admin@post.ink / admin123');
 }
 

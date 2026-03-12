@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "node src/index.js",
-    "start": "node src/index.js",
+    "dev": "npx prisma generate && node src/index.js",
+    "start": "npx prisma generate && node src/index.js",
     "seed": "node prisma/seed.js",
     "export-seed": "node prisma/export-seed.js"
   },

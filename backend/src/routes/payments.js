@@ -53,6 +53,12 @@ paymentsRouter.post('/', async (req, res) => {
       },
       include: { booking: { include: { artist: true, customer: true } } },
     });
+    if (payment.bookingId && (status === 'completed')) {
+      await prisma.booking.update({
+        where: { id: payment.bookingId },
+        data: { status: 'Paid' },
+      });
+    }
     res.status(201).json(payment);
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -77,6 +83,12 @@ paymentsRouter.patch('/:id', async (req, res) => {
       data,
       include: { booking: { include: { artist: true, customer: true } } },
     });
+    if (payment.bookingId && (payment.status === 'completed')) {
+      await prisma.booking.update({
+        where: { id: payment.bookingId },
+        data: { status: 'Paid' },
+      });
+    }
     res.json(payment);
   } catch (e) {
     if (e.code === 'P2025') return res.status(404).json({ error: 'Payment not found' });

@@ -4,6 +4,7 @@ import { getArtists, uploadUrl, updateArtistStatus } from '../api';
 import { formatRupiah } from '../currency';
 import styles from './ArtistList.module.css';
 import layoutStyles from './Studio.module.css';
+import { IdWithCopy } from '../components/IdWithCopy';
 
 const ROWS_PER_PAGE = 8;
 
@@ -101,6 +102,7 @@ export function ArtistList() {
             <thead>
               <tr>
                 <th>No.</th>
+                <th>ID</th>
                 <th>Photo</th>
                 <th>Name</th>
                 <th>Speciality</th>
@@ -112,7 +114,7 @@ export function ArtistList() {
             <tbody>
               {paginatedArtists.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className={styles.emptyCell}>
+                  <td colSpan={8} className={styles.emptyCell}>
                     No artists yet. <Link to="/manage/artists/new" className={layoutStyles.addBtn}>Add your first artist</Link>
                   </td>
                 </tr>
@@ -124,6 +126,7 @@ export function ArtistList() {
                   return (
                     <tr key={a.id} className={a.isActive === false ? styles.rowInactive : ''}>
                       <td className={styles.cellNum}>{rowNum}</td>
+                      <td className={layoutStyles.cellId}><IdWithCopy id={a.id} /></td>
                       <td className={styles.cellPhoto}>
                         {thumb ? (
                           <img src={uploadUrl(thumb)} alt={a.name} className={styles.photoThumb} />

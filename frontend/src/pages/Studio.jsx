@@ -3,7 +3,6 @@ import { Link, useSearchParams } from 'react-router-dom';
 import {
   getBookings,
   getPayments,
-  getProjects,
   getArtists,
   getCustomers,
   getStudios,
@@ -27,11 +26,11 @@ import {
   createUser,
   updateUser,
   deleteUser,
-  getSessions,
 } from '../api';
 import { formatRupiah, formatWithConversion, formatNumberWithDots, parseNumberInput } from '../currency';
 import styles from './Studio.module.css';
 import { ArtistList } from './ArtistList';
+import { IdWithCopy } from '../components/IdWithCopy';
 
 const ROWS_PER_PAGE = 8;
 
@@ -95,7 +94,7 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
   );
 }
 
-const BOOKING_STATUSES = ['draft', 'pending', 'confirmed', 'in_progress', 'completed', 'cancelled'];
+const BOOKING_STATUSES = ['Unpaid', 'Paid'];
 const PAYMENT_STATUSES = ['pending', 'completed', 'refunded'];
 const PAYMENT_TYPES = [
   { value: 'down_payment', label: 'Down payment' },
@@ -110,15 +109,54 @@ const PAYMENT_METHODS = [
   { value: 'Cash', label: 'Cash' },
 ];
 
+function truncate(str, max = 25) {
+  if (!str || typeof str !== 'string') return '—';
+  const s = str.trim();
+  return s.length <= max ? s : s.slice(0, max) + '…';
+}
+
+/** Preference can be JSON { text } or plain string */
+function preferenceText(booking) {
+  if (!booking?.preference) return '';
+  try {
+    const v = JSON.parse(booking.preference);
+    return (v && typeof v.text === 'string') ? v.text : booking.preference;
+  } catch {
+    return booking.preference;
+  }
+}
+
+/** Consistent tag color per artist id (hue 0–360, fixed saturation/lightness) */
+function artistTagColor(artistId) {
+  if (!artistId) return '120, 40%, 45%';
+  let h = 0;
+  for (let i = 0; i < artistId.length; i++) h = (h * 31 + artistId.charCodeAt(i)) >>> 0;
+  const hue = h % 360;
+  const saturation = 42 + (h % 20);
+  const lightness = 42 + (h % 12);
+  return `${hue}, ${saturation}%, ${lightness}%`;
+}
+
 export function Studio() {
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get('tab') || 'bookings';
   const [tab, setTab] = useState(tabParam);
+  const [createdToast, setCreatedToast] = useState(false);
 
   useEffect(() => {
     const t = searchParams.get('tab') || 'bookings';
-    if (['bookings', 'artists', 'projects', 'sessions', 'payments', 'commissions', 'customers', 'specialities', 'payment-destinations', 'users'].includes(t)) setTab(t);
+    if (['bookings', 'artists', 'payments', 'commissions', 'customers', 'specialities', 'payment-destinations', 'users'].includes(t)) setTab(t);
   }, [searchParams]);
+
+  useEffect(() => {
+    if (searchParams.get('created') === '1') {
+      setTab('bookings');
+      setSearchParams({ tab: 'bookings' }, { replace: true });
+      setCreatedToast(true);
+      const t = setTimeout(() => setCreatedToast(false), 5000);
+      return () => clearTimeout(t);
+    }
+  }, [searchParams, setSearchParams]);
 
   const switchTab = (t) => {
     setTab(t);
@@ -130,8 +168,6 @@ export function Studio() {
   const [customers, setCustomers] = useState([]);
   const [studios, setStudios] = useState([]);
   const [bookings, setBookings] = useState([]);
-  const [projects, setProjects] = useState([]);
-  const [sessions, setSessions] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -160,8 +196,6 @@ export function Studio() {
   });
 
   const [selectedSlot, setSelectedSlot] = useState(null);
-  const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
-  const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [newCustomer, setNewCustomer] = useState({ name: '', email: '', phone: '' });
 
   const [specialities, setSpecialities] = useState([]);
@@ -179,26 +213,41 @@ export function Studio() {
   const [bookingPage, setBookingPage] = useState(1);
   const [paymentPage, setPaymentPage] = useState(1);
   const [commissionPage, setCommissionPage] = useState(1);
-  const [sessionPage, setSessionPage] = useState(1);
   const [customerPage, setCustomerPage] = useState(1);
   const [customerHistoryModal, setCustomerHistoryModal] = useState(null);
 
-  const [bookingFilters, setBookingFilters] = useState({
-    status: '',
-    artistId: '',
-    studioId: '',
-    customerId: '',
-    from: '',
-    to: '',
-    sort: 'latest',
-  });
+  const [bookingSearch, setBookingSearch] = useState('');
 
-  const bookingTotalPages = Math.max(1, Math.ceil(bookings.length / ROWS_PER_PAGE));
+  const filterBookingsBySearch = (list, query) => {
+    const q = (query || '').trim().toLowerCase();
+    if (!q) return [...list].sort((a, b) => (b.date + (b.startTime || '')).localeCompare(a.date + (a.startTime || '')));
+    return list.filter((b) => {
+      const customerName = (b.customer?.name || '').toLowerCase();
+      const artistName = (b.artist?.name || '').toLowerCase();
+      const studioName = (b.studio?.name || '').toLowerCase();
+      const projectName = (b.projectName || '').toLowerCase();
+      const id = (b.id || '').toLowerCase();
+      const shortCode = (b.shortCode || '').toLowerCase();
+      const date = (b.date || '').toLowerCase();
+      const startTime = (b.startTime || '').toLowerCase();
+      const endTime = (b.endTime || '').toLowerCase();
+      const placement = (b.placement || '').toLowerCase();
+      const notes = (b.notes || '').toLowerCase();
+      const status = (b.status || '').toLowerCase();
+      const prefText = preferenceText(b).toLowerCase();
+      return (
+        customerName.includes(q) || artistName.includes(q) || studioName.includes(q) ||
+        projectName.includes(q) || id.includes(q) || shortCode.includes(q) ||
+        date.includes(q) || startTime.includes(q) || endTime.includes(q) ||
+        placement.includes(q) || notes.includes(q) || status.includes(q) || prefText.includes(q)
+      );
+    }).sort((a, b) => (b.date + (b.startTime || '')).localeCompare(a.date + (a.startTime || '')));
+  };
+
+  const filteredBookings = filterBookingsBySearch(bookings, bookingSearch);
+  const bookingTotalPages = Math.max(1, Math.ceil(filteredBookings.length / ROWS_PER_PAGE));
   const paymentTotalPages = Math.max(1, Math.ceil(payments.length / ROWS_PER_PAGE));
   const commissionTotalPages = Math.max(1, Math.ceil(commissions.length / ROWS_PER_PAGE));
-  const sessionsList = Array.isArray(sessions) ? sessions : [];
-  const sessionTotalPages = Math.max(1, Math.ceil(sessionsList.length / ROWS_PER_PAGE));
-  const paginatedSessions = sessionsList.slice((sessionPage - 1) * ROWS_PER_PAGE, sessionPage * ROWS_PER_PAGE);
   const customerTotalPages = Math.max(1, Math.ceil(customers.length / ROWS_PER_PAGE));
   const specialitiesList = Array.isArray(specialities) ? specialities : [];
   const specTotalPages = Math.max(1, Math.ceil(specialitiesList.length / ROWS_PER_PAGE));
@@ -206,7 +255,7 @@ export function Studio() {
   const destList = Array.isArray(paymentDestinations) ? paymentDestinations : [];
   const destTotalPages = Math.max(1, Math.ceil(destList.length / ROWS_PER_PAGE));
 
-  const paginatedBookings = bookings.slice((bookingPage - 1) * ROWS_PER_PAGE, bookingPage * ROWS_PER_PAGE);
+  const paginatedBookings = filteredBookings.slice((bookingPage - 1) * ROWS_PER_PAGE, bookingPage * ROWS_PER_PAGE);
   const paginatedPayments = payments.slice((paymentPage - 1) * ROWS_PER_PAGE, paymentPage * ROWS_PER_PAGE);
   const paginatedCommissions = commissions.slice((commissionPage - 1) * ROWS_PER_PAGE, commissionPage * ROWS_PER_PAGE);
   const paginatedCustomers = customers.slice((customerPage - 1) * ROWS_PER_PAGE, customerPage * ROWS_PER_PAGE);
@@ -252,28 +301,12 @@ export function Studio() {
       .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
   };
 
-  const buildBookingParams = (f) => {
-    const params = {};
-    if (f.status) params.status = f.status;
-    if (f.artistId) params.artistId = f.artistId;
-    if (f.studioId) params.studioId = f.studioId;
-    if (f.customerId) params.customerId = f.customerId;
-    if (f.from) params.from = f.from;
-    if (f.to) params.to = f.to;
-    if (f.sort) params.sort = f.sort;
-    return params;
-  };
-
-  const load = (bookingFiltersOverride) => {
+  const load = () => {
     setLoading(true);
     setError(null);
-    const f = bookingFiltersOverride !== undefined ? bookingFiltersOverride : bookingFilters;
-    const bookingParams = buildBookingParams(f);
     Promise.all([
-      getBookings(bookingParams),
+      getBookings(),
       getPayments(),
-      getProjects(),
-      getSessions(),
       getCommissions(),
       getArtists(),
       getCustomers(),
@@ -282,11 +315,9 @@ export function Studio() {
       getPaymentDestinations(),
       getUsers(),
     ])
-      .then(([b, p, pr, sess, co, a, c, s, sp, pd, u]) => {
+      .then(([b, p, co, a, c, s, sp, pd, u]) => {
         setBookings(b);
         setPayments(p);
-        setProjects(Array.isArray(pr) ? pr : []);
-        setSessions(Array.isArray(sess) ? sess : []);
         setCommissions(co);
         setArtists(a);
         setCustomers(c);
@@ -299,26 +330,13 @@ export function Studio() {
       .finally(() => setLoading(false));
   };
 
-  const applyBookingFilters = (next) => {
-    setBookingFilters(next);
-    setBookingPage(1);
-    load(next);
-  };
-
-  const resetBookingFilters = () => {
-    const def = { status: '', artistId: '', studioId: '', customerId: '', from: '', to: '', sort: 'latest' };
-    setBookingFilters(def);
-    setBookingPage(1);
-    load(def);
-  };
-
   useEffect(() => {
     load();
   }, []);
 
   useEffect(() => {
     const t = searchParams.get('tab') || 'bookings';
-    if (['bookings', 'payments', 'commissions', 'customers', 'specialities'].includes(t)) {
+    if (['bookings', 'artists', 'payments', 'commissions', 'customers', 'specialities', 'payment-destinations', 'users'].includes(t)) {
       setTab(t);
     }
   }, [searchParams]);
@@ -555,6 +573,12 @@ export function Studio() {
   return (
     <>
       {error && <div className={styles.error} role="alert">{error}</div>}
+      {createdToast && (
+        <div className={styles.toast} role="status" aria-live="polite">
+          <span className={styles.toastIcon}>✓</span>
+          <span>Booking record was successfully created.</span>
+        </div>
+      )}
 
       <div className={styles.adminCard}>
         <div className={styles.adminContent}>
@@ -563,94 +587,36 @@ export function Studio() {
           <div className={styles.sectionHead}>
             <div>
               <h2>Bookings</h2>
-              {bookings.length > 0 && <span className={styles.countHint}>Showing {(bookingPage - 1) * ROWS_PER_PAGE + 1}–{Math.min(bookingPage * ROWS_PER_PAGE, bookings.length)} of {bookings.length}</span>}
+              {filteredBookings.length > 0 && <span className={styles.countHint}>Showing {(bookingPage - 1) * ROWS_PER_PAGE + 1}–{Math.min(bookingPage * ROWS_PER_PAGE, filteredBookings.length)} of {filteredBookings.length}</span>}
             </div>
             <Link to="/manage/bookings/new" className={styles.addBtn}>
               + New booking
             </Link>
           </div>
           <div className={styles.filterBar}>
-            <select
-              value={bookingFilters.status}
-              onChange={(e) => applyBookingFilters({ ...bookingFilters, status: e.target.value })}
-              className={styles.filterSelect}
-              aria-label="Filter by status"
-            >
-              <option value="">All statuses</option>
-              {BOOKING_STATUSES.map((s) => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
-            <select
-              value={bookingFilters.artistId}
-              onChange={(e) => applyBookingFilters({ ...bookingFilters, artistId: e.target.value })}
-              className={styles.filterSelect}
-              aria-label="Filter by artist"
-            >
-              <option value="">All artists</option>
-              {artists.map((a) => (
-                <option key={a.id} value={a.id}>{a.name}</option>
-              ))}
-            </select>
-            <select
-              value={bookingFilters.studioId}
-              onChange={(e) => applyBookingFilters({ ...bookingFilters, studioId: e.target.value })}
-              className={styles.filterSelect}
-              aria-label="Filter by studio"
-            >
-              <option value="">All studios</option>
-              {studios.map((s) => (
-                <option key={s.id} value={s.id}>{s.name}</option>
-              ))}
-            </select>
-            <select
-              value={bookingFilters.customerId}
-              onChange={(e) => applyBookingFilters({ ...bookingFilters, customerId: e.target.value })}
-              className={styles.filterSelect}
-              aria-label="Filter by customer"
-            >
-              <option value="">All customers</option>
-              {customers.map((c) => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
             <input
-              type="date"
-              value={bookingFilters.from}
-              onChange={(e) => applyBookingFilters({ ...bookingFilters, from: e.target.value })}
-              className={styles.filterDate}
-              aria-label="From date"
+              type="search"
+              value={bookingSearch}
+              onChange={(e) => { setBookingSearch(e.target.value); setBookingPage(1); }}
+              placeholder="Search bookings (customer, artist, studio, project, date, notes…)"
+              className={styles.searchInput}
+              aria-label="Search bookings"
             />
-            <input
-              type="date"
-              value={bookingFilters.to}
-              onChange={(e) => applyBookingFilters({ ...bookingFilters, to: e.target.value })}
-              className={styles.filterDate}
-              aria-label="To date"
-            />
-            <select
-              value={bookingFilters.sort}
-              onChange={(e) => applyBookingFilters({ ...bookingFilters, sort: e.target.value })}
-              className={styles.filterSelect}
-              aria-label="Sort order"
-            >
-              <option value="latest">Latest first</option>
-              <option value="oldest">Oldest first</option>
-            </select>
-            <button type="button" onClick={resetBookingFilters} className={styles.filterReset}>
-              Reset
-            </button>
           </div>
           <div className={styles.tableWrap}>
             <table className={styles.table}>
               <thead>
                 <tr>
                   <th>No.</th>
+                  <th>ID</th>
+                  <th>Project name</th>
                   <th>Customer</th>
                   <th>Artist</th>
                   <th>Studio</th>
-                  <th>Date</th>
-                  <th>Time</th>
+                  <th>Project Schedule</th>
+                  <th>Placement</th>
+                  <th>Project Type</th>
+                  <th>Total</th>
                   <th>Paid</th>
                   <th>Remaining</th>
                   <th>Status</th>
@@ -660,10 +626,10 @@ export function Studio() {
               <tbody>
                 {paginatedBookings.length === 0 ? (
                   <tr>
-                    <td colSpan={11}>
-                      {bookings.length === 0 && (bookingFilters.status || bookingFilters.artistId || bookingFilters.studioId || bookingFilters.customerId || bookingFilters.from || bookingFilters.to)
-                        ? 'No bookings match your filters. Click Reset to clear filters.'
-                        : 'No bookings yet. Create one above.'}
+                    <td colSpan={15}>
+                      {bookings.length === 0
+                        ? 'No bookings yet. Create one above.'
+                        : 'No bookings match your search.'}
                     </td>
                   </tr>
                 ) : (
@@ -676,18 +642,34 @@ export function Studio() {
                     return (
                       <tr key={b.id}>
                         <td>{rowNum}</td>
+                        <td className={styles.cellId}><IdWithCopy id={b.id} /></td>
+                        <td title={b.projectName || ''} className={styles.cellNotes}>{truncate(b.projectName, 22)}</td>
                         <td className={styles.cellEmphasis}>{b.customer?.name || '—'}</td>
-                        <td className={styles.cellEmphasis}>{b.artist?.name || '—'}</td>
+                        <td>
+                          {b.artist ? (
+                            <span
+                              className={styles.artistTag}
+                              style={{ backgroundColor: `hsl(${artistTagColor(b.artistId)})`, color: '#fff' }}
+                              title={b.artist.name}
+                            >
+                              {b.artist.name}
+                            </span>
+                          ) : '—'}
+                        </td>
                         <td>{b.studio?.name || '—'}</td>
-                        <td className={styles.cellDate}>{b.date}</td>
-                        <td className={styles.cellTime}>{b.startTime} – {b.endTime}</td>
+                        <td className={styles.cellSchedule}>
+                          <span className={styles.cellDate}>{b.date}</span>
+                          <span className={styles.cellTime}> {b.startTime} – {b.endTime}</span>
+                        </td>
+                        <td title={b.placement || ''}>{truncate(b.placement, 12)}</td>
+                        <td>{b.pricingType === 'hourly' ? 'Hourly rate' : b.pricingType === 'fixed' ? 'Fixed rate' : '—'}</td>
+                        <td className={styles.cellAmount}>{formatRupiah(b.totalAmount ?? (b.paidTotal != null && b.remainingAmount != null ? b.paidTotal + b.remainingAmount : null))}</td>
                         <td className={styles.cellAmount}>{formatRupiah(b.paidTotal)}</td>
                         <td className={b.remainingAmount != null && b.remainingAmount > 0 ? `${styles.remainingDue} ${styles.cellAmount}` : styles.cellAmount}>
                           {formatRupiah(b.remainingAmount)}
                         </td>
                         <td>
                           <span className={styles[`status_${b.status}`]}>{b.status}</span>
-                          {b.review && <span className={styles.reviewBadge} title={`Reviewed: ${b.review.rating}/5`}>★ {b.review.rating}</span>}
                         </td>
                         <td>
                           <span className={styles.tableActions}>
@@ -710,135 +692,6 @@ export function Studio() {
 
       {tab === 'artists' && <ArtistList />}
 
-      {tab === 'projects' && (
-        <section className={styles.section}>
-          <div className={styles.sectionHead}>
-            <div>
-              <h2>Projects</h2>
-              <span className={styles.countHint}>Work tied to bookings. {projects.length} project{projects.length !== 1 ? 's' : ''}</span>
-            </div>
-          </div>
-          <div className={styles.tableWrap}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>No.</th>
-                  <th>Project name</th>
-                  <th>Booking</th>
-                  <th>Artist</th>
-                  <th>Customer</th>
-                  <th>Studio</th>
-                  <th>Pricing</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {projects.length === 0 ? (
-                  <tr>
-                    <td colSpan={8}>No projects yet. Add a project from a booking detail page.</td>
-                  </tr>
-                ) : (
-                  projects.map((pr, i) => {
-                    const b = pr.booking;
-                    const pricingStr = pr.pricingType === 'fixed'
-                      ? `Fixed — ${formatRupiah(pr.fixedAmount)}`
-                      : `Hourly — ${formatRupiah(pr.hourlyRate)}/hr${pr.agreedHours ? ` × ${pr.agreedHours} hrs` : ''}`;
-                    return (
-                      <tr key={pr.id}>
-                        <td>{i + 1}</td>
-                        <td className={styles.cellEmphasis}>{pr.name}</td>
-                        <td>
-                          {b ? (
-                            <Link to={`/manage/bookings/${b.id}`} className={styles.link}>
-                              {b.date} {b.startTime}
-                            </Link>
-                          ) : '—'}
-                        </td>
-                        <td>{b?.artist?.name ?? '—'}</td>
-                        <td>{b?.customer?.name ?? '—'}</td>
-                        <td>{b?.studio?.name ?? '—'}</td>
-                        <td className={styles.cellAmount}>{pricingStr}</td>
-                        <td>
-                          {b && <Link to={`/manage/bookings/${b.id}`} className={styles.smBtn}>Booking</Link>}
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      )}
-
-      {tab === 'sessions' && (
-        <section className={styles.section}>
-          <div className={styles.sectionHead}>
-            <div>
-              <h2>Sessions</h2>
-              <span className={styles.countHint}>
-                {sessionsList.length === 0 ? 'No sessions' : `Showing ${(sessionPage - 1) * ROWS_PER_PAGE + 1}–${Math.min(sessionPage * ROWS_PER_PAGE, sessionsList.length)} of ${sessionsList.length}`}
-              </span>
-            </div>
-          </div>
-          <div className={styles.tableWrap}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>No.</th>
-                  <th>Date</th>
-                  <th>Time</th>
-                  <th>Project</th>
-                  <th>Booking</th>
-                  <th>Artist</th>
-                  <th>Customer</th>
-                  <th>Actual hrs</th>
-                  <th>Notes</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedSessions.length === 0 ? (
-                  <tr>
-                    <td colSpan={10}>No sessions yet. Add sessions from a booking detail page.</td>
-                  </tr>
-                ) : (
-                  paginatedSessions.map((sess, i) => {
-                    const proj = sess.project;
-                    const b = proj?.booking;
-                    const timeStr = [sess.startTime, sess.endTime].filter(Boolean).join(' – ') || '—';
-                    const rowNum = (sessionPage - 1) * ROWS_PER_PAGE + i + 1;
-                    return (
-                      <tr key={sess.id}>
-                        <td>{rowNum}</td>
-                        <td>{sess.date ?? '—'}</td>
-                        <td>{timeStr}</td>
-                        <td className={styles.cellEmphasis}>{proj?.name ?? '—'}</td>
-                        <td>
-                          {b ? (
-                            <Link to={`/manage/bookings/${b.id}`} className={styles.link}>
-                              {b.date} {b.startTime}
-                            </Link>
-                          ) : '—'}
-                        </td>
-                        <td>{b?.artist?.name ?? '—'}</td>
-                        <td>{b?.customer?.name ?? '—'}</td>
-                        <td>{sess.actualHours != null ? String(sess.actualHours) : '—'}</td>
-                        <td>{sess.notes ?? '—'}</td>
-                        <td>
-                          {b && <Link to={`/manage/bookings/${b.id}`} className={styles.smBtn}>Booking</Link>}
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
-          <Pagination currentPage={sessionPage} totalPages={sessionTotalPages} onPageChange={setSessionPage} />
-        </section>
-      )}
-
       {tab === 'payments' && (
         <section className={styles.section}>
           <div className={styles.sectionHead}>
@@ -855,6 +708,7 @@ export function Studio() {
               <thead>
                 <tr>
                   <th>No.</th>
+                  <th>ID</th>
                   <th>Amount</th>
                   <th>Method</th>
                   <th>Type</th>
@@ -867,7 +721,7 @@ export function Studio() {
               <tbody>
                 {paginatedPayments.length === 0 ? (
                   <tr>
-                    <td colSpan={8}>No payments yet. Create one above or add a down payment from a booking.</td>
+                    <td colSpan={9}>No payments yet. Create one above or add a down payment from a booking.</td>
                   </tr>
                 ) : (
                   paginatedPayments.map((p, i) => {
@@ -875,6 +729,7 @@ export function Studio() {
                     return (
                     <tr key={p.id}>
                       <td>{rowNum}</td>
+                      <td className={styles.cellId}><IdWithCopy id={p.id} /></td>
                       <td className={styles.cellAmount}>{formatRupiah(p.amount)} <span className={styles.convHint}>{formatWithConversion(p.amount).usd}</span></td>
                       <td className={styles.cellEmphasis}>{p.method || '—'}</td>
                       <td>{p.type || '—'}</td>
@@ -915,6 +770,7 @@ export function Studio() {
               <thead>
                 <tr>
                   <th>No.</th>
+                  <th>ID</th>
                   <th>Studio</th>
                   <th>Artist</th>
                   <th>Studio commission %</th>
@@ -924,7 +780,7 @@ export function Studio() {
               <tbody>
                 {paginatedCommissions.length === 0 ? (
                   <tr>
-                    <td colSpan={5}>No commission agreements. Add one to set the % the studio takes per artist.</td>
+                    <td colSpan={6}>No commission agreements. Add one to set the % the studio takes per artist.</td>
                   </tr>
                 ) : (
                   paginatedCommissions.map((c, i) => {
@@ -932,6 +788,7 @@ export function Studio() {
                     return (
                     <tr key={c.id}>
                       <td>{rowNum}</td>
+                      <td className={styles.cellId}><IdWithCopy id={c.id} /></td>
                       <td className={styles.cellEmphasis}>{c.studio?.name || '—'}</td>
                       <td className={styles.cellEmphasis}>{c.artist?.name || '—'}</td>
                       <td className={styles.cellAmount}>{c.commissionPercent}%</td>
@@ -963,6 +820,7 @@ export function Studio() {
               <thead>
                 <tr>
                   <th>No.</th>
+                  <th>ID</th>
                   <th>Name</th>
                   <th>Email</th>
                   <th>Phone</th>
@@ -977,7 +835,7 @@ export function Studio() {
               <tbody>
                 {paginatedCustomers.length === 0 ? (
                   <tr>
-                    <td colSpan={10}>No customers yet. Customers are added when you create a booking (select or create customer).</td>
+                    <td colSpan={11}>No customers yet. Customers are added when you create a booking (select or create customer).</td>
                   </tr>
                 ) : (
                   paginatedCustomers.map((c, i) => {
@@ -991,6 +849,7 @@ export function Studio() {
                     return (
                       <tr key={c.id}>
                         <td>{rowNum}</td>
+                        <td className={styles.cellId}><IdWithCopy id={c.id} /></td>
                         <td className={styles.cellEmphasis}>{c.name || '—'}</td>
                         <td>{c.email || '—'}</td>
                         <td>{c.phone || '—'}</td>
@@ -1010,7 +869,7 @@ export function Studio() {
                         <td>{createdStr}</td>
                         <td>
                           <button type="button" className={styles.smBtn} onClick={() => setCustomerHistoryModal(c)}>History</button>
-                          <button type="button" className={styles.smBtn} onClick={() => { applyBookingFilters({ ...bookingFilters, customerId: c.id }); switchTab('bookings'); }}>View bookings</button>
+                          <button type="button" className={styles.smBtn} onClick={() => { setBookingSearch(c.name || ''); setBookingPage(1); switchTab('bookings'); }}>View bookings</button>
                         </td>
                       </tr>
                     );
@@ -1050,6 +909,7 @@ export function Studio() {
               <thead>
                 <tr>
                   <th>No.</th>
+                  <th>ID</th>
                   <th>Name</th>
                   <th>Actions</th>
                 </tr>
@@ -1057,7 +917,7 @@ export function Studio() {
               <tbody>
                 {paginatedSpecialities.length === 0 ? (
                   <tr>
-                    <td colSpan={3}>No specialities yet. Add one above.</td>
+                    <td colSpan={4}>No specialities yet. Add one above.</td>
                   </tr>
                 ) : (
                   paginatedSpecialities.map((sp, i) => {
@@ -1065,6 +925,7 @@ export function Studio() {
                     return (
                       <tr key={sp.id}>
                         <td>{rowNum}</td>
+                        <td className={styles.cellId}><IdWithCopy id={sp.id} /></td>
                         <td>
                           {specEditId === sp.id ? (
                             <input
@@ -1143,6 +1004,7 @@ export function Studio() {
               <thead>
                 <tr>
                   <th>No.</th>
+                  <th>ID</th>
                   <th>Bank name</th>
                   <th>Bank account</th>
                   <th>Type</th>
@@ -1153,7 +1015,7 @@ export function Studio() {
               <tbody>
                 {paginatedDests.length === 0 ? (
                   <tr>
-                    <td colSpan={6}>No payment options yet. Add one to show in the booking form.</td>
+                    <td colSpan={7}>No payment options yet. Add one to show in the booking form.</td>
                   </tr>
                 ) : (
                   paginatedDests.map((d, i) => {
@@ -1161,6 +1023,7 @@ export function Studio() {
                     return (
                       <tr key={d.id}>
                         <td>{rowNum}</td>
+                        <td className={styles.cellId}><IdWithCopy id={d.id} /></td>
                         <td className={styles.cellEmphasis}>{d.name || '—'}</td>
                         <td>{d.account || '—'}</td>
                         <td>{d.type || '—'}</td>
@@ -1194,6 +1057,7 @@ export function Studio() {
               <thead>
                 <tr>
                   <th>No.</th>
+                  <th>ID</th>
                   <th>Email</th>
                   <th>Name</th>
                   <th>Role</th>
@@ -1204,7 +1068,7 @@ export function Studio() {
               <tbody>
                 {users.length === 0 ? (
                   <tr>
-                    <td colSpan={6}>No users yet. Add one to allow login to the platform.</td>
+                    <td colSpan={7}>No users yet. Add one to allow login to the platform.</td>
                   </tr>
                 ) : (
                   users.map((u, i) => {
@@ -1212,6 +1076,7 @@ export function Studio() {
                     return (
                       <tr key={u.id}>
                         <td>{i + 1}</td>
+                        <td className={styles.cellId}><IdWithCopy id={u.id} /></td>
                         <td className={styles.cellEmphasis}>{u.email}</td>
                         <td>{u.name || '—'}</td>
                         <td><span className={u.role === 'admin' ? styles.status_confirmed : ''}>{u.role}</span></td>

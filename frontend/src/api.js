@@ -334,36 +334,6 @@ export async function deleteCommission(id) {
   if (!res.ok) throw new Error(await res.text());
 }
 
-// ----- Reviews -----
-export async function getReviews(params = {}) {
-  const q = new URLSearchParams(params);
-  const url = `${API}/reviews` + (q.toString() ? `?${q}` : '');
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
-}
-
-export async function getArtistReviewSummary(artistId) {
-  const res = await fetch(`${API}/reviews/artist/${artistId}/summary`);
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
-}
-
-export async function createReview(data) {
-  const res = await fetch(`${API}/reviews`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
-}
-
-export async function deleteReview(id) {
-  const res = await fetch(`${API}/reviews/${id}`, { method: 'DELETE' });
-  if (!res.ok) throw new Error(await res.text());
-}
-
 // Parse error body: use JSON { error } if present, else raw text
 async function errorMessage(res) {
   const text = await res.text();

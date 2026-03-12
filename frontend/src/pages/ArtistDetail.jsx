@@ -4,16 +4,6 @@ import { getArtist, deleteArtist, uploadUrl } from '../api';
 import { formatRupiah, formatWithConversion } from '../currency';
 import styles from './ArtistDetail.module.css';
 
-function StarRating({ rating, size = '1rem' }) {
-  const filled = Math.min(5, Math.max(0, Math.round(rating)));
-  const empty = 5 - filled;
-  return (
-    <span className={styles.stars} style={{ fontSize: size }}>
-      {'★'.repeat(filled)}{'☆'.repeat(empty)}
-    </span>
-  );
-}
-
 export function ArtistDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -61,10 +51,6 @@ export function ArtistDetail() {
   const photos = safeParse(artist.photos);
   const portfolio = safeParse(artist.portfolio);
   const conv = artist.rate ? formatWithConversion(artist.rate) : null;
-  const reviews = artist.reviews || [];
-  const avgRating = reviews.length > 0
-    ? Math.round((reviews.reduce((s, r) => s + r.rating, 0) / reviews.length) * 10) / 10
-    : null;
 
   return (
     <div className={styles.wrap}>
@@ -92,13 +78,6 @@ export function ArtistDetail() {
         <div className={styles.heroInfo}>
           <h1>{artist.name}</h1>
           {artist.speciality && <span className={styles.speciality}>{artist.speciality}</span>}
-          {avgRating != null && (
-            <div className={styles.ratingBadge}>
-              <StarRating rating={avgRating} size="1.1rem" />
-              <span className={styles.ratingValue}>{avgRating}</span>
-              <span className={styles.ratingCount}>({reviews.length} review{reviews.length !== 1 ? 's' : ''})</span>
-            </div>
-          )}
           {artist.experiences && <p className={styles.experiences}>{artist.experiences} experience</p>}
           {artist.rate != null && (
             <div className={styles.rateCard}>
@@ -130,43 +109,6 @@ export function ArtistDetail() {
           <div className={styles.gallery}>
             {portfolio.map((url, i) => (
               <img key={i} src={uploadUrl(url)} alt="" />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {reviews.length > 0 && (
-        <section className={styles.section}>
-          <h2>Reviews ({reviews.length})</h2>
-          {avgRating != null && (
-            <div className={styles.reviewSummary}>
-              <span className={styles.reviewAvg}>{avgRating}</span>
-              <StarRating rating={avgRating} size="1.3rem" />
-              <span className={styles.reviewTotal}>based on {reviews.length} review{reviews.length !== 1 ? 's' : ''}</span>
-            </div>
-          )}
-          <div className={styles.reviewsList}>
-            {reviews.map((r) => (
-              <div key={r.id} className={styles.reviewCard}>
-                <div className={styles.reviewHeader}>
-                  <div className={styles.reviewerInfo}>
-                    <span className={styles.reviewerAvatar}>{(r.customer?.name || 'A')[0].toUpperCase()}</span>
-                    <div>
-                      <span className={styles.reviewerName}>{r.customer?.name || 'Anonymous'}</span>
-                      {r.booking?.date && (
-                        <span className={styles.reviewDate}>
-                          {new Date(r.booking.date + 'T00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <StarRating rating={r.rating} size="0.95rem" />
-                </div>
-                {r.booking?.notes && (
-                  <span className={styles.reviewService}>{r.booking.notes}</span>
-                )}
-                {r.comment && <p className={styles.reviewText}>{r.comment}</p>}
-              </div>
             ))}
           </div>
         </section>

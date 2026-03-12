@@ -24,7 +24,6 @@ async function main() {
     payments,
     paymentDestinations,
     studioCommissions,
-    reviews,
   ] = await Promise.all([
     prisma.speciality.findMany({ orderBy: { name: 'asc' } }),
     prisma.tattooArtist.findMany({ orderBy: { name: 'asc' } }),
@@ -32,7 +31,7 @@ async function main() {
     prisma.tattooStudio.findMany({ orderBy: { name: 'asc' } }),
     prisma.customer.findMany({ orderBy: { name: 'asc' } }),
     prisma.booking.findMany({
-      include: { artist: true, customer: true, studio: true, payments: true, review: true, projects: true },
+      include: { artist: true, customer: true, studio: true, payments: true, projects: true },
       orderBy: [{ date: 'desc' }, { startTime: 'desc' }],
     }),
     prisma.project.findMany({ orderBy: { createdAt: 'asc' } }),
@@ -40,7 +39,6 @@ async function main() {
     prisma.payment.findMany({ orderBy: { createdAt: 'asc' } }),
     prisma.paymentDestination.findMany({ orderBy: { name: 'asc' } }),
     prisma.studioCommission.findMany({ orderBy: [{ studioId: 'asc' }, { artistId: 'asc' }] }),
-    prisma.review.findMany({ orderBy: { createdAt: 'asc' } }),
   ]);
 
   const data = {
@@ -56,7 +54,6 @@ async function main() {
     payments,
     paymentDestinations,
     studioCommissions,
-    reviews,
   };
 
   const outDir = path.join(__dirname, 'backup');
@@ -65,7 +62,7 @@ async function main() {
   fs.writeFileSync(outPath, JSON.stringify(data, null, 2), 'utf8');
   console.log(`Exported to ${outPath}`);
   console.log(
-    `  Specialities: ${data.specialities.length}, Artists: ${data.tattooArtists.length}, Studios: ${data.tattooStudios.length}, Customers: ${data.customers.length}, Bookings: ${data.bookings.length}, Projects: ${data.projects.length}, Sessions: ${data.sessions.length}, Payments: ${data.payments.length}, PaymentDestinations: ${data.paymentDestinations.length}, Reviews: ${data.reviews.length}`,
+    `  Specialities: ${data.specialities.length}, Artists: ${data.tattooArtists.length}, Studios: ${data.tattooStudios.length}, Customers: ${data.customers.length}, Bookings: ${data.bookings.length}, Projects: ${data.projects.length}, Sessions: ${data.sessions.length}, Payments: ${data.payments.length}, PaymentDestinations: ${data.paymentDestinations.length}`,
   );
 }
 

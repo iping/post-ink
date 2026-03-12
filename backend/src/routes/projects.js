@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { generateNumericId } from '../utils/id.js';
 
 const prisma = new PrismaClient();
 export const projectsRouter = Router();
@@ -61,8 +62,9 @@ projectsRouter.post('/', async (req, res) => {
     }
     const booking = await prisma.booking.findUnique({ where: { id: bookingId } });
     if (!booking) return res.status(400).json({ error: 'Booking not found' });
+    const projectId = await generateNumericId(prisma, 'project');
     const project = await prisma.project.create({
-      data,
+      data: { ...data, id: projectId },
       include: { booking: { include: { artist: true, customer: true, studio: true } }, sessions: true },
     });
     const sessionPayload = firstSession && typeof firstSession === 'object'
@@ -80,8 +82,10 @@ projectsRouter.post('/', async (req, res) => {
           actualHours: null,
           notes: null,
         };
+    const firstSessionId = await generateNumericId(prisma, 'session');
     const first = await prisma.session.create({
       data: {
+        id: firstSessionId,
         projectId: project.id,
         date: sessionPayload.date,
         startTime: sessionPayload.startTime,

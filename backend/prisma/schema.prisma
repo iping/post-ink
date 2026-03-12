@@ -36,7 +36,6 @@ model TattooArtist {
   availability ArtistAvailability[]
   bookings     Booking[]
   commissions  StudioCommission[]
-  reviews      Review[]
 }
 
 // Artist availability slots (date + time range)
@@ -69,14 +68,13 @@ model TattooStudio {
 
 // ----- Customer -----
 model Customer {
-  id        String   @id @default(cuid())
+  id        String   @id // 6-digit numeric, set in app
   name      String
   email     String?
   phone     String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   bookings  Booking[]
-  reviews   Review[]
 }
 
 // ----- Booking (Studio: manage booking process) -----
@@ -92,16 +90,16 @@ model Booking {
   date        String        // YYYY-MM-DD
   startTime   String
   endTime     String
-  status       String        @default("pending") // pending, confirmed, completed, cancelled
+  status       String        @default("Unpaid")  // Paid = payment evidence recorded; Unpaid = not yet paid
   pricingType  String?       // "fixed" | "hourly": fixed = totalAmount is final; hourly = total from projects (hours × rate, accumulative)
   totalAmount  Float?        // agreed total when pricingType=fixed; when hourly, total computed from projects
   placement    String?       // body placement e.g. Arm, Back, Chest
   preference  String?       // customer reference / preference (style, image ref, etc.)
+  projectName String?       // e.g. "Maya Chen – Andi Pratama – 1"
   notes       String?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
   payments    Payment[]
-  review      Review?
   projects    Project[]
 
   @@index([artistId])
@@ -111,7 +109,7 @@ model Booking {
 
 // ----- Project (work per booking; one booking can have multiple projects; each project has sessions) -----
 model Project {
-  id           String    @id @default(cuid())
+  id           String    @id // 6-digit numeric, set in app
   bookingId    String
   booking      Booking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
   name         String    // e.g. "Alpha"
@@ -129,7 +127,7 @@ model Project {
 
 // ----- Session (each project has minimum 1 session; one session = one date/time block) -----
 model Session {
-  id           String   @id @default(cuid())
+  id           String   @id // 6-digit numeric, set in app
   projectId    String
   project      Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   date         String   // YYYY-MM-DD
@@ -199,20 +197,3 @@ model Speciality {
   updatedAt DateTime @updatedAt
 }
 
-// ----- Review (customer feedback after completed booking) -----
-model Review {
-  id         String        @id @default(cuid())
-  bookingId  String        @unique
-  booking    Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  artistId   String
-  artist     TattooArtist  @relation(fields: [artistId], references: [id], onDelete: Cascade)
-  customerId String?
-  customer   Customer?     @relation(fields: [customerId], references: [id], onDelete: SetNull)
-  rating     Int           // 1–5 stars
-  comment    String?
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime      @updatedAt
-
-  @@index([artistId])
-  @@index([customerId])
-}

@@ -66,8 +66,6 @@ export function ManageLayout() {
               </Link>
             </div>
           )}
-          <Link to="/manage?tab=projects" className={styles.sideNavLink} data-short="Pr" title="Projects">Projects</Link>
-          <Link to="/manage?tab=sessions" className={styles.sideNavLink} data-short="Se" title="Session">Session</Link>
           <Link to="/manage?tab=artists" className={styles.sideNavLink} data-short="A" title="Tattoo Artist">Tattoo Artist</Link>
           <Link to="/manage?tab=payments" className={styles.sideNavLink} data-short="P" title="Payments">Payments</Link>
           <Link to="/manage?tab=commissions" className={styles.sideNavLink} data-short="C" title="Commission">Commission</Link>
