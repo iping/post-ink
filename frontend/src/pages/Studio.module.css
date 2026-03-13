@@ -777,6 +777,8 @@
 .status_Paid { color: var(--success); font-weight: 600; }
 .status_Unpaid { color: #c49a2e; font-weight: 600; }
 .status_refunded { color: var(--muted); font-weight: 500; }
+.status_lead { color: #9a6700; font-weight: 600; }
+.status_customer { color: var(--success); font-weight: 600; }
 
 .smBtn,
 .smBtnDanger {

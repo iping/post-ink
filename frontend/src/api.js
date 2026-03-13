@@ -268,8 +268,13 @@ export async function deletePayment(id) {
 }
 
 // ----- Customers & Studios (for dropdowns) -----
-export async function getCustomers() {
-  const res = await fetch(`${API}/customers`);
+export async function getCustomers(params = {}) {
+  const q = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') q.set(key, value);
+  });
+  const url = q.toString() ? `${API}/customers?${q}` : `${API}/customers`;
+  const res = await fetch(url);
   if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
@@ -282,6 +287,21 @@ export async function createCustomer(data) {
   });
   if (!res.ok) throw new Error(await res.text());
   return res.json();
+}
+
+export async function updateCustomer(id, data) {
+  const res = await fetch(`${API}/customers/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function deleteCustomer(id) {
+  const res = await fetch(`${API}/customers/${id}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error(await res.text());
 }
 
 export async function getStudios() {

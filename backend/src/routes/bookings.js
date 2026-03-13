@@ -21,6 +21,20 @@ async function ensureUniqueShortCode() {
   throw new Error('Could not generate unique short code');
 }
 
+async function promoteLeadCustomer(tx, customerId) {
+  if (!customerId) return;
+  const customer = await tx.customer.findUnique({
+    where: { id: customerId },
+    select: { id: true, type: true },
+  });
+  if (customer?.type === 'lead') {
+    await tx.customer.update({
+      where: { id: customerId },
+      data: { type: 'customer' },
+    });
+  }
+}
+
 /** For hourly pricing: total = sum of (hourlyRate × agreedHours) across projects (accumulative). */
 function computedTotalForBooking(booking) {
   if (booking.pricingType === 'hourly' && Array.isArray(booking.projects) && booking.projects.length > 0) {
@@ -112,9 +126,12 @@ bookingsRouter.post('/', async (req, res) => {
       projectName: projectName || null,
     };
     if (pricingType === 'fixed' || pricingType === 'hourly') data.pricingType = pricingType;
-    const booking = await prisma.booking.create({
-      data,
-      include: { artist: true, customer: true, studio: true, payments: true },
+    const booking = await prisma.$transaction(async (tx) => {
+      await promoteLeadCustomer(tx, data.customerId);
+      return tx.booking.create({
+        data,
+        include: { artist: true, customer: true, studio: true, payments: true },
+      });
     });
     const withProjects = await prisma.booking.findUnique({
       where: { id: booking.id },
@@ -147,10 +164,13 @@ bookingsRouter.patch('/:id', async (req, res) => {
     if (body.preference !== undefined) data.preference = body.preference || null;
     if (body.projectName !== undefined) data.projectName = body.projectName || null;
     if (body.pricingType === 'fixed' || body.pricingType === 'hourly') data.pricingType = body.pricingType;
-    const booking = await prisma.booking.update({
-      where: { id: req.params.id },
-      data,
-      include: { artist: true, customer: true, studio: true, payments: true, projects: true },
+    const booking = await prisma.$transaction(async (tx) => {
+      if (data.customerId) await promoteLeadCustomer(tx, data.customerId);
+      return tx.booking.update({
+        where: { id: req.params.id },
+        data,
+        include: { artist: true, customer: true, studio: true, payments: true, projects: true },
+      });
     });
     const paidTotal = (booking.payments || []).filter((p) => p.status === 'completed').reduce((s, p) => s + p.amount, 0);
     const totalAmount = computedTotalForBooking(booking);

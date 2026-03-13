@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useState, useEffect, useMemo } from 'react';
+import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom';
 import {
   getArtists,
   getCustomers,
@@ -25,6 +25,14 @@ const BOOKING_STATUSES = ['Unpaid', 'Paid'];
 
 const MAX_PREFERENCE_IMAGES = 3;
 const MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2MB
+const LEAD_SOURCE_OPTIONS = [
+  { value: 'website', label: 'Website' },
+  { value: 'instagram', label: 'Instagram' },
+  { value: 'tiktok', label: 'TikTok' },
+  { value: 'walkin', label: 'Walk-in' },
+  { value: 'whatsapp', label: 'WhatsApp' },
+  { value: 'artist', label: 'Artist' },
+];
 
 const PLACEMENT_OPTIONS = [
   { value: 'Arm', label: 'Arm - Upper limb' },
@@ -52,10 +60,30 @@ function safeParseJson(str) {
   }
 }
 
+function filterCustomersBySearch(list, query) {
+  const q = (query || '').trim().toLowerCase();
+  if (!q) return list;
+  return list.filter((customer) => {
+    const text = [
+      customer.name,
+      customer.email,
+      customer.phone,
+      customer.referredArtist?.name,
+      customer.leadSource,
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
+    return text.includes(q);
+  });
+}
+
 export function BookingForm() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const isEdit = Boolean(id);
+  const preselectedCustomerId = searchParams.get('customerId') || '';
 
   const [artists, setArtists] = useState([]);
   const [customers, setCustomers] = useState([]);
@@ -81,8 +109,16 @@ export function BookingForm() {
     notes: '',
   });
   const [selectedSlot, setSelectedSlot] = useState(null);
-  const [newCustomer, setNewCustomer] = useState({ name: '', email: '', phone: '' });
-  const [useNewCustomer, setUseNewCustomer] = useState(false);
+  const [newCustomer, setNewCustomer] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    leadSource: 'website',
+    referredArtistId: '',
+  });
+  const [customerMode, setCustomerMode] = useState('existing');
+  const [leadSearch, setLeadSearch] = useState('');
+  const [existingCustomerSearch, setExistingCustomerSearch] = useState('');
   const [uploadingPreference, setUploadingPreference] = useState(false);
   const [useCustomTime, setUseCustomTime] = useState(false);
   const [depositDestinationId, setDepositDestinationId] = useState(''); // selected PaymentDestination id
@@ -94,6 +130,14 @@ export function BookingForm() {
   const [estimationMode, setEstimationMode] = useState('rate'); // 'rate' = Fixed rate, 'unlimited' = Hourly rate
   const [estimationAmount, setEstimationAmount] = useState('');
   const [firstDepositAmount, setFirstDepositAmount] = useState(''); // editable first deposit; must be >= artist 1h rate
+  const leadCustomers = useMemo(() => customers.filter((customer) => customer.type === 'lead'), [customers]);
+  const existingCustomers = useMemo(() => customers.filter((customer) => customer.type !== 'lead'), [customers]);
+  const filteredLeadCustomers = useMemo(() => filterCustomersBySearch(leadCustomers, leadSearch), [leadCustomers, leadSearch]);
+  const filteredExistingCustomers = useMemo(
+    () => filterCustomersBySearch(existingCustomers, existingCustomerSearch),
+    [existingCustomers, existingCustomerSearch],
+  );
+
   useEffect(() => {
     Promise.all([getArtists({ activeOnly: true }), getCustomers(), getStudios(), getPaymentDestinations({ activeOnly: 'true' }), getPayments()])
       .then(([a, c, s, pd, pm]) => {
@@ -105,10 +149,24 @@ export function BookingForm() {
         if (s.length > 0 && !bookingForm.studioId) {
           setBookingForm((f) => ({ ...f, studioId: s[0].id }));
         }
+        if (!isEdit && preselectedCustomerId) {
+          const selectedCustomer = c.find((customer) => customer.id === preselectedCustomerId);
+          if (selectedCustomer) {
+            setCustomerMode(selectedCustomer.type === 'lead' ? 'leads' : 'existing');
+            setBookingForm((f) => ({ ...f, customerId: preselectedCustomerId }));
+          }
+        }
       })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
-  }, []);
+  }, [isEdit, preselectedCustomerId]);
+
+  useEffect(() => {
+    if (!bookingForm.customerId) return;
+    const selectedCustomer = customers.find((customer) => customer.id === bookingForm.customerId);
+    if (!selectedCustomer) return;
+    setCustomerMode(selectedCustomer.type === 'lead' ? 'leads' : 'existing');
+  }, [bookingForm.customerId, customers]);
 
   useEffect(() => {
     if (isEdit && id) {
@@ -229,9 +287,29 @@ export function BookingForm() {
     e.preventDefault();
     setError(null);
     let customerId = bookingForm.customerId;
-    if (useNewCustomer && newCustomer.name.trim()) {
+    if (customerMode === 'new' && !newCustomer.name.trim()) {
+      setError('New customer name is required.');
+      return;
+    }
+    if (customerMode === 'new' && newCustomer.name.trim()) {
+      if (!newCustomer.email.trim() && !newCustomer.phone.trim()) {
+        setError('New customer must have at least email or phone.');
+        return;
+      }
+      if (!newCustomer.leadSource) {
+        setError('Please select customer source.');
+        return;
+      }
+      if (newCustomer.leadSource === 'artist' && !newCustomer.referredArtistId) {
+        setError('Please select artist name for artist source.');
+        return;
+      }
       try {
-        const c = await createCustomer(newCustomer);
+        const c = await createCustomer({
+          ...newCustomer,
+          type: 'customer',
+          referredArtistId: newCustomer.leadSource === 'artist' ? newCustomer.referredArtistId : null,
+        });
         customerId = c.id;
         setCustomers((prev) => [...prev, c]);
       } catch (err) {
@@ -451,25 +529,56 @@ export function BookingForm() {
                 <label className={styles.radioLabel}>
                   <input
                     type="radio"
-                    name="customerSource"
-                    checked={!useNewCustomer}
-                    onChange={() => { setUseNewCustomer(false); setError(null); }}
+                    name="customerMode"
+                    checked={customerMode === 'leads'}
+                    onChange={() => {
+                      setCustomerMode('leads');
+                      setBookingForm((f) => ({ ...f, customerId: '' }));
+                      setDeductFromDeposit(false);
+                      setError(null);
+                    }}
                   />
-                  <span>Select from list</span>
+                  <span>Leads</span>
                 </label>
                 <label className={styles.radioLabel}>
                   <input
                     type="radio"
-                    name="customerSource"
-                    checked={useNewCustomer}
-                    onChange={() => { setUseNewCustomer(true); setError(null); }}
+                    name="customerMode"
+                    checked={customerMode === 'existing'}
+                    onChange={() => {
+                      setCustomerMode('existing');
+                      setBookingForm((f) => ({ ...f, customerId: '' }));
+                      setDeductFromDeposit(false);
+                      setError(null);
+                    }}
+                  />
+                  <span>Existing customer</span>
+                </label>
+                <label className={styles.radioLabel}>
+                  <input
+                    type="radio"
+                    name="customerMode"
+                    checked={customerMode === 'new'}
+                    onChange={() => {
+                      setCustomerMode('new');
+                      setBookingForm((f) => ({ ...f, customerId: '' }));
+                      setDeductFromDeposit(false);
+                      setError(null);
+                    }}
                   />
                   <span>New customer</span>
                 </label>
               </div>
-              {!useNewCustomer && (
+              {customerMode === 'leads' && (
                 <label className={styles.label}>
-                  <span className={styles.labelText}>Customer</span>
+                  <span className={styles.labelText}>Search leads</span>
+                  <input
+                    className={styles.input}
+                    placeholder="Search by name, email, phone, source, artist"
+                    value={leadSearch}
+                    onChange={(e) => setLeadSearch(e.target.value)}
+                  />
+                  <span className={styles.labelText}>Lead</span>
                   <select
                     className={styles.input}
                     value={bookingForm.customerId}
@@ -478,8 +587,41 @@ export function BookingForm() {
                       setDeductFromDeposit(false);
                     }}
                   >
-                    <option value="">— No customer —</option>
-                    {customers.map((c) => {
+                    <option value="">— Select lead —</option>
+                    {filteredLeadCustomers.map((c) => {
+                      const artistReferral = c.referredArtist?.name ? ` · Artist: ${c.referredArtist.name}` : '';
+                      return (
+                        <option key={c.id} value={c.id}>
+                          {c.name} — {c.leadSource || 'Lead'}{artistReferral}
+                        </option>
+                      );
+                    })}
+                  </select>
+                  {filteredLeadCustomers.length === 0 && (
+                    <p className={styles.helper}>No leads match your search.</p>
+                  )}
+                </label>
+              )}
+              {customerMode === 'existing' && (
+                <label className={styles.label}>
+                  <span className={styles.labelText}>Search customer</span>
+                  <input
+                    className={styles.input}
+                    placeholder="Search by name, email, phone"
+                    value={existingCustomerSearch}
+                    onChange={(e) => setExistingCustomerSearch(e.target.value)}
+                  />
+                  <span className={styles.labelText}>Existing customer</span>
+                  <select
+                    className={styles.input}
+                    value={bookingForm.customerId}
+                    onChange={(e) => {
+                      setBookingForm((f) => ({ ...f, customerId: e.target.value }));
+                      setDeductFromDeposit(false);
+                    }}
+                  >
+                    <option value="">— Select customer —</option>
+                    {filteredExistingCustomers.map((c) => {
                       const deposit = getCustomerDeposit(c.id);
                       return (
                         <option key={c.id} value={c.id}>
@@ -488,11 +630,15 @@ export function BookingForm() {
                       );
                     })}
                   </select>
+                  {filteredExistingCustomers.length === 0 && (
+                    <p className={styles.helper}>No customers match your search.</p>
+                  )}
                 </label>
               )}
-              {useNewCustomer && (
+              {customerMode === 'new' && (
                 <fieldset className={styles.fieldset}>
                   <legend className={styles.legend}>New customer</legend>
+                  <p className={styles.helper}>Fill the full customer profile. At least one contact method is required: email or phone.</p>
                   <label className={styles.label}>
                     <span className={styles.labelText}>Name</span>
                     <input
@@ -521,6 +667,39 @@ export function BookingForm() {
                       onChange={(e) => setNewCustomer((n) => ({ ...n, phone: e.target.value }))}
                     />
                   </label>
+                  <label className={styles.label}>
+                    <span className={styles.labelText}>Source</span>
+                    <select
+                      className={styles.input}
+                      value={newCustomer.leadSource}
+                      onChange={(e) =>
+                        setNewCustomer((n) => ({
+                          ...n,
+                          leadSource: e.target.value,
+                          referredArtistId: e.target.value === 'artist' ? n.referredArtistId : '',
+                        }))
+                      }
+                    >
+                      {LEAD_SOURCE_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>{option.label}</option>
+                      ))}
+                    </select>
+                  </label>
+                  {newCustomer.leadSource === 'artist' && (
+                    <label className={styles.label}>
+                      <span className={styles.labelText}>Artist name</span>
+                      <select
+                        className={styles.input}
+                        value={newCustomer.referredArtistId}
+                        onChange={(e) => setNewCustomer((n) => ({ ...n, referredArtistId: e.target.value }))}
+                      >
+                        <option value="">Select artist</option>
+                        {artists.map((artist) => (
+                          <option key={artist.id} value={artist.id}>{artist.name}</option>
+                        ))}
+                      </select>
+                    </label>
+                  )}
                 </fieldset>
               )}
             </div>
@@ -876,7 +1055,7 @@ export function BookingForm() {
               </div>
               {bookingForm.artistId && chosenDeposit > 0 && (
                 <div className={styles.estimationCardExtra}>
-                  {!useNewCustomer && bookingForm.customerId && (() => {
+                  {customerMode !== 'new' && bookingForm.customerId && (() => {
                     const customerBalance = getCustomerDeposit(bookingForm.customerId);
                     const canDeduct = customerBalance >= chosenDeposit;
                     const amountLeftToPay = customerBalance > 0 && customerBalance < chosenDeposit ? chosenDeposit - customerBalance : 0;

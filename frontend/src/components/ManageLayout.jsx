@@ -77,6 +77,7 @@ export function ManageLayout() {
           <Link to="/manage?tab=payments" className={styles.sideNavLink} data-short="P" title="Payments">Payments</Link>
           <Link to="/manage?tab=commissions" className={styles.sideNavLink} data-short="C" title="Commission">Commission</Link>
           <Link to="/manage?tab=customers" className={styles.sideNavLink} data-short="U" title="Customers">Customers</Link>
+          <Link to="/manage?tab=leads" className={styles.sideNavLink} data-short="L" title="Leads">Leads</Link>
           <Link to="/manage?tab=specialities" className={styles.sideNavLink} data-short="S" title="Specialities">Specialities</Link>
           <Link to="/manage?tab=payment-destinations" className={styles.sideNavLink} data-short="Pay" title="Payment options">Payment options</Link>
           <Link to="/manage?tab=users" className={styles.sideNavLink} data-short="Us" title="Users">Users</Link>

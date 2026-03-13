@@ -36,6 +36,7 @@ model TattooArtist {
   availability ArtistAvailability[]
   bookings     Booking[]
   commissions  StudioCommission[]
+  referredLeads Customer[] @relation("LeadReferralArtist")
 }
 
 // Artist availability slots (date + time range)
@@ -72,9 +73,17 @@ model Customer {
   name      String
   email     String?
   phone     String?
+  type      String   @default("customer") // lead | customer
+  leadSource String?
+  referredArtistId String?
+  referredArtist TattooArtist? @relation("LeadReferralArtist", fields: [referredArtistId], references: [id], onDelete: SetNull)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   bookings  Booking[]
+
+  @@index([type])
+  @@index([leadSource])
+  @@index([referredArtistId])
 }
 
 // ----- Booking (Studio: manage booking process) -----

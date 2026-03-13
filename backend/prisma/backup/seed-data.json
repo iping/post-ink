@@ -1,5 +1,5 @@
 {
-  "exportedAt": "2026-03-12T19:54:00.642Z",
+  "exportedAt": "2026-03-13T10:24:15.427Z",
   "specialities": [
     {
       "id": "cmmn63x1g0004hlltta7jofnc",
@@ -18657,6 +18657,9 @@
       "name": "Andi Pratama",
       "email": "andi@example.com",
       "phone": "+62 812-3456-7890",
+      "type": "customer",
+      "leadSource": null,
+      "referredArtistId": null,
       "createdAt": "2026-03-12T07:50:05.467Z",
       "updatedAt": "2026-03-12T07:50:05.467Z"
     },
@@ -18665,54 +18668,163 @@
       "name": "Ayu Puspita",
       "email": "ayu@example.com",
       "phone": "+62 822-7788-9900",
+      "type": "customer",
+      "leadSource": null,
+      "referredArtistId": null,
       "createdAt": "2026-03-12T07:50:05.470Z",
       "updatedAt": "2026-03-12T07:50:05.470Z"
+    },
+    {
+      "id": "398808",
+      "name": "Bagas Mahendra",
+      "email": "bagas.lead@example.com",
+      "phone": null,
+      "type": "lead",
+      "leadSource": "website",
+      "referredArtistId": null,
+      "createdAt": "2026-03-13T10:11:33.509Z",
+      "updatedAt": "2026-03-13T10:11:33.509Z"
     },
     {
       "id": "779653",
       "name": "Budi Santoso",
       "email": "budi@example.com",
       "phone": "+62 811-2233-4455",
+      "type": "customer",
+      "leadSource": null,
+      "referredArtistId": null,
       "createdAt": "2026-03-12T07:50:05.467Z",
       "updatedAt": "2026-03-12T07:50:05.467Z"
+    },
+    {
+      "id": "980958",
+      "name": "Clara Adisty",
+      "email": "clara.lead@example.com",
+      "phone": "+62 813-2200-1144",
+      "type": "lead",
+      "leadSource": "tiktok",
+      "referredArtistId": null,
+      "createdAt": "2026-03-13T10:11:33.510Z",
+      "updatedAt": "2026-03-13T10:11:33.510Z"
     },
     {
       "id": "792967",
       "name": "Dewi Anggraini",
       "email": "dewi.a@example.com",
       "phone": "+62 838-0011-2233",
+      "type": "customer",
+      "leadSource": null,
+      "referredArtistId": null,
       "createdAt": "2026-03-12T07:50:05.467Z",
       "updatedAt": "2026-03-12T07:50:05.467Z"
+    },
+    {
+      "id": "900894",
+      "name": "Dian Puspa",
+      "email": null,
+      "phone": "+62 878-4400-6611",
+      "type": "lead",
+      "leadSource": "walkin",
+      "referredArtistId": null,
+      "createdAt": "2026-03-13T10:11:33.510Z",
+      "updatedAt": "2026-03-13T10:11:33.510Z"
     },
     {
       "id": "169333",
       "name": "Doni Hermawan",
       "email": "doni@example.com",
       "phone": "+62 852-9900-1122",
+      "type": "customer",
+      "leadSource": null,
+      "referredArtistId": null,
       "createdAt": "2026-03-12T07:50:05.467Z",
       "updatedAt": "2026-03-12T07:50:05.467Z"
+    },
+    {
+      "id": "450340",
+      "name": "Eko Prabowo",
+      "email": "eko.prospect@example.com",
+      "phone": "+62 852-7111-8899",
+      "type": "lead",
+      "leadSource": "artist",
+      "referredArtistId": "cmmn63x7y00kuhlltmwuzrgxi",
+      "createdAt": "2026-03-13T10:11:33.511Z",
+      "updatedAt": "2026-03-13T10:11:33.511Z"
     },
     {
       "id": "556816",
       "name": "Fajar Kurniawan",
       "email": "fajar@example.com",
       "phone": "+62 878-1122-3344",
+      "type": "customer",
+      "leadSource": null,
+      "referredArtistId": null,
       "createdAt": "2026-03-12T07:50:05.467Z",
       "updatedAt": "2026-03-12T07:50:05.467Z"
+    },
+    {
+      "id": "904923",
+      "name": "Fina Maharani",
+      "email": "fina.dm@example.com",
+      "phone": null,
+      "type": "lead",
+      "leadSource": "instagram",
+      "referredArtistId": null,
+      "createdAt": "2026-03-13T10:11:33.512Z",
+      "updatedAt": "2026-03-13T10:11:33.512Z"
+    },
+    {
+      "id": "451452",
+      "name": "Galih Saptono",
+      "email": null,
+      "phone": "+62 821-3900-5522",
+      "type": "lead",
+      "leadSource": "website",
+      "referredArtistId": null,
+      "createdAt": "2026-03-13T10:11:33.513Z",
+      "updatedAt": "2026-03-13T10:11:33.513Z"
+    },
+    {
+      "id": "106976",
+      "name": "Hana Cahyani",
+      "email": "hana.cahyani@example.com",
+      "phone": "+62 812-6633-2244",
+      "type": "lead",
+      "leadSource": "artist",
+      "referredArtistId": "cmmn63xe6014whlltk1qpaoma",
+      "createdAt": "2026-03-13T10:11:33.514Z",
+      "updatedAt": "2026-03-13T10:11:33.514Z"
     },
     {
       "id": "111993",
       "name": "Kevin Wijaya",
       "email": "kevin@example.com",
       "phone": "+62 812-1100-2233",
+      "type": "customer",
+      "leadSource": null,
+      "referredArtistId": null,
       "createdAt": "2026-03-12T07:50:05.471Z",
       "updatedAt": "2026-03-12T07:50:05.471Z"
+    },
+    {
+      "id": "607631",
+      "name": "Lead QA Browser 202603130923",
+      "email": "lead.qa.browser+202603130923@example.com",
+      "phone": "+62 812 3456 7890",
+      "type": "customer",
+      "leadSource": null,
+      "referredArtistId": null,
+      "createdAt": "2026-03-13T09:23:22.314Z",
+      "updatedAt": "2026-03-13T09:23:23.859Z"
     },
     {
       "id": "228274",
       "name": "Mela Putri",
       "email": "mela@example.com",
       "phone": "+62 821-5566-7788",
+      "type": "customer",
+      "leadSource": null,
+      "referredArtistId": null,
       "createdAt": "2026-03-12T07:50:05.472Z",
       "updatedAt": "2026-03-12T07:50:05.472Z"
     },
@@ -18721,6 +18833,9 @@
       "name": "Nadia Rahmawati",
       "email": "nadia@example.com",
       "phone": "+62 831-3344-5566",
+      "type": "customer",
+      "leadSource": null,
+      "referredArtistId": null,
       "createdAt": "2026-03-12T07:50:05.475Z",
       "updatedAt": "2026-03-12T07:50:05.475Z"
     },
@@ -18729,14 +18844,42 @@
       "name": "Oscar Setiawan",
       "email": "oscar@example.com",
       "phone": "+62 878-6677-8899",
+      "type": "customer",
+      "leadSource": null,
+      "referredArtistId": null,
       "createdAt": "2026-03-12T07:50:05.475Z",
       "updatedAt": "2026-03-12T07:50:05.475Z"
+    },
+    {
+      "id": "317935",
+      "name": "QA Artist Lead 1773396067553",
+      "email": null,
+      "phone": null,
+      "type": "customer",
+      "leadSource": null,
+      "referredArtistId": null,
+      "createdAt": "2026-03-13T10:01:10.621Z",
+      "updatedAt": "2026-03-13T10:08:12.331Z"
+    },
+    {
+      "id": "894051",
+      "name": "Rani Kusuma",
+      "email": "rani.lead@example.com",
+      "phone": "+62 813-4455-6677",
+      "type": "lead",
+      "leadSource": "instagram",
+      "referredArtistId": null,
+      "createdAt": "2026-03-13T10:11:33.502Z",
+      "updatedAt": "2026-03-13T10:11:33.502Z"
     },
     {
       "id": "201716",
       "name": "Rina Wijaya",
       "email": "rina@example.com",
       "phone": "+62 856-7788-9900",
+      "type": "customer",
+      "leadSource": null,
+      "referredArtistId": null,
       "createdAt": "2026-03-12T07:50:05.476Z",
       "updatedAt": "2026-03-12T07:50:05.476Z"
     },
@@ -18745,6 +18888,9 @@
       "name": "Rizky Fadillah",
       "email": "rizky@example.com",
       "phone": "+62 857-4455-6677",
+      "type": "customer",
+      "leadSource": null,
+      "referredArtistId": null,
       "createdAt": "2026-03-12T07:50:05.470Z",
       "updatedAt": "2026-03-12T07:50:05.470Z"
     },
@@ -18753,22 +18899,53 @@
       "name": "Sari Dewi",
       "email": "sari@example.com",
       "phone": "+62 813-9876-5432",
+      "type": "customer",
+      "leadSource": null,
+      "referredArtistId": null,
       "createdAt": "2026-03-12T07:50:05.467Z",
       "updatedAt": "2026-03-12T07:50:05.467Z"
+    },
+    {
+      "id": "813143",
+      "name": "Tomi Saputra",
+      "email": null,
+      "phone": "+62 822-6677-8899",
+      "type": "lead",
+      "leadSource": "whatsapp",
+      "referredArtistId": null,
+      "createdAt": "2026-03-13T10:11:33.507Z",
+      "updatedAt": "2026-03-13T10:11:33.507Z"
     },
     {
       "id": "701775",
       "name": "Tommy Adriansyah",
       "email": "tommy@example.com",
       "phone": "+62 815-6677-8899",
+      "type": "customer",
+      "leadSource": null,
+      "referredArtistId": null,
       "createdAt": "2026-03-12T07:50:05.467Z",
       "updatedAt": "2026-03-12T07:50:05.467Z"
+    },
+    {
+      "id": "970958",
+      "name": "Vera Lestari",
+      "email": "vera.lead@example.com",
+      "phone": "+62 857-9988-7766",
+      "type": "lead",
+      "leadSource": "artist",
+      "referredArtistId": "cmmn63x1t000shlltpl7k5rau",
+      "createdAt": "2026-03-13T10:11:33.508Z",
+      "updatedAt": "2026-03-13T10:11:33.508Z"
     },
     {
       "id": "336371",
       "name": "Yuni Lestari",
       "email": "yuni@example.com",
       "phone": "+62 819-3344-5566",
+      "type": "customer",
+      "leadSource": null,
+      "referredArtistId": null,
       "createdAt": "2026-03-12T07:50:05.467Z",
       "updatedAt": "2026-03-12T07:50:05.467Z"
     }
@@ -18810,6 +18987,9 @@
         "name": "Oscar Setiawan",
         "email": "oscar@example.com",
         "phone": "+62 878-6677-8899",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
         "createdAt": "2026-03-12T07:50:05.475Z",
         "updatedAt": "2026-03-12T07:50:05.475Z"
       },
@@ -18886,6 +19066,9 @@
         "name": "Nadia Rahmawati",
         "email": "nadia@example.com",
         "phone": "+62 831-3344-5566",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
         "createdAt": "2026-03-12T07:50:05.475Z",
         "updatedAt": "2026-03-12T07:50:05.475Z"
       },
@@ -18911,7 +19094,20 @@
           "updatedAt": "2026-03-12T07:58:47.322Z"
         }
       ],
-      "projects": []
+      "projects": [
+        {
+          "id": "425398",
+          "bookingId": "cmmn6f4sk0009lgs0c359518x",
+          "name": "Project – Nadia Rahmawati",
+          "pricingType": "fixed",
+          "fixedAmount": 50000000,
+          "hourlyRate": null,
+          "agreedHours": null,
+          "notes": null,
+          "createdAt": "2026-03-13T06:59:49.774Z",
+          "updatedAt": "2026-03-13T06:59:49.774Z"
+        }
+      ]
     },
     {
       "id": "cmmn6soq80001pe7gdaqq2ki7",
@@ -18949,6 +19145,9 @@
         "name": "Mela Putri",
         "email": "mela@example.com",
         "phone": "+62 821-5566-7788",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
         "createdAt": "2026-03-12T07:50:05.472Z",
         "updatedAt": "2026-03-12T07:50:05.472Z"
       },
@@ -19012,6 +19211,9 @@
         "name": "Budi Santoso",
         "email": "budi@example.com",
         "phone": "+62 811-2233-4455",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
         "createdAt": "2026-03-12T07:50:05.467Z",
         "updatedAt": "2026-03-12T07:50:05.467Z"
       },
@@ -19075,6 +19277,9 @@
         "name": "Nadia Rahmawati",
         "email": "nadia@example.com",
         "phone": "+62 831-3344-5566",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
         "createdAt": "2026-03-12T07:50:05.475Z",
         "updatedAt": "2026-03-12T07:50:05.475Z"
       },
@@ -19138,6 +19343,9 @@
         "name": "Oscar Setiawan",
         "email": "oscar@example.com",
         "phone": "+62 878-6677-8899",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
         "createdAt": "2026-03-12T07:50:05.475Z",
         "updatedAt": "2026-03-12T07:50:05.475Z"
       },
@@ -19187,6 +19395,9 @@
         "name": "Ayu Puspita",
         "email": "ayu@example.com",
         "phone": "+62 822-7788-9900",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
         "createdAt": "2026-03-12T07:50:05.470Z",
         "updatedAt": "2026-03-12T07:50:05.470Z"
       },
@@ -19250,6 +19461,9 @@
         "name": "Dewi Anggraini",
         "email": "dewi.a@example.com",
         "phone": "+62 838-0011-2233",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
         "createdAt": "2026-03-12T07:50:05.467Z",
         "updatedAt": "2026-03-12T07:50:05.467Z"
       },
@@ -19299,6 +19513,9 @@
         "name": "Kevin Wijaya",
         "email": "kevin@example.com",
         "phone": "+62 812-1100-2233",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
         "createdAt": "2026-03-12T07:50:05.471Z",
         "updatedAt": "2026-03-12T07:50:05.471Z"
       },
@@ -19348,6 +19565,9 @@
         "name": "Mela Putri",
         "email": "mela@example.com",
         "phone": "+62 821-5566-7788",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
         "createdAt": "2026-03-12T07:50:05.472Z",
         "updatedAt": "2026-03-12T07:50:05.472Z"
       },
@@ -19411,6 +19631,9 @@
         "name": "Mela Putri",
         "email": "mela@example.com",
         "phone": "+62 821-5566-7788",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
         "createdAt": "2026-03-12T07:50:05.472Z",
         "updatedAt": "2026-03-12T07:50:05.472Z"
       },
@@ -19474,6 +19697,9 @@
         "name": "Rizky Fadillah",
         "email": "rizky@example.com",
         "phone": "+62 857-4455-6677",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
         "createdAt": "2026-03-12T07:50:05.470Z",
         "updatedAt": "2026-03-12T07:50:05.470Z"
       },
@@ -19537,6 +19763,9 @@
         "name": "Tommy Adriansyah",
         "email": "tommy@example.com",
         "phone": "+62 815-6677-8899",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
         "createdAt": "2026-03-12T07:50:05.467Z",
         "updatedAt": "2026-03-12T07:50:05.467Z"
       },
@@ -19560,6 +19789,72 @@
           "evidenceUrl": null,
           "createdAt": "2026-03-12T07:50:05.546Z",
           "updatedAt": "2026-03-12T07:50:05.546Z"
+        }
+      ],
+      "projects": []
+    },
+    {
+      "id": "cmmon49o50001af02tza38cbr",
+      "shortCode": "C2GFN",
+      "artistId": "cmmn63xr0020zhlltrqawimxa",
+      "customerId": "201716",
+      "studioId": "cmmn63y4u02v2hlltvcvmqd8n",
+      "date": "2026-03-13",
+      "startTime": "14:00",
+      "endTime": "15:00",
+      "status": "Paid",
+      "pricingType": "hourly",
+      "totalAmount": null,
+      "placement": "Chest",
+      "preference": "{\"text\":\"DSDFSDF\",\"images\":[\"/uploads/pref-1773390827969-Screenshot-2026-03-09-at-16.06.11.png\"]}",
+      "projectName": "Karin Wolff – Rina Wijaya – 1",
+      "notes": null,
+      "createdAt": "2026-03-13T08:34:00.051Z",
+      "updatedAt": "2026-03-13T08:34:00.074Z",
+      "artist": {
+        "id": "cmmn63xr0020zhlltrqawimxa",
+        "name": "Karin Wolff",
+        "shortDescription": "Berlin-trained artist who merges European illustration with Southeast Asian motifs. Known for intricate floral sleeves, whimsical animal pieces, and bold color palettes that pop.",
+        "experiences": "7 years",
+        "speciality": "Illustrative, Floral, Color Realism, Neo-Traditional",
+        "rate": 800000,
+        "photos": "[\"https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&h=600&fit=crop&crop=face\"]",
+        "portfolio": "[\"https://images.unsplash.com/photo-1562962230-16e4623d36e6?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1586953208270-767889fa9b0f?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1568515045052-f9a854d70bfd?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?w=500&h=500&fit=crop\"]",
+        "isActive": true,
+        "createdAt": "2026-03-12T07:50:04.956Z",
+        "updatedAt": "2026-03-12T07:50:04.956Z"
+      },
+      "customer": {
+        "id": "201716",
+        "name": "Rina Wijaya",
+        "email": "rina@example.com",
+        "phone": "+62 856-7788-9900",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
+        "createdAt": "2026-03-12T07:50:05.476Z",
+        "updatedAt": "2026-03-12T07:50:05.476Z"
+      },
+      "studio": {
+        "id": "cmmn63y4u02v2hlltvcvmqd8n",
+        "name": "Ink Haven Studio",
+        "address": "Jl. Kemang Raya No. 45, Jakarta Selatan",
+        "createdAt": "2026-03-12T07:50:05.455Z",
+        "updatedAt": "2026-03-12T07:50:05.455Z"
+      },
+      "payments": [
+        {
+          "id": "cmmon49ok0003af02a5xghoii",
+          "bookingId": "cmmon49o50001af02tza38cbr",
+          "amount": 800000,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "down_payment",
+          "method": "From deposit",
+          "transferDestination": null,
+          "evidenceUrl": null,
+          "createdAt": "2026-03-13T08:34:00.068Z",
+          "updatedAt": "2026-03-13T08:34:00.068Z"
         }
       ],
       "projects": []
@@ -19600,6 +19895,9 @@
         "name": "Sari Dewi",
         "email": "sari@example.com",
         "phone": "+62 813-9876-5432",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
         "createdAt": "2026-03-12T07:50:05.467Z",
         "updatedAt": "2026-03-12T07:50:05.467Z"
       },
@@ -19674,6 +19972,9 @@
         "name": "Andi Pratama",
         "email": "andi@example.com",
         "phone": "+62 812-3456-7890",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
         "createdAt": "2026-03-12T07:50:05.467Z",
         "updatedAt": "2026-03-12T07:50:05.467Z"
       },
@@ -19715,6 +20016,72 @@
       ]
     },
     {
+      "id": "cmmoovsk40002fmp7qprr03gw",
+      "shortCode": "QB9PE",
+      "artistId": "cmmn63xr0020zhlltrqawimxa",
+      "customerId": "607631",
+      "studioId": "cmmn63y4u02v2hlltvcvmqd8n",
+      "date": "2026-03-13",
+      "startTime": "09:00",
+      "endTime": "10:00",
+      "status": "Paid",
+      "pricingType": "fixed",
+      "totalAmount": 800000,
+      "placement": "Arm",
+      "preference": null,
+      "projectName": "Karin Wolff – Lead QA Browser 202603130923 – 1",
+      "notes": null,
+      "createdAt": "2026-03-13T09:23:23.861Z",
+      "updatedAt": "2026-03-13T09:23:23.872Z",
+      "artist": {
+        "id": "cmmn63xr0020zhlltrqawimxa",
+        "name": "Karin Wolff",
+        "shortDescription": "Berlin-trained artist who merges European illustration with Southeast Asian motifs. Known for intricate floral sleeves, whimsical animal pieces, and bold color palettes that pop.",
+        "experiences": "7 years",
+        "speciality": "Illustrative, Floral, Color Realism, Neo-Traditional",
+        "rate": 800000,
+        "photos": "[\"https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&h=600&fit=crop&crop=face\"]",
+        "portfolio": "[\"https://images.unsplash.com/photo-1562962230-16e4623d36e6?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1586953208270-767889fa9b0f?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1568515045052-f9a854d70bfd?w=500&h=500&fit=crop\",\"https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?w=500&h=500&fit=crop\"]",
+        "isActive": true,
+        "createdAt": "2026-03-12T07:50:04.956Z",
+        "updatedAt": "2026-03-12T07:50:04.956Z"
+      },
+      "customer": {
+        "id": "607631",
+        "name": "Lead QA Browser 202603130923",
+        "email": "lead.qa.browser+202603130923@example.com",
+        "phone": "+62 812 3456 7890",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
+        "createdAt": "2026-03-13T09:23:22.314Z",
+        "updatedAt": "2026-03-13T09:23:23.859Z"
+      },
+      "studio": {
+        "id": "cmmn63y4u02v2hlltvcvmqd8n",
+        "name": "Ink Haven Studio",
+        "address": "Jl. Kemang Raya No. 45, Jakarta Selatan",
+        "createdAt": "2026-03-12T07:50:05.455Z",
+        "updatedAt": "2026-03-12T07:50:05.455Z"
+      },
+      "payments": [
+        {
+          "id": "cmmoovskd0004fmp7238gsba3",
+          "bookingId": "cmmoovsk40002fmp7qprr03gw",
+          "amount": 800000,
+          "currency": "IDR",
+          "status": "completed",
+          "type": "down_payment",
+          "method": "Cash",
+          "transferDestination": null,
+          "evidenceUrl": null,
+          "createdAt": "2026-03-13T09:23:23.869Z",
+          "updatedAt": "2026-03-13T09:23:23.869Z"
+        }
+      ],
+      "projects": []
+    },
+    {
       "id": "cmmn63y9z02yihlltvvwygmel",
       "shortCode": "SYC81",
       "artistId": "cmmn63xiu01exhllt52cc9y3l",
@@ -19750,6 +20117,9 @@
         "name": "Budi Santoso",
         "email": "budi@example.com",
         "phone": "+62 811-2233-4455",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
         "createdAt": "2026-03-12T07:50:05.467Z",
         "updatedAt": "2026-03-12T07:50:05.467Z"
       },
@@ -19826,6 +20196,9 @@
         "name": "Rina Wijaya",
         "email": "rina@example.com",
         "phone": "+62 856-7788-9900",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
         "createdAt": "2026-03-12T07:50:05.476Z",
         "updatedAt": "2026-03-12T07:50:05.476Z"
       },
@@ -19902,6 +20275,9 @@
         "name": "Rina Wijaya",
         "email": "rina@example.com",
         "phone": "+62 856-7788-9900",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
         "createdAt": "2026-03-12T07:50:05.476Z",
         "updatedAt": "2026-03-12T07:50:05.476Z"
       },
@@ -19965,6 +20341,9 @@
         "name": "Rina Wijaya",
         "email": "rina@example.com",
         "phone": "+62 856-7788-9900",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
         "createdAt": "2026-03-12T07:50:05.476Z",
         "updatedAt": "2026-03-12T07:50:05.476Z"
       },
@@ -20028,6 +20407,9 @@
         "name": "Tommy Adriansyah",
         "email": "tommy@example.com",
         "phone": "+62 815-6677-8899",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
         "createdAt": "2026-03-12T07:50:05.467Z",
         "updatedAt": "2026-03-12T07:50:05.467Z"
       },
@@ -20104,6 +20486,9 @@
         "name": "Andi Pratama",
         "email": "andi@example.com",
         "phone": "+62 812-3456-7890",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
         "createdAt": "2026-03-12T07:50:05.467Z",
         "updatedAt": "2026-03-12T07:50:05.467Z"
       },
@@ -20180,6 +20565,9 @@
         "name": "Doni Hermawan",
         "email": "doni@example.com",
         "phone": "+62 852-9900-1122",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
         "createdAt": "2026-03-12T07:50:05.467Z",
         "updatedAt": "2026-03-12T07:50:05.467Z"
       },
@@ -20191,7 +20579,20 @@
         "updatedAt": "2026-03-12T07:50:05.455Z"
       },
       "payments": [],
-      "projects": []
+      "projects": [
+        {
+          "id": "463972",
+          "bookingId": "cmmn63y9302w6hlltzfwb2fbl",
+          "name": "Project – Doni Hermawan",
+          "pricingType": "fixed",
+          "fixedAmount": 2500000,
+          "hourlyRate": null,
+          "agreedHours": null,
+          "notes": "Watercolor butterfly — cancelled by customer",
+          "createdAt": "2026-03-13T08:36:46.222Z",
+          "updatedAt": "2026-03-13T08:36:46.222Z"
+        }
+      ]
     },
     {
       "id": "cmmn63yao02zmhllth1fiw2nb",
@@ -20229,6 +20630,9 @@
         "name": "Rizky Fadillah",
         "email": "rizky@example.com",
         "phone": "+62 857-4455-6677",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
         "createdAt": "2026-03-12T07:50:05.470Z",
         "updatedAt": "2026-03-12T07:50:05.470Z"
       },
@@ -20305,6 +20709,9 @@
         "name": "Kevin Wijaya",
         "email": "kevin@example.com",
         "phone": "+62 812-1100-2233",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
         "createdAt": "2026-03-12T07:50:05.471Z",
         "updatedAt": "2026-03-12T07:50:05.471Z"
       },
@@ -20381,6 +20788,9 @@
         "name": "Sari Dewi",
         "email": "sari@example.com",
         "phone": "+62 813-9876-5432",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
         "createdAt": "2026-03-12T07:50:05.467Z",
         "updatedAt": "2026-03-12T07:50:05.467Z"
       },
@@ -20457,6 +20867,9 @@
         "name": "Rizky Fadillah",
         "email": "rizky@example.com",
         "phone": "+62 857-4455-6677",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
         "createdAt": "2026-03-12T07:50:05.470Z",
         "updatedAt": "2026-03-12T07:50:05.470Z"
       },
@@ -20506,6 +20919,9 @@
         "name": "Andi Pratama",
         "email": "andi@example.com",
         "phone": "+62 812-3456-7890",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
         "createdAt": "2026-03-12T07:50:05.467Z",
         "updatedAt": "2026-03-12T07:50:05.467Z"
       },
@@ -20569,6 +20985,9 @@
         "name": "Budi Santoso",
         "email": "budi@example.com",
         "phone": "+62 811-2233-4455",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
         "createdAt": "2026-03-12T07:50:05.467Z",
         "updatedAt": "2026-03-12T07:50:05.467Z"
       },
@@ -20645,6 +21064,9 @@
         "name": "Fajar Kurniawan",
         "email": "fajar@example.com",
         "phone": "+62 878-1122-3344",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
         "createdAt": "2026-03-12T07:50:05.467Z",
         "updatedAt": "2026-03-12T07:50:05.467Z"
       },
@@ -20708,6 +21130,9 @@
         "name": "Mela Putri",
         "email": "mela@example.com",
         "phone": "+62 821-5566-7788",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
         "createdAt": "2026-03-12T07:50:05.472Z",
         "updatedAt": "2026-03-12T07:50:05.472Z"
       },
@@ -20771,6 +21196,9 @@
         "name": "Doni Hermawan",
         "email": "doni@example.com",
         "phone": "+62 852-9900-1122",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
         "createdAt": "2026-03-12T07:50:05.467Z",
         "updatedAt": "2026-03-12T07:50:05.467Z"
       },
@@ -20847,6 +21275,9 @@
         "name": "Dewi Anggraini",
         "email": "dewi.a@example.com",
         "phone": "+62 838-0011-2233",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
         "createdAt": "2026-03-12T07:50:05.467Z",
         "updatedAt": "2026-03-12T07:50:05.467Z"
       },
@@ -20910,6 +21341,9 @@
         "name": "Mela Putri",
         "email": "mela@example.com",
         "phone": "+62 821-5566-7788",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
         "createdAt": "2026-03-12T07:50:05.472Z",
         "updatedAt": "2026-03-12T07:50:05.472Z"
       },
@@ -20973,6 +21407,9 @@
         "name": "Ayu Puspita",
         "email": "ayu@example.com",
         "phone": "+62 822-7788-9900",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
         "createdAt": "2026-03-12T07:50:05.470Z",
         "updatedAt": "2026-03-12T07:50:05.470Z"
       },
@@ -21036,6 +21473,9 @@
         "name": "Sari Dewi",
         "email": "sari@example.com",
         "phone": "+62 813-9876-5432",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
         "createdAt": "2026-03-12T07:50:05.467Z",
         "updatedAt": "2026-03-12T07:50:05.467Z"
       },
@@ -21099,6 +21539,9 @@
         "name": "Yuni Lestari",
         "email": "yuni@example.com",
         "phone": "+62 819-3344-5566",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
         "createdAt": "2026-03-12T07:50:05.467Z",
         "updatedAt": "2026-03-12T07:50:05.467Z"
       },
@@ -21162,6 +21605,9 @@
         "name": "Rina Wijaya",
         "email": "rina@example.com",
         "phone": "+62 856-7788-9900",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
         "createdAt": "2026-03-12T07:50:05.476Z",
         "updatedAt": "2026-03-12T07:50:05.476Z"
       },
@@ -21225,6 +21671,9 @@
         "name": "Yuni Lestari",
         "email": "yuni@example.com",
         "phone": "+62 819-3344-5566",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
         "createdAt": "2026-03-12T07:50:05.467Z",
         "updatedAt": "2026-03-12T07:50:05.467Z"
       },
@@ -21288,6 +21737,9 @@
         "name": "Oscar Setiawan",
         "email": "oscar@example.com",
         "phone": "+62 878-6677-8899",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
         "createdAt": "2026-03-12T07:50:05.475Z",
         "updatedAt": "2026-03-12T07:50:05.475Z"
       },
@@ -21351,6 +21803,9 @@
         "name": "Doni Hermawan",
         "email": "doni@example.com",
         "phone": "+62 852-9900-1122",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
         "createdAt": "2026-03-12T07:50:05.467Z",
         "updatedAt": "2026-03-12T07:50:05.467Z"
       },
@@ -21414,6 +21869,9 @@
         "name": "Nadia Rahmawati",
         "email": "nadia@example.com",
         "phone": "+62 831-3344-5566",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
         "createdAt": "2026-03-12T07:50:05.475Z",
         "updatedAt": "2026-03-12T07:50:05.475Z"
       },
@@ -21477,6 +21935,9 @@
         "name": "Mela Putri",
         "email": "mela@example.com",
         "phone": "+62 821-5566-7788",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
         "createdAt": "2026-03-12T07:50:05.472Z",
         "updatedAt": "2026-03-12T07:50:05.472Z"
       },
@@ -21540,6 +22001,9 @@
         "name": "Oscar Setiawan",
         "email": "oscar@example.com",
         "phone": "+62 878-6677-8899",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
         "createdAt": "2026-03-12T07:50:05.475Z",
         "updatedAt": "2026-03-12T07:50:05.475Z"
       },
@@ -21603,6 +22067,9 @@
         "name": "Fajar Kurniawan",
         "email": "fajar@example.com",
         "phone": "+62 878-1122-3344",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
         "createdAt": "2026-03-12T07:50:05.467Z",
         "updatedAt": "2026-03-12T07:50:05.467Z"
       },
@@ -21666,6 +22133,9 @@
         "name": "Fajar Kurniawan",
         "email": "fajar@example.com",
         "phone": "+62 878-1122-3344",
+        "type": "customer",
+        "leadSource": null,
+        "referredArtistId": null,
         "createdAt": "2026-03-12T07:50:05.467Z",
         "updatedAt": "2026-03-12T07:50:05.467Z"
       },
@@ -21742,9 +22212,60 @@
       "notes": null,
       "createdAt": "2026-03-12T19:09:22.745Z",
       "updatedAt": "2026-03-12T19:09:22.745Z"
+    },
+    {
+      "id": "425398",
+      "bookingId": "cmmn6f4sk0009lgs0c359518x",
+      "name": "Project – Nadia Rahmawati",
+      "pricingType": "fixed",
+      "fixedAmount": 50000000,
+      "hourlyRate": null,
+      "agreedHours": null,
+      "notes": null,
+      "createdAt": "2026-03-13T06:59:49.774Z",
+      "updatedAt": "2026-03-13T06:59:49.774Z"
+    },
+    {
+      "id": "463972",
+      "bookingId": "cmmn63y9302w6hlltzfwb2fbl",
+      "name": "Project – Doni Hermawan",
+      "pricingType": "fixed",
+      "fixedAmount": 2500000,
+      "hourlyRate": null,
+      "agreedHours": null,
+      "notes": "Watercolor butterfly — cancelled by customer",
+      "createdAt": "2026-03-13T08:36:46.222Z",
+      "updatedAt": "2026-03-13T08:36:46.222Z"
     }
   ],
   "sessions": [
+    {
+      "id": "337910",
+      "projectId": "463972",
+      "date": "2026-03-04",
+      "startTime": "11:00",
+      "endTime": "14:00",
+      "actualHours": null,
+      "notes": null,
+      "status": "in_progress",
+      "startedAt": "2026-03-13T08:37:27.462Z",
+      "pausedAt": null,
+      "completedAt": null,
+      "createdAt": "2026-03-13T08:36:46.225Z",
+      "updatedAt": "2026-03-13T08:37:27.465Z",
+      "project": {
+        "id": "463972",
+        "bookingId": "cmmn63y9302w6hlltzfwb2fbl",
+        "name": "Project – Doni Hermawan",
+        "pricingType": "fixed",
+        "fixedAmount": 2500000,
+        "hourlyRate": null,
+        "agreedHours": null,
+        "notes": "Watercolor butterfly — cancelled by customer",
+        "createdAt": "2026-03-13T08:36:46.222Z",
+        "updatedAt": "2026-03-13T08:36:46.222Z"
+      }
+    },
     {
       "id": "671596",
       "projectId": "808937",
@@ -21824,6 +22345,33 @@
         "notes": "Roses and shading. Final session for this piece.",
         "createdAt": "2026-03-12T07:50:05.605Z",
         "updatedAt": "2026-03-12T07:50:05.605Z"
+      }
+    },
+    {
+      "id": "408600",
+      "projectId": "425398",
+      "date": "2026-03-20",
+      "startTime": "16:00",
+      "endTime": "17:00",
+      "actualHours": null,
+      "notes": null,
+      "status": "in_progress",
+      "startedAt": "2026-03-13T06:59:59.624Z",
+      "pausedAt": null,
+      "completedAt": null,
+      "createdAt": "2026-03-13T06:59:49.783Z",
+      "updatedAt": "2026-03-13T06:59:59.630Z",
+      "project": {
+        "id": "425398",
+        "bookingId": "cmmn6f4sk0009lgs0c359518x",
+        "name": "Project – Nadia Rahmawati",
+        "pricingType": "fixed",
+        "fixedAmount": 50000000,
+        "hourlyRate": null,
+        "agreedHours": null,
+        "notes": null,
+        "createdAt": "2026-03-13T06:59:49.774Z",
+        "updatedAt": "2026-03-13T06:59:49.774Z"
       }
     },
     {
@@ -22478,6 +23026,32 @@
       "evidenceUrl": null,
       "createdAt": "2026-03-12T08:30:43.201Z",
       "updatedAt": "2026-03-12T08:30:43.201Z"
+    },
+    {
+      "id": "cmmon49ok0003af02a5xghoii",
+      "bookingId": "cmmon49o50001af02tza38cbr",
+      "amount": 800000,
+      "currency": "IDR",
+      "status": "completed",
+      "type": "down_payment",
+      "method": "From deposit",
+      "transferDestination": null,
+      "evidenceUrl": null,
+      "createdAt": "2026-03-13T08:34:00.068Z",
+      "updatedAt": "2026-03-13T08:34:00.068Z"
+    },
+    {
+      "id": "cmmoovskd0004fmp7238gsba3",
+      "bookingId": "cmmoovsk40002fmp7qprr03gw",
+      "amount": 800000,
+      "currency": "IDR",
+      "status": "completed",
+      "type": "down_payment",
+      "method": "Cash",
+      "transferDestination": null,
+      "evidenceUrl": null,
+      "createdAt": "2026-03-13T09:23:23.869Z",
+      "updatedAt": "2026-03-13T09:23:23.869Z"
     }
   ],
   "paymentDestinations": [

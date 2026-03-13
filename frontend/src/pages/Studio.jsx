@@ -1,13 +1,15 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   getBookings,
   getPayments,
   getArtists,
   getCustomers,
+  createCustomer,
+  updateCustomer,
+  deleteCustomer,
   getStudios,
   deleteBooking,
-  updateBooking,
   createPayment,
   updatePayment,
   getCommissions,
@@ -108,6 +110,18 @@ const PAYMENT_METHODS = [
   { value: 'Credit Card', label: 'Credit Card' },
   { value: 'Cash', label: 'Cash' },
 ];
+const LEAD_SOURCE_OPTIONS = [
+  { value: 'website', label: 'Website' },
+  { value: 'instagram', label: 'Instagram' },
+  { value: 'tiktok', label: 'TikTok' },
+  { value: 'walkin', label: 'Walk-in' },
+  { value: 'whatsapp', label: 'WhatsApp' },
+  { value: 'artist', label: 'Artist' },
+];
+
+function leadSourceLabel(value) {
+  return LEAD_SOURCE_OPTIONS.find((option) => option.value === value)?.label || '—';
+}
 
 function truncate(str, max = 25) {
   if (!str || typeof str !== 'string') return '—';
@@ -138,6 +152,7 @@ function artistTagColor(artistId) {
 }
 
 export function Studio() {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get('tab') || 'dashboard';
   const [tab, setTab] = useState(tabParam);
@@ -146,7 +161,7 @@ export function Studio() {
 
   useEffect(() => {
     const t = searchParams.get('tab') || 'dashboard';
-    if (['dashboard', 'bookings', 'artists', 'payments', 'commissions', 'customers', 'specialities', 'payment-destinations', 'users'].includes(t)) {
+    if (['dashboard', 'bookings', 'artists', 'payments', 'commissions', 'customers', 'leads', 'specialities', 'payment-destinations', 'users'].includes(t)) {
       setTab(t);
     }
   }, [searchParams]);
@@ -198,8 +213,9 @@ export function Studio() {
     commissionPercent: '',
   });
 
-  const [selectedSlot, setSelectedSlot] = useState(null);
-  const [newCustomer, setNewCustomer] = useState({ name: '', email: '', phone: '' });
+  const [showLeadForm, setShowLeadForm] = useState(false);
+  const [editingLead, setEditingLead] = useState(null);
+  const [leadForm, setLeadForm] = useState({ name: '', email: '', phone: '', leadSource: 'website', referredArtistId: '' });
 
   const [specialities, setSpecialities] = useState([]);
   const [specPage, setSpecPage] = useState(1);
@@ -217,6 +233,7 @@ export function Studio() {
   const [paymentPage, setPaymentPage] = useState(1);
   const [commissionPage, setCommissionPage] = useState(1);
   const [customerPage, setCustomerPage] = useState(1);
+  const [leadPage, setLeadPage] = useState(1);
   const [customerHistoryModal, setCustomerHistoryModal] = useState(null);
 
   const [bookingSearch, setBookingSearch] = useState('');
@@ -248,10 +265,13 @@ export function Studio() {
   };
 
   const filteredBookings = filterBookingsBySearch(bookings, bookingSearch);
+  const leadProfiles = customers.filter((c) => c.type === 'lead');
+  const bookedCustomers = customers.filter((c) => c.type !== 'lead');
   const bookingTotalPages = Math.max(1, Math.ceil(filteredBookings.length / ROWS_PER_PAGE));
   const paymentTotalPages = Math.max(1, Math.ceil(payments.length / ROWS_PER_PAGE));
   const commissionTotalPages = Math.max(1, Math.ceil(commissions.length / ROWS_PER_PAGE));
-  const customerTotalPages = Math.max(1, Math.ceil(customers.length / ROWS_PER_PAGE));
+  const customerTotalPages = Math.max(1, Math.ceil(bookedCustomers.length / ROWS_PER_PAGE));
+  const leadTotalPages = Math.max(1, Math.ceil(leadProfiles.length / ROWS_PER_PAGE));
   const specialitiesList = Array.isArray(specialities) ? specialities : [];
   const specTotalPages = Math.max(1, Math.ceil(specialitiesList.length / ROWS_PER_PAGE));
 
@@ -261,7 +281,8 @@ export function Studio() {
   const paginatedBookings = filteredBookings.slice((bookingPage - 1) * ROWS_PER_PAGE, bookingPage * ROWS_PER_PAGE);
   const paginatedPayments = payments.slice((paymentPage - 1) * ROWS_PER_PAGE, paymentPage * ROWS_PER_PAGE);
   const paginatedCommissions = commissions.slice((commissionPage - 1) * ROWS_PER_PAGE, commissionPage * ROWS_PER_PAGE);
-  const paginatedCustomers = customers.slice((customerPage - 1) * ROWS_PER_PAGE, customerPage * ROWS_PER_PAGE);
+  const paginatedCustomers = bookedCustomers.slice((customerPage - 1) * ROWS_PER_PAGE, customerPage * ROWS_PER_PAGE);
+  const paginatedLeads = leadProfiles.slice((leadPage - 1) * ROWS_PER_PAGE, leadPage * ROWS_PER_PAGE);
   const paginatedSpecialities = specialitiesList.slice((specPage - 1) * ROWS_PER_PAGE, specPage * ROWS_PER_PAGE);
   const paginatedDests = destList.slice((destPage - 1) * ROWS_PER_PAGE, destPage * ROWS_PER_PAGE);
 
@@ -272,7 +293,8 @@ export function Studio() {
   const totalUnpaidBookings = bookings.filter((b) => b.status === 'Unpaid').length;
   const todayBookings = bookings.filter((b) => b.date === todayStr).length;
   const upcomingBookings = bookings.filter((b) => b.date > todayStr).length;
-  const totalCustomers = customers.length;
+  const totalCustomers = bookedCustomers.length;
+  const totalLeads = leadProfiles.length;
   const totalArtists = artists.length;
   const totalRevenue = payments
     .filter((p) => p.status === 'completed')
@@ -516,6 +538,66 @@ export function Studio() {
     }
   };
 
+  const openNewLead = () => {
+    setEditingLead(null);
+    setLeadForm({ name: '', email: '', phone: '', leadSource: 'website', referredArtistId: '' });
+    setShowLeadForm(true);
+  };
+
+  const openEditLead = (lead) => {
+    setEditingLead(lead);
+    setLeadForm({
+      name: lead.name || '',
+      email: lead.email || '',
+      phone: lead.phone || '',
+      leadSource: lead.leadSource || 'website',
+      referredArtistId: lead.referredArtistId || '',
+    });
+    setShowLeadForm(true);
+  };
+
+  const saveLead = async (e) => {
+    e.preventDefault();
+    setError(null);
+    const payload = {
+      name: (leadForm.name || '').trim(),
+      email: (leadForm.email || '').trim() || null,
+      phone: (leadForm.phone || '').trim() || null,
+      type: 'lead',
+      leadSource: leadForm.leadSource,
+      referredArtistId: leadForm.leadSource === 'artist' ? (leadForm.referredArtistId || null) : null,
+    };
+    if (!payload.name) return setError('Lead name is required');
+    if (!payload.email && !payload.phone) return setError('Fill at least one contact: email or phone');
+    if (!payload.leadSource) return setError('Lead source is required');
+    if (payload.leadSource === 'artist' && !payload.referredArtistId) return setError('Select an artist name');
+    try {
+      if (editingLead) {
+        await updateCustomer(editingLead.id, payload);
+      } else {
+        await createCustomer(payload);
+      }
+      setShowLeadForm(false);
+      setEditingLead(null);
+      setLeadForm({ name: '', email: '', phone: '', leadSource: 'website', referredArtistId: '' });
+      load();
+    } catch (err) {
+      setError(err.message || 'Failed to save lead');
+    }
+  };
+
+  const removeLead = async (lead) => {
+    if (!window.confirm(`Delete ${lead.name}?`)) return;
+    setError(null);
+    try {
+      await deleteCustomer(lead.id);
+      if (customerHistoryModal?.id === lead.id) setCustomerHistoryModal(null);
+      load();
+    } catch (err) {
+      setError(err.message || 'Failed to delete lead');
+    }
+  };
+
   const addSpeciality = async (e) => {
     e.preventDefault();
     const name = (specNewName || '').trim();
@@ -648,7 +730,7 @@ export function Studio() {
           <div className={styles.sectionHead}>
             <div>
               <h2>Dashboard</h2>
-              <span className={styles.countHint}>Overview of bookings, revenue, and customers</span>
+              <span className={styles.countHint}>Overview of bookings, revenue, customers, and leads</span>
             </div>
           </div>
           <div className={styles.dashboardRow}>
@@ -686,6 +768,11 @@ export function Studio() {
               <span className={styles.dashboardLabel}>Customers</span>
               <span className={styles.dashboardValue}>{totalCustomers}</span>
               <span className={styles.dashboardSub}>Active profiles</span>
+            </div>
+            <div className={styles.dashboardCard}>
+              <span className={styles.dashboardLabel}>Leads</span>
+              <span className={styles.dashboardValue}>{totalLeads}</span>
+              <span className={styles.dashboardSub}>Potential customers</span>
             </div>
             <div className={styles.dashboardCard}>
               <span className={styles.dashboardLabel}>Artists</span>
@@ -1010,12 +1097,82 @@ export function Studio() {
         </section>
       )}
 
+      {tab === 'leads' && (
+        <section className={styles.section}>
+          <div className={styles.sectionHead}>
+            <div>
+              <h2>Leads</h2>
+              {leadProfiles.length > 0 && <span className={styles.countHint}>Showing {(leadPage - 1) * ROWS_PER_PAGE + 1}–{Math.min(leadPage * ROWS_PER_PAGE, leadProfiles.length)} of {leadProfiles.length}</span>}
+            </div>
+            <button type="button" onClick={openNewLead} className={styles.addBtn}>
+              + Add lead
+            </button>
+          </div>
+          <div className={styles.tableWrap}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>No.</th>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Source</th>
+                  <th>Artist</th>
+                  <th>Bookings</th>
+                  <th>Created</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedLeads.length === 0 ? (
+                  <tr>
+                    <td colSpan={10}>No leads yet. Add one here, then they will become a customer automatically when they book.</td>
+                  </tr>
+                ) : (
+                  paginatedLeads.map((lead, i) => {
+                    const rowNum = (leadPage - 1) * ROWS_PER_PAGE + i + 1;
+                    const bookingCount = getCustomerBookings(lead.id).length;
+                    const createdStr = lead.createdAt ? new Date(lead.createdAt).toLocaleDateString('en-GB', { dateStyle: 'short' }) : '—';
+                    return (
+                      <tr key={lead.id}>
+                        <td>{rowNum}</td>
+                        <td className={styles.cellId}><IdWithCopy id={lead.id} /></td>
+                        <td className={styles.cellEmphasis}>{lead.name || '—'}</td>
+                        <td>{lead.email || '—'}</td>
+                        <td>{lead.phone || '—'}</td>
+                        <td><span className={styles.status_lead}>{leadSourceLabel(lead.leadSource)}</span></td>
+                        <td>{lead.referredArtist?.name || '—'}</td>
+                        <td className={styles.cellAmount}>{bookingCount}</td>
+                        <td>{createdStr}</td>
+                        <td>
+                          <button type="button" className={styles.smBtn} onClick={() => openEditLead(lead)}>Edit</button>
+                          <button
+                            type="button"
+                            className={styles.smBtn}
+                            onClick={() => navigate(`/manage/bookings/new?customerId=${encodeURIComponent(lead.id)}`)}
+                          >
+                            Convert
+                          </button>
+                          <button type="button" className={styles.smBtnDanger} onClick={() => removeLead(lead)}>Delete</button>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+          <Pagination currentPage={leadPage} totalPages={leadTotalPages} onPageChange={setLeadPage} />
+        </section>
+      )}
+
       {tab === 'customers' && (
         <section className={styles.section}>
           <div className={styles.sectionHead}>
             <div>
               <h2>Customer profiles</h2>
-              {customers.length > 0 && <span className={styles.countHint}>Showing {(customerPage - 1) * ROWS_PER_PAGE + 1}–{Math.min(customerPage * ROWS_PER_PAGE, customers.length)} of {customers.length}</span>}
+              {bookedCustomers.length > 0 && <span className={styles.countHint}>Showing {(customerPage - 1) * ROWS_PER_PAGE + 1}–{Math.min(customerPage * ROWS_PER_PAGE, bookedCustomers.length)} of {bookedCustomers.length}</span>}
             </div>
           </div>
           <div className={styles.tableWrap}>
@@ -1038,7 +1195,7 @@ export function Studio() {
               <tbody>
                 {paginatedCustomers.length === 0 ? (
                   <tr>
-                    <td colSpan={11}>No customers yet. Customers are added when you create a booking (select or create customer).</td>
+                    <td colSpan={11}>No booked customers yet. Leads will appear here automatically after they make a booking.</td>
                   </tr>
                 ) : (
                   paginatedCustomers.map((c, i) => {
@@ -1296,6 +1453,79 @@ export function Studio() {
             </table>
           </div>
         </section>
+      )}
+
+      {showLeadForm && (
+        <div className={styles.modal} role="dialog" aria-modal="true" aria-label={editingLead ? 'Edit lead' : 'Add lead'}>
+          <div className={styles.modalContent}>
+            <h3>{editingLead ? 'Edit lead' : 'Add lead'}</h3>
+            <p className={styles.help}>Leads are potential customers. They become customers automatically when a booking is created for them. Fill at least one contact method: email or phone.</p>
+            <form onSubmit={saveLead}>
+              <label>
+                Name *
+                <input
+                  value={leadForm.name}
+                  onChange={(e) => setLeadForm((f) => ({ ...f, name: e.target.value }))}
+                  placeholder="Full name"
+                  required
+                />
+              </label>
+              <label>
+                Email
+                <input
+                  type="email"
+                  value={leadForm.email}
+                  onChange={(e) => setLeadForm((f) => ({ ...f, email: e.target.value }))}
+                  placeholder="email@example.com"
+                />
+              </label>
+              <label>
+                Phone
+                <input
+                  value={leadForm.phone}
+                  onChange={(e) => setLeadForm((f) => ({ ...f, phone: e.target.value }))}
+                  placeholder="+62 ..."
+                />
+              </label>
+              <label>
+                Source *
+                <select
+                  value={leadForm.leadSource}
+                  onChange={(e) =>
+                    setLeadForm((f) => ({
+                      ...f,
+                      leadSource: e.target.value,
+                      referredArtistId: e.target.value === 'artist' ? f.referredArtistId : '',
+                    }))
+                  }
+                >
+                  {LEAD_SOURCE_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>{option.label}</option>
+                  ))}
+                </select>
+              </label>
+              {leadForm.leadSource === 'artist' && (
+                <label>
+                  Artist name *
+                  <select
+                    value={leadForm.referredArtistId}
+                    onChange={(e) => setLeadForm((f) => ({ ...f, referredArtistId: e.target.value }))}
+                    required
+                  >
+                    <option value="">Select artist</option>
+                    {artists.map((artist) => (
+                      <option key={artist.id} value={artist.id}>{artist.name}</option>
+                    ))}
+                  </select>
+                </label>
+              )}
+              <div className={styles.formActions}>
+                <button type="submit">{editingLead ? 'Save' : 'Add lead'}</button>
+                <button type="button" onClick={() => { setShowLeadForm(false); setEditingLead(null); }}>Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
 
       {customerHistoryModal && (

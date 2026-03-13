@@ -301,7 +301,7 @@ async function main() {
     throw new Error(`Could not generate unique 6-digit id for ${model}`);
   }
 
-  // ─── 15 Customers ───
+  // ─── Customers + leads ───
   const customerData = [
     { name: 'Andi Pratama', email: 'andi@example.com', phone: '+62 812-3456-7890' },
     { name: 'Sari Dewi', email: 'sari@example.com', phone: '+62 813-9876-5432' },
@@ -318,6 +318,16 @@ async function main() {
     { name: 'Kevin Wijaya', email: 'kevin@example.com', phone: '+62 812-1100-2233' },
     { name: 'Nadia Rahmawati', email: 'nadia@example.com', phone: '+62 831-3344-5566' },
     { name: 'Oscar Setiawan', email: 'oscar@example.com', phone: '+62 878-6677-8899' },
+    { name: 'Rani Kusuma', email: 'rani.lead@example.com', phone: '+62 813-4455-6677', type: 'lead', leadSource: 'instagram' },
+    { name: 'Tomi Saputra', email: null, phone: '+62 822-6677-8899', type: 'lead', leadSource: 'whatsapp' },
+    { name: 'Vera Lestari', email: 'vera.lead@example.com', phone: '+62 857-9988-7766', type: 'lead', leadSource: 'artist', referredArtistId: createdArtists[0].id },
+    { name: 'Bagas Mahendra', email: 'bagas.lead@example.com', phone: null, type: 'lead', leadSource: 'website' },
+    { name: 'Clara Adisty', email: 'clara.lead@example.com', phone: '+62 813-2200-1144', type: 'lead', leadSource: 'tiktok' },
+    { name: 'Dian Puspa', email: null, phone: '+62 878-4400-6611', type: 'lead', leadSource: 'walkin' },
+    { name: 'Eko Prabowo', email: 'eko.prospect@example.com', phone: '+62 852-7111-8899', type: 'lead', leadSource: 'artist', referredArtistId: createdArtists[2].id },
+    { name: 'Fina Maharani', email: 'fina.dm@example.com', phone: null, type: 'lead', leadSource: 'instagram' },
+    { name: 'Galih Saptono', email: null, phone: '+62 821-3900-5522', type: 'lead', leadSource: 'website' },
+    { name: 'Hana Cahyani', email: 'hana.cahyani@example.com', phone: '+62 812-6633-2244', type: 'lead', leadSource: 'artist', referredArtistId: createdArtists[4].id },
   ];
   const customers = await Promise.all(
     customerData.map((c) => prisma.customer.create({ data: { id: genNumericId('customer'), ...c } })),

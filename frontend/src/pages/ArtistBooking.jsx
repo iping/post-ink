@@ -136,7 +136,7 @@ export function ArtistBooking() {
     setSubmitting(true);
     setError(null);
     try {
-      const customer = await createCustomer(customerForm);
+      const customer = await createCustomer({ ...customerForm, type: 'customer' });
       const [sh, sm] = selectedTime.split('.').map(Number);
       const startTime = `${pad(sh)}:${pad(sm)}`;
       const endMin = sh * 60 + sm + duration * 60;

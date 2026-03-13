@@ -47,7 +47,7 @@ export function Login() {
   return (
     <div className={styles.wrap}>
       <div className={styles.card}>
-        <h1 className={styles.title}>Post.Ink</h1>
+        <h1 className={styles.title}>InkedHub</h1>
         <p className={styles.subtitle}>Sign in to manage the platform</p>
         <form onSubmit={handleSubmit} className={styles.form}>
           {error && <div className={styles.error} role="alert">{error}</div>}

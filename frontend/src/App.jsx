@@ -38,8 +38,8 @@ function App() {
     <div className="app">
       <header className="header">
         <Link to="/" className="logo">
-          <span className="logo-mark">P.</span>
-          <span className="logo-text">Post.Ink</span>
+          <span className="logo-mark">I.</span>
+          <span className="logo-text">InkedHub</span>
         </Link>
         <nav>
           <NavLink to="/" end>Discover</NavLink>
@@ -108,7 +108,7 @@ function App() {
       </main>
       <footer className="footer">
         <div className="footer-bottom">
-          <span>&copy; {new Date().getFullYear()} Post.Ink. All rights reserved.</span>
+          <span>&copy; {new Date().getFullYear()} InkedHub. All rights reserved.</span>
         </div>
       </footer>
     </div>
