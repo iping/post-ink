@@ -196,6 +196,27 @@ export function BookingDetail() {
   const preference = parsePreference(booking.preference);
   const artistPhotos = (() => { try { const a = JSON.parse(booking.artist?.photos || '[]'); return Array.isArray(a) ? a : []; } catch { return []; } })();
   const projects = Array.isArray(booking.projects) ? booking.projects : [];
+  const paymentHistory = Array.isArray(booking.payments)
+    ? [...booking.payments].sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+    : [];
+  const paymentReceiverLabel = (payment) => {
+    if (payment.receiverType === 'studio') return payment.receiverStudio?.name || booking.studio?.name || 'Studio';
+    if (payment.receiverType === 'artist') return payment.receiverArtist?.name || booking.artist?.name || 'Artist';
+    return '—';
+  };
+  const paymentAccountLabel = (payment) => {
+    if (payment.paymentDestination) {
+      return `${payment.paymentDestination.name}${payment.paymentDestination.account ? ` — ${payment.paymentDestination.account}` : ''}`;
+    }
+    return payment.transferDestination || payment.method || '—';
+  };
+  const bookingTotal = booking.computedTotalAmount ?? booking.totalAmount;
+  const expectedStudioShare = commission && bookingTotal != null
+    ? bookingTotal * commission.commissionPercent / 100
+    : null;
+  const expectedArtistShare = commission && bookingTotal != null
+    ? bookingTotal * (100 - commission.commissionPercent) / 100
+    : null;
 
   return (
     <div className={artistStyles.page}>
@@ -248,16 +269,38 @@ export function BookingDetail() {
                 <p><strong>Customer:</strong> {booking.customer?.name || '—'}</p>
                 {booking.studio?.name && <p><strong>Studio:</strong> {booking.studio.name}</p>}
                 {booking.placement && <p><strong>Placement:</strong> {booking.placement}</p>}
-                <p><strong>Total amount:</strong> {formatRupiah(booking.totalAmount)} <span className={styles.convHint}>{formatWithConversion(booking.totalAmount).usd}</span></p>
+                <p><strong>Total amount:</strong> {formatRupiah(bookingTotal)} <span className={styles.convHint}>{formatWithConversion(bookingTotal).usd}</span></p>
                 <p><strong>Paid:</strong> {formatRupiah(booking.paidTotal)}</p>
                 <p className={styles.remainingLine}>
                   <strong>Remaining:</strong>{' '}
                   <span className={(booking.remainingAmount ?? 0) > 0 ? styles.remainingDue : ''}>{formatRupiah(booking.remainingAmount)}</span>
                 </p>
-                <p><strong>Payment status:</strong> {booking.status === 'Paid' ? 'Paid (evidence recorded)' : 'Unpaid'}</p>
+                <div className={styles.arSplitCard}>
+                  <div className={styles.arSplitRow}>
+                    <span>Collected by studio</span>
+                    <strong>{formatRupiah(booking.studioPaidTotal)}</strong>
+                  </div>
+                  <div className={styles.arSplitRow}>
+                    <span>Collected by artist</span>
+                    <strong>{formatRupiah(booking.artistPaidTotal)}</strong>
+                  </div>
+                  {expectedStudioShare != null && (
+                    <div className={styles.arSplitRow}>
+                      <span>Expected studio commission</span>
+                      <strong>{formatRupiah(expectedStudioShare)}</strong>
+                    </div>
+                  )}
+                  {expectedArtistShare != null && (
+                    <div className={styles.arSplitRow}>
+                      <span>Expected artist share</span>
+                      <strong>{formatRupiah(expectedArtistShare)}</strong>
+                    </div>
+                  )}
+                </div>
+                <p><strong>Payment status:</strong> {booking.status === 'Paid' ? 'Paid' : 'Unpaid'}</p>
                 {commission && (
                   <div className={styles.commissionBreakdown}>
-                    <strong>Commission (studio {commission.commissionPercent}%):</strong> Studio {formatRupiah((booking.totalAmount ?? 0) * commission.commissionPercent / 100)} | Artist {formatRupiah((booking.totalAmount ?? 0) * (100 - commission.commissionPercent) / 100)}
+                    <strong>Commission (studio {commission.commissionPercent}%):</strong> Studio {formatRupiah(expectedStudioShare ?? 0)} | Artist {formatRupiah(expectedArtistShare ?? 0)}
                   </div>
                 )}
               </div>
@@ -326,6 +369,26 @@ export function BookingDetail() {
                 </div>
               ) : (
                 <p className={artistStyles.cardHint}>No artist assigned.</p>
+              )}
+            </div>
+
+            <div className={artistStyles.card}>
+              <div className={artistStyles.cardHead}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 1v22" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
+                <h2>Payment history</h2>
+              </div>
+              {paymentHistory.length === 0 ? (
+                <p className={artistStyles.cardHint}>No payments recorded yet.</p>
+              ) : (
+                <ul className={styles.paymentList}>
+                  {paymentHistory.map((payment) => (
+                    <li key={payment.id}>
+                      <strong>{formatRupiah(payment.amount)}</strong> · {payment.type || 'payment'} · {payment.status}
+                      <br />
+                      To {paymentReceiverLabel(payment)} via {paymentAccountLabel(payment)}
+                    </li>
+                  ))}
+                </ul>
               )}
             </div>
 

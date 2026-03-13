@@ -37,6 +37,8 @@ model TattooArtist {
   bookings     Booking[]
   commissions  StudioCommission[]
   referredLeads Customer[] @relation("LeadReferralArtist")
+  paymentDestinations PaymentDestination[] @relation("ArtistPaymentDestinations")
+  receivedPayments Payment[] @relation("ArtistReceivedPayments")
 }
 
 // Artist availability slots (date + time range)
@@ -65,6 +67,8 @@ model TattooStudio {
   updatedAt  DateTime @updatedAt
   bookings   Booking[]
   commissions StudioCommission[]
+  paymentDestinations PaymentDestination[] @relation("StudioPaymentDestinations")
+  receivedPayments Payment[] @relation("StudioReceivedPayments")
 }
 
 // ----- Customer -----
@@ -159,17 +163,28 @@ model Payment {
   id                 String   @id @default(cuid())
   bookingId          String?
   booking            Booking? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  paymentDestinationId String?
+  paymentDestination PaymentDestination? @relation(fields: [paymentDestinationId], references: [id], onDelete: SetNull)
   amount             Float
   currency           String   @default("IDR")
   status             String   @default("pending") // pending, completed, refunded
   type               String?  // down_payment, final, other
   method             String?  // BCA, Mandiri, BNI, Credit Card, Cash
   transferDestination String? // account number or reference (e.g. BCA 1234567890)
+  receiverType       String? // studio | artist
+  receiverStudioId   String?
+  receiverStudio     TattooStudio? @relation("StudioReceivedPayments", fields: [receiverStudioId], references: [id], onDelete: SetNull)
+  receiverArtistId   String?
+  receiverArtist     TattooArtist? @relation("ArtistReceivedPayments", fields: [receiverArtistId], references: [id], onDelete: SetNull)
   evidenceUrl        String?  // receipt / payment proof image URL
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
   @@index([bookingId])
+  @@index([paymentDestinationId])
+  @@index([receiverType])
+  @@index([receiverStudioId])
+  @@index([receiverArtistId])
 }
 
 // ----- Studio commission: % agreed between artist and studio -----
@@ -194,12 +209,21 @@ model PaymentDestination {
   name      String   // Bank Name or display name (e.g. "BCA", "Mandiri")
   account   String?  // Bank Account or reference (e.g. "1234567890")
   type      String   // "Bank" | "Credit Card" | "Cash"
+  ownerType String   // studio | artist
+  studioId  String?
+  studio    TattooStudio? @relation("StudioPaymentDestinations", fields: [studioId], references: [id], onDelete: SetNull)
+  artistId  String?
+  artist    TattooArtist? @relation("ArtistPaymentDestinations", fields: [artistId], references: [id], onDelete: SetNull)
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  payments  Payment[]
 
   @@index([type])
   @@index([isActive])
+  @@index([ownerType])
+  @@index([studioId])
+  @@index([artistId])
 }
 
 // ----- Speciality (master list for artist speciality picker) -----

@@ -21,8 +21,6 @@ import styles from './BookingForm.module.css';
 import layoutStyles from './Studio.module.css';
 import artistStyles from './ArtistForm.module.css';
 
-const BOOKING_STATUSES = ['Unpaid', 'Paid'];
-
 const MAX_PREFERENCE_IMAGES = 3;
 const MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2MB
 const LEAD_SOURCE_OPTIONS = [
@@ -31,6 +29,10 @@ const LEAD_SOURCE_OPTIONS = [
   { value: 'tiktok', label: 'TikTok' },
   { value: 'walkin', label: 'Walk-in' },
   { value: 'whatsapp', label: 'WhatsApp' },
+  { value: 'artist', label: 'Artist' },
+];
+const OWNER_TYPE_OPTIONS = [
+  { value: 'studio', label: 'Studio' },
   { value: 'artist', label: 'Artist' },
 ];
 
@@ -78,6 +80,37 @@ function filterCustomersBySearch(list, query) {
   });
 }
 
+function customerSearchScore(customer, query) {
+  const q = (query || '').trim().toLowerCase();
+  if (!q) return 0;
+
+  const name = (customer.name || '').toLowerCase();
+  const email = (customer.email || '').toLowerCase();
+  const phone = (customer.phone || '').toLowerCase();
+  const source = (customer.leadSource || '').toLowerCase();
+  const artist = (customer.referredArtist?.name || '').toLowerCase();
+  const haystack = [name, email, phone, source, artist].filter(Boolean).join(' ');
+  const tokens = q.split(/\s+/).filter(Boolean);
+
+  let score = 0;
+  if (name === q) score += 140;
+  if (email === q || phone === q) score += 130;
+  if (name.startsWith(q)) score += 90;
+  if (email.startsWith(q) || phone.startsWith(q)) score += 80;
+  if (name.includes(q)) score += 50;
+  if (email.includes(q) || phone.includes(q)) score += 45;
+  if (artist.includes(q)) score += 35;
+  if (source.includes(q)) score += 25;
+  for (const token of tokens) {
+    if (name.includes(token)) score += 18;
+    if (email.includes(token) || phone.includes(token)) score += 15;
+    if (artist.includes(token)) score += 10;
+    if (source.includes(token)) score += 7;
+  }
+  if (haystack.includes(q)) score += 10;
+  return score;
+}
+
 export function BookingForm() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -117,11 +150,11 @@ export function BookingForm() {
     referredArtistId: '',
   });
   const [customerMode, setCustomerMode] = useState('existing');
-  const [leadSearch, setLeadSearch] = useState('');
-  const [existingCustomerSearch, setExistingCustomerSearch] = useState('');
+  const [customerSearch, setCustomerSearch] = useState('');
   const [uploadingPreference, setUploadingPreference] = useState(false);
   const [useCustomTime, setUseCustomTime] = useState(false);
   const [depositDestinationId, setDepositDestinationId] = useState(''); // selected PaymentDestination id
+  const [depositReceiverType, setDepositReceiverType] = useState('studio');
   const [deductFromDeposit, setDeductFromDeposit] = useState(false);
   const [depositEvidenceUrl, setDepositEvidenceUrl] = useState('');
   const [uploadingEvidence, setUploadingEvidence] = useState(false);
@@ -132,10 +165,41 @@ export function BookingForm() {
   const [firstDepositAmount, setFirstDepositAmount] = useState(''); // editable first deposit; must be >= artist 1h rate
   const leadCustomers = useMemo(() => customers.filter((customer) => customer.type === 'lead'), [customers]);
   const existingCustomers = useMemo(() => customers.filter((customer) => customer.type !== 'lead'), [customers]);
-  const filteredLeadCustomers = useMemo(() => filterCustomersBySearch(leadCustomers, leadSearch), [leadCustomers, leadSearch]);
+  const selectedArtist = useMemo(
+    () => artists.find((artist) => artist.id === bookingForm.artistId) || null,
+    [artists, bookingForm.artistId],
+  );
+  const filteredLeadCustomers = useMemo(() => filterCustomersBySearch(leadCustomers, customerSearch), [leadCustomers, customerSearch]);
   const filteredExistingCustomers = useMemo(
-    () => filterCustomersBySearch(existingCustomers, existingCustomerSearch),
-    [existingCustomers, existingCustomerSearch],
+    () => filterCustomersBySearch(existingCustomers, customerSearch),
+    [existingCustomers, customerSearch],
+  );
+  const customerSuggestions = useMemo(() => {
+    const q = (customerSearch || '').trim();
+    if (!q) return [];
+    return [...customers]
+      .map((customer) => ({
+        customer,
+        score: customerSearchScore(customer, q),
+      }))
+      .filter((item) => item.score > 0)
+      .sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        return (a.customer.name || '').localeCompare(b.customer.name || '');
+      })
+      .slice(0, 6);
+  }, [customers, customerSearch]);
+  const studioOwnedDestinations = useMemo(
+    () => paymentDestinations.filter((destination) => destination.ownerType === 'studio' && destination.studioId === bookingForm.studioId),
+    [paymentDestinations, bookingForm.studioId],
+  );
+  const artistOwnedDestinations = useMemo(
+    () => paymentDestinations.filter((destination) => destination.ownerType === 'artist' && destination.artistId === bookingForm.artistId),
+    [paymentDestinations, bookingForm.artistId],
+  );
+  const availableDepositDestinations = useMemo(
+    () => (depositReceiverType === 'studio' ? studioOwnedDestinations : artistOwnedDestinations),
+    [depositReceiverType, studioOwnedDestinations, artistOwnedDestinations],
   );
 
   useEffect(() => {
@@ -148,6 +212,7 @@ export function BookingForm() {
         setPayments(Array.isArray(pm) ? pm : []);
         if (s.length > 0 && !bookingForm.studioId) {
           setBookingForm((f) => ({ ...f, studioId: s[0].id }));
+          setDepositReceiverType('studio');
         }
         if (!isEdit && preselectedCustomerId) {
           const selectedCustomer = c.find((customer) => customer.id === preselectedCustomerId);
@@ -211,6 +276,15 @@ export function BookingForm() {
     }
   }, [isEdit, id]);
 
+  useEffect(() => {
+    if (depositReceiverType === 'studio' && !bookingForm.studioId && bookingForm.artistId) {
+      setDepositReceiverType('artist');
+    }
+    if (depositReceiverType === 'artist' && !bookingForm.artistId && bookingForm.studioId) {
+      setDepositReceiverType('studio');
+    }
+  }, [bookingForm.artistId, bookingForm.studioId, depositReceiverType]);
+
   // When artist changes, pre-fill first deposit with artist's 1h rate
   useEffect(() => {
     if (isEdit) return;
@@ -228,16 +302,31 @@ export function BookingForm() {
     const index = isEdit && id ? id.slice(0, 8) : '1';
     return `${artistName} – ${customerName} – ${index}`;
   })();
-  const projectNameDisplay = bookingForm.projectName.trim() !== '' ? bookingForm.projectName : defaultProjectName;
-
   const handleStudioChange = (studioId) => {
-    setBookingForm((f) => ({ ...f, studioId, artistId: '', date: '', startTime: '', endTime: '' }));
+    setBookingForm((f) => ({
+      ...f,
+      studioId,
+      artistId: '',
+      date: '',
+      startTime: '',
+      endTime: '',
+    }));
     setSelectedSlot(null);
+    setDepositDestinationId('');
+    setDeductFromDeposit(false);
   };
 
   const handleArtistChange = (artistId) => {
-    setBookingForm((f) => ({ ...f, artistId, date: '', startTime: '', endTime: '' }));
+    setBookingForm((f) => ({
+      ...f,
+      artistId,
+      date: '',
+      startTime: '',
+      endTime: '',
+    }));
     setSelectedSlot(null);
+    setDepositDestinationId('');
+    setDeductFromDeposit(false);
   };
 
   const handleCalendarDateSelect = (dateStr) => {
@@ -249,6 +338,20 @@ export function BookingForm() {
     setSelectedSlot(slot);
     setUseCustomTime(false);
     setBookingForm((f) => ({ ...f, date: slot.date, startTime: slot.startTime, endTime: slot.endTime }));
+  };
+
+  const chooseCustomerFromSuggestion = (customer) => {
+    setCustomerMode(customer.type === 'lead' ? 'leads' : 'existing');
+    setBookingForm((f) => ({ ...f, customerId: customer.id }));
+    setDeductFromDeposit(false);
+  };
+
+  const paymentDestinationLabel = (destination) => {
+    if (!destination) return '—';
+    const ownerName = destination.ownerType === 'studio'
+      ? destination.studio?.name || 'Studio'
+      : destination.artist?.name || 'Artist';
+    return `${destination.name}${destination.account ? ` — ${destination.account}` : ''} (${ownerName})`;
   };
 
   const buildPayload = (statusOverride) => {
@@ -279,7 +382,7 @@ export function BookingForm() {
             })
           : null,
       notes: bookingForm.notes?.trim() || null,
-      projectName: (bookingForm.projectName?.trim() || defaultProjectName) || null,
+      projectName: defaultProjectName || null,
     };
   };
 
@@ -345,13 +448,20 @@ export function BookingForm() {
       return;
     }
     if (!asDraft && payload.customerId && chosenDeposit > 0) {
-      const customerBalance = getCustomerDeposit(payload.customerId);
+      const customerBalance = getCustomerDeposit(payload.customerId, depositReceiverType);
       if (customerBalance >= chosenDeposit && !deductFromDeposit) {
-        setError('Please use the customer\'s deposit first. Check "Deduct booking fee from customer\'s deposit" to continue the booking.');
+        setError(`Please use the customer's ${depositReceiverType} deposit first. Check "Deduct first payment from customer's deposit" to continue the booking.`);
         return;
       }
       if (deductFromDeposit && customerBalance < chosenDeposit) {
-        setError(`Customer deposit (${formatRupiah(customerBalance)}) is less than booking fee (${formatRupiah(chosenDeposit)}). Uncheck "Deduct from deposit" or choose another customer.`);
+        setError(`Customer deposit (${formatRupiah(customerBalance)}) is less than the first payment (${formatRupiah(chosenDeposit)}). Uncheck "Deduct from deposit" or choose another customer.`);
+        return;
+      }
+    }
+    if (!asDraft && chosenDeposit > 0 && !deductFromDeposit && depositDestinationId) {
+      const selectedDestination = availableDepositDestinations.find((destination) => destination.id === depositDestinationId);
+      if (!selectedDestination) {
+        setError('Selected payment account does not match the current receiver or booking.');
         return;
       }
     }
@@ -370,9 +480,12 @@ export function BookingForm() {
                   bookingId: created.id,
                   amount: depositAmt,
                   currency: 'IDR',
-                  method: 'From deposit',
                   type: 'down_payment',
-                  transferDestination: null,
+                  method: 'Deposit balance',
+                  transferDestination: 'Existing customer deposit',
+                  receiverType: depositReceiverType,
+                  receiverStudioId: depositReceiverType === 'studio' ? payload.studioId : null,
+                  receiverArtistId: depositReceiverType === 'artist' ? payload.artistId : null,
                   evidenceUrl: null,
                   status: 'completed',
                 });
@@ -381,16 +494,18 @@ export function BookingForm() {
                 return;
               }
             } else {
-              const dest = depositDestinationId ? paymentDestinations.find((d) => d.id === depositDestinationId) : null;
+              const dest = depositDestinationId ? availableDepositDestinations.find((d) => d.id === depositDestinationId) : null;
               if (dest) {
                 try {
                   await createPayment({
                     bookingId: created.id,
                     amount: depositAmt,
                     currency: 'IDR',
-                    method: dest.type,
                     type: 'down_payment',
-                    transferDestination: dest.account || null,
+                    paymentDestinationId: dest.id,
+                    receiverType: depositReceiverType,
+                    receiverStudioId: depositReceiverType === 'studio' ? payload.studioId : null,
+                    receiverArtistId: depositReceiverType === 'artist' ? payload.artistId : null,
                     evidenceUrl: depositEvidenceUrl || null,
                     status: 'completed',
                   });
@@ -451,17 +566,38 @@ export function BookingForm() {
     }));
   };
 
-  const selectedArtist = artists.find((a) => a.id === bookingForm.artistId);
   const minDeposit = selectedArtist?.rate != null ? Number(selectedArtist.rate) : 0;
   // Effective first deposit: editable, but must be >= artist's 1h rate
   const chosenDepositNum = firstDepositAmount !== '' ? Number(firstDepositAmount) : minDeposit;
   const chosenDeposit = chosenDepositNum >= minDeposit ? chosenDepositNum : minDeposit;
   const firstDepositInvalid = firstDepositAmount !== '' && chosenDepositNum < minDeposit;
+  const paymentPreview = useMemo(() => {
+    const totalAmount = bookingForm.pricingType === 'fixed'
+      ? (estimationAmount !== '' ? Number(estimationAmount) : (selectedArtist?.rate != null ? Number(selectedArtist.rate) : 0))
+      : 0;
+    const firstPaymentAmount = chosenDeposit > 0 ? chosenDeposit : 0;
+    const remainingAmount = Math.max(0, totalAmount - firstPaymentAmount);
+    return {
+      totalAmount,
+      firstPaymentAmount,
+      remainingAmount,
+    };
+  }, [
+    bookingForm.pricingType,
+    estimationAmount,
+    selectedArtist,
+    chosenDeposit,
+  ]);
 
   /** Deposit total (completed down_payment) for a customer, for dropdown display */
-  const getCustomerDeposit = (customerId) => {
+  const getCustomerDeposit = (customerId, ownerType = null) => {
     return (payments || [])
-      .filter((p) => (p.booking?.customerId ?? p.booking?.customer?.id) === customerId && p.status === 'completed' && p.type === 'down_payment')
+      .filter((payment) => {
+        const paymentCustomerId = payment.booking?.customerId ?? payment.booking?.customer?.id;
+        if (paymentCustomerId !== customerId || payment.status !== 'completed' || payment.type !== 'down_payment') return false;
+        if (ownerType && payment.receiverType !== ownerType) return false;
+        return true;
+      })
       .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
   };
 
@@ -569,15 +705,39 @@ export function BookingForm() {
                   <span>New customer</span>
                 </label>
               </div>
+              <label className={styles.label}>
+                <span className={styles.labelText}>Global search</span>
+                <input
+                  className={styles.input}
+                  placeholder="Search leads and customers by name, email, phone, source, artist"
+                  value={customerSearch}
+                  onChange={(e) => setCustomerSearch(e.target.value)}
+                />
+              </label>
+              {customerSuggestions.length > 0 && (
+                <div className={styles.searchSuggestionList} role="listbox" aria-label="Customer suggestions">
+                  {customerSuggestions.map(({ customer }) => (
+                    <button
+                      key={customer.id}
+                      type="button"
+                      className={styles.searchSuggestionItem}
+                      onClick={() => chooseCustomerFromSuggestion(customer)}
+                    >
+                      <span className={styles.searchSuggestionTitle}>
+                        {customer.name}
+                        <span className={styles.searchSuggestionBadge}>
+                          {customer.type === 'lead' ? 'Lead' : 'Customer'}
+                        </span>
+                      </span>
+                      <span className={styles.searchSuggestionMeta}>
+                        {[customer.email, customer.phone, customer.leadSource, customer.referredArtist?.name].filter(Boolean).join(' · ')}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
               {customerMode === 'leads' && (
                 <label className={styles.label}>
-                  <span className={styles.labelText}>Search leads</span>
-                  <input
-                    className={styles.input}
-                    placeholder="Search by name, email, phone, source, artist"
-                    value={leadSearch}
-                    onChange={(e) => setLeadSearch(e.target.value)}
-                  />
                   <span className={styles.labelText}>Lead</span>
                   <select
                     className={styles.input}
@@ -604,13 +764,6 @@ export function BookingForm() {
               )}
               {customerMode === 'existing' && (
                 <label className={styles.label}>
-                  <span className={styles.labelText}>Search customer</span>
-                  <input
-                    className={styles.input}
-                    placeholder="Search by name, email, phone"
-                    value={existingCustomerSearch}
-                    onChange={(e) => setExistingCustomerSearch(e.target.value)}
-                  />
                   <span className={styles.labelText}>Existing customer</span>
                   <select
                     className={styles.input}
@@ -622,10 +775,11 @@ export function BookingForm() {
                   >
                     <option value="">— Select customer —</option>
                     {filteredExistingCustomers.map((c) => {
-                      const deposit = getCustomerDeposit(c.id);
+                      const studioDeposit = getCustomerDeposit(c.id, 'studio');
+                      const artistDeposit = getCustomerDeposit(c.id, 'artist');
                       return (
                         <option key={c.id} value={c.id}>
-                          {c.name} — Deposit: {formatRupiah(deposit)}
+                          {c.name} — Studio {formatRupiah(studioDeposit)} · Artist {formatRupiah(artistDeposit)}
                         </option>
                       );
                     })}
@@ -918,18 +1072,11 @@ export function BookingForm() {
               )}
             </div>
             {isEdit && (
-              <label className={styles.label}>
+              <div className={styles.readOnlyField}>
                 <span className={styles.labelText}>Status</span>
-                <select
-                  className={styles.input}
-                  value={bookingForm.status}
-                  onChange={(e) => setBookingForm((f) => ({ ...f, status: e.target.value }))}
-                >
-                  {BOOKING_STATUSES.map((s) => (
-                    <option key={s} value={s}>{s}</option>
-                  ))}
-                </select>
-              </label>
+                <p className={styles.readOnlyValue}>{bookingForm.status}</p>
+                <p className={styles.helper}>Status updates automatically when total completed payments reach the booking total.</p>
+              </div>
             )}
             <label className={styles.label}>
               <span className={styles.labelText}>Notes</span>
@@ -954,24 +1101,6 @@ export function BookingForm() {
                   <p className={styles.estimationCardDesc}>Set pricing type, total amount, and first payment.</p>
                 </div>
               </header>
-
-              <div className={styles.estimationField}>
-                <label className={styles.estimationFieldLabel} htmlFor="booking-project-name">Project name</label>
-                <div className={styles.estimationInputWrap}>
-                  <input
-                    id="booking-project-name"
-                    type="text"
-                    className={styles.estimationInput}
-                    placeholder={defaultProjectName}
-                    value={bookingForm.projectName}
-                    onChange={(e) => setBookingForm((f) => ({ ...f, projectName: e.target.value }))}
-                    aria-describedby="booking-project-name-hint"
-                  />
-                </div>
-                <span id="booking-project-name-hint" className={styles.estimationFieldHint}>
-                  Default: Artist – Customer – 1 (or booking id when editing)
-                </span>
-              </div>
 
               <div className={styles.estimationSegmentWrap}>
                 <span className={styles.estimationSegmentLabel}>Project type</span>
@@ -1055,8 +1184,42 @@ export function BookingForm() {
               </div>
               {bookingForm.artistId && chosenDeposit > 0 && (
                 <div className={styles.estimationCardExtra}>
+                  <div className={styles.ownerSplitGrid}>
+                    <label className={styles.label}>
+                      <span className={styles.labelText}>First payment receiver</span>
+                      <select
+                        className={styles.input}
+                        value={depositReceiverType}
+                        onChange={(e) => {
+                          setDepositReceiverType(e.target.value);
+                          setDepositDestinationId('');
+                          setDeductFromDeposit(false);
+                        }}
+                      >
+                        {OWNER_TYPE_OPTIONS.filter((option) => option.value === 'studio' ? !!bookingForm.studioId : !!bookingForm.artistId).map((option) => (
+                          <option key={option.value} value={option.value}>{option.label}</option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
+                  {bookingForm.pricingType === 'fixed' && paymentPreview.totalAmount > 0 && (
+                    <div className={styles.splitPreviewCard}>
+                      <div className={styles.splitPreviewRow}>
+                        <span>Total agreed amount</span>
+                        <strong>{formatRupiah(paymentPreview.totalAmount)}</strong>
+                      </div>
+                      <div className={styles.splitPreviewRow}>
+                        <span>First payment</span>
+                        <strong>{formatRupiah(paymentPreview.firstPaymentAmount)}</strong>
+                      </div>
+                      <div className={styles.splitPreviewRow}>
+                        <span>Remaining after first payment</span>
+                        <strong>{formatRupiah(paymentPreview.remainingAmount)}</strong>
+                      </div>
+                    </div>
+                  )}
                   {customerMode !== 'new' && bookingForm.customerId && (() => {
-                    const customerBalance = getCustomerDeposit(bookingForm.customerId);
+                    const customerBalance = getCustomerDeposit(bookingForm.customerId, depositReceiverType);
                     const canDeduct = customerBalance >= chosenDeposit;
                     const amountLeftToPay = customerBalance > 0 && customerBalance < chosenDeposit ? chosenDeposit - customerBalance : 0;
                     return (
@@ -1065,7 +1228,7 @@ export function BookingForm() {
                           <div className={styles.readOnlyField}>
                             <span className={styles.labelText}>Amount left for customer to pay</span>
                             <p className={styles.amountLeftValue}>{formatRupiah(amountLeftToPay)}</p>
-                            <p className={styles.depositBalanceHint} style={{ margin: 0 }}>(booking fee {formatRupiah(chosenDeposit)} − deposit {formatRupiah(customerBalance)})</p>
+                            <p className={styles.depositBalanceHint} style={{ margin: 0 }}>(first payment {formatRupiah(chosenDeposit)} − {depositReceiverType} deposit {formatRupiah(customerBalance)})</p>
                           </div>
                         )}
                         {canDeduct ? (
@@ -1077,11 +1240,11 @@ export function BookingForm() {
                                 setDeductFromDeposit(e.target.checked);
                                 if (e.target.checked) setDepositDestinationId('');
                               }}
-                              aria-label="Deduct booking fee from customer deposit"
+                              aria-label="Deduct first payment from customer deposit"
                             />
                             <span>
-                              Deduct booking fee from customer&apos;s deposit
-                              <span className={styles.depositBalanceHint}> (balance: {formatRupiah(customerBalance)})</span>
+                              Deduct first payment from customer&apos;s deposit
+                              <span className={styles.depositBalanceHint}> ({depositReceiverType} balance: {formatRupiah(customerBalance)})</span>
                             </span>
                           </label>
                         ) : null}
@@ -1109,20 +1272,25 @@ export function BookingForm() {
                   {!deductFromDeposit && (
                     <>
                       <label className={styles.label}>
-                        <span className={styles.labelText}>Paid?</span>
+                        <span className={styles.labelText}>Payment account</span>
                         <select
                           className={styles.input}
                           value={depositDestinationId}
                           onChange={(e) => setDepositDestinationId(e.target.value)}
-                          aria-label="Where booking fee was paid"
+                          aria-label="Which owned account receives the first payment"
                         >
-                          <option value="">No</option>
-                          {paymentDestinations.map((d) => (
+                          <option value="">No payment recorded yet</option>
+                          {availableDepositDestinations.map((d) => (
                             <option key={d.id} value={d.id}>
-                              {d.name}{d.account ? ` — ${d.account}` : ''}
+                              {paymentDestinationLabel(d)}
                             </option>
                           ))}
                         </select>
+                        {availableDepositDestinations.length === 0 && (
+                          <p className={styles.helper}>
+                            No active {depositReceiverType}-owned accounts match this booking yet.
+                          </p>
+                        )}
                       </label>
                       <label className={styles.label}>
                         <span className={styles.labelText}>Receipt (optional)</span>

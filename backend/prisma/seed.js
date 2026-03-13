@@ -121,18 +121,6 @@ async function main() {
     await prisma.speciality.create({ data: { name } });
   }
 
-  // ─── Payment destinations (where booking fee can be paid) ───
-  const paymentDestData = [
-    { name: 'BCA', account: '1234567890', type: 'Bank', isActive: true },
-    { name: 'Mandiri', account: '0987654321', type: 'Bank', isActive: true },
-    { name: 'BNI', account: '1122334455', type: 'Bank', isActive: true },
-    { name: 'Credit Card', account: '4111 1111 1111 1111', type: 'Credit Card', isActive: true },
-    { name: 'Cash', account: null, type: 'Cash', isActive: true },
-  ];
-  for (const d of paymentDestData) {
-    await prisma.paymentDestination.create({ data: d });
-  }
-
   // ─── 10 Tattoo Artists ───
   const artists = [
     {
@@ -288,6 +276,60 @@ async function main() {
     prisma.tattooStudio.create({ data: { name: 'Sacred Skin Collective', address: 'Jl. Braga No. 88, Bandung' } }),
   ]);
 
+  const studioDestinations = {};
+  for (let i = 0; i < studios.length; i++) {
+    const studio = studios[i];
+    studioDestinations[studio.id] = await Promise.all([
+      prisma.paymentDestination.create({
+        data: {
+          name: `${studio.name} BCA`,
+          account: `BCA-${String(i + 1).padStart(4, '0')}123456`,
+          type: 'Bank',
+          ownerType: 'studio',
+          studioId: studio.id,
+          isActive: true,
+        },
+      }),
+      prisma.paymentDestination.create({
+        data: {
+          name: `${studio.name} Cash`,
+          account: null,
+          type: 'Cash',
+          ownerType: 'studio',
+          studioId: studio.id,
+          isActive: true,
+        },
+      }),
+    ]);
+  }
+
+  const artistDestinations = {};
+  for (let i = 0; i < createdArtists.length; i++) {
+    const artist = createdArtists[i];
+    artistDestinations[artist.id] = await Promise.all([
+      prisma.paymentDestination.create({
+        data: {
+          name: `${artist.name} Mandiri`,
+          account: `ART-${String(i + 1).padStart(4, '0')}778899`,
+          type: 'Bank',
+          ownerType: 'artist',
+          artistId: artist.id,
+          isActive: true,
+        },
+      }),
+      prisma.paymentDestination.create({
+        data: {
+          name: `${artist.name} Cash`,
+          account: null,
+          type: 'Cash',
+          ownerType: 'artist',
+          artistId: artist.id,
+          isActive: true,
+        },
+      }),
+    ]);
+  }
+
   // 6-digit numeric IDs for Customer, Project, Session (schema requires app-set id)
   const usedNumericIds = { customer: new Set(), project: new Set(), session: new Set() };
   function genNumericId(model) {
@@ -343,9 +385,6 @@ async function main() {
     d.setDate(d.getDate() - daysAgo);
     return d.toISOString().slice(0, 10);
   };
-  const METHODS = ['BCA', 'Mandiri', 'BNI', 'Credit Card', 'Cash'];
-  const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
-
   const SHORT_CODE_CHARS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   const usedShortCodes = new Set();
   function generateShortCode() {
@@ -381,6 +420,7 @@ async function main() {
   const createdActiveBookings = [];
   for (const ab of activeBookings) {
     const prefStr = ab.preference ? JSON.stringify({ text: ab.preference }) : null;
+    const depositAmount = Math.round(ab.amount * 0.3);
     const booking = await prisma.booking.create({
       data: {
         shortCode: uniqueShortCode(),
@@ -401,20 +441,20 @@ async function main() {
     createdActiveBookings.push(booking);
 
     if (ab.hasPayment) {
+      const studioAccount = studioDestinations[studios[ab.studioIdx].id][0];
       await prisma.payment.create({
         data: {
           bookingId: booking.id,
-          amount: Math.round(ab.amount * 0.3),
+          paymentDestinationId: studioAccount.id,
+          amount: depositAmount,
           currency: 'IDR',
-          method: pick(METHODS),
+          method: studioAccount.type,
           type: 'down_payment',
-          transferDestination: pick(['BCA 1234567890', 'Mandiri 0987654321', 'BNI 5566778899', null]),
+          transferDestination: studioAccount.account,
+          receiverType: 'studio',
+          receiverStudioId: studios[ab.studioIdx].id,
           status: 'completed',
         },
-      });
-      await prisma.booking.update({
-        where: { id: booking.id },
-        data: { status: 'Paid' },
       });
     }
   }
@@ -515,6 +555,7 @@ async function main() {
   ];
 
   for (const cb of cancelledBookings) {
+    const depositAmount = Math.round(cb.amount * 0.3);
     const booking = await prisma.booking.create({
       data: {
         shortCode: uniqueShortCode(),
@@ -533,8 +574,20 @@ async function main() {
     });
     // Refunded down payment for first cancelled
     if (cb === cancelledBookings[0]) {
+      const studioAccount = studioDestinations[studios[cb.studioIdx].id][0];
       await prisma.payment.create({
-        data: { bookingId: booking.id, amount: 1200000, currency: 'IDR', method: 'BCA', type: 'down_payment', status: 'refunded' },
+        data: {
+          bookingId: booking.id,
+          paymentDestinationId: studioAccount.id,
+          amount: 1200000,
+          currency: 'IDR',
+          method: studioAccount.type,
+          transferDestination: studioAccount.account,
+          receiverType: 'studio',
+          receiverStudioId: studios[cb.studioIdx].id,
+          type: 'down_payment',
+          status: 'refunded',
+        },
       });
     }
   }
@@ -573,6 +626,11 @@ async function main() {
   for (let idx = 0; idx < completedBookings.length; idx++) {
     const cb = completedBookings[idx];
     const preference = cb.preference ? JSON.stringify({ text: cb.preference }) : null;
+    const depositAmount = Math.round(cb.amount * 0.3);
+    const bookingFeeReceiverType = idx % 2 === 0 ? 'studio' : 'artist';
+    const balanceReceiverType = bookingFeeReceiverType === 'studio' ? 'artist' : 'studio';
+    const studioAccount = studioDestinations[studios[cb.studioIdx].id][idx % studioDestinations[studios[cb.studioIdx].id].length];
+    const artistAccount = artistDestinations[createdArtists[cb.artistIdx].id][idx % artistDestinations[createdArtists[cb.artistIdx].id].length];
     const booking = await prisma.booking.create({
       data: {
         shortCode: uniqueShortCode(),
@@ -595,14 +653,50 @@ async function main() {
     if (idx % 3 === 0) {
       const dp = Math.round(cb.amount * 0.3);
       await prisma.payment.create({
-        data: { bookingId: booking.id, amount: dp, currency: 'IDR', method: pick(METHODS), type: 'down_payment', transferDestination: pick(['BCA 1234567890', 'Mandiri 0987654321', 'BNI 5566778899']), status: 'completed' },
+        data: {
+          bookingId: booking.id,
+          paymentDestinationId: bookingFeeReceiverType === 'studio' ? studioAccount.id : artistAccount.id,
+          amount: dp,
+          currency: 'IDR',
+          method: bookingFeeReceiverType === 'studio' ? studioAccount.type : artistAccount.type,
+          type: 'down_payment',
+          transferDestination: bookingFeeReceiverType === 'studio' ? studioAccount.account : artistAccount.account,
+          receiverType: bookingFeeReceiverType,
+          receiverStudioId: bookingFeeReceiverType === 'studio' ? studios[cb.studioIdx].id : null,
+          receiverArtistId: bookingFeeReceiverType === 'artist' ? createdArtists[cb.artistIdx].id : null,
+          status: 'completed',
+        },
       });
       await prisma.payment.create({
-        data: { bookingId: booking.id, amount: cb.amount - dp, currency: 'IDR', method: 'Cash', type: 'final', status: 'completed' },
+        data: {
+          bookingId: booking.id,
+          paymentDestinationId: balanceReceiverType === 'studio' ? studioAccount.id : artistAccount.id,
+          amount: cb.amount - dp,
+          currency: 'IDR',
+          method: balanceReceiverType === 'studio' ? studioAccount.type : artistAccount.type,
+          transferDestination: balanceReceiverType === 'studio' ? studioAccount.account : artistAccount.account,
+          type: 'final',
+          receiverType: balanceReceiverType,
+          receiverStudioId: balanceReceiverType === 'studio' ? studios[cb.studioIdx].id : null,
+          receiverArtistId: balanceReceiverType === 'artist' ? createdArtists[cb.artistIdx].id : null,
+          status: 'completed',
+        },
       });
     } else {
       await prisma.payment.create({
-        data: { bookingId: booking.id, amount: cb.amount, currency: 'IDR', method: pick(METHODS), type: 'final', status: 'completed' },
+        data: {
+          bookingId: booking.id,
+          paymentDestinationId: balanceReceiverType === 'studio' ? studioAccount.id : artistAccount.id,
+          amount: cb.amount,
+          currency: 'IDR',
+          method: balanceReceiverType === 'studio' ? studioAccount.type : artistAccount.type,
+          transferDestination: balanceReceiverType === 'studio' ? studioAccount.account : artistAccount.account,
+          type: 'final',
+          receiverType: balanceReceiverType,
+          receiverStudioId: balanceReceiverType === 'studio' ? studios[cb.studioIdx].id : null,
+          receiverArtistId: balanceReceiverType === 'artist' ? createdArtists[cb.artistIdx].id : null,
+          status: 'completed',
+        },
       });
     }
   }

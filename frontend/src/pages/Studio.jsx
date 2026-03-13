@@ -103,13 +103,6 @@ const PAYMENT_TYPES = [
   { value: 'final', label: 'Final payment' },
   { value: 'other', label: 'Other' },
 ];
-const PAYMENT_METHODS = [
-  { value: 'BCA', label: 'Bank BCA' },
-  { value: 'Mandiri', label: 'Bank Mandiri' },
-  { value: 'BNI', label: 'Bank BNI' },
-  { value: 'Credit Card', label: 'Credit Card' },
-  { value: 'Cash', label: 'Cash' },
-];
 const LEAD_SOURCE_OPTIONS = [
   { value: 'website', label: 'Website' },
   { value: 'instagram', label: 'Instagram' },
@@ -118,9 +111,17 @@ const LEAD_SOURCE_OPTIONS = [
   { value: 'whatsapp', label: 'WhatsApp' },
   { value: 'artist', label: 'Artist' },
 ];
+const OWNER_TYPE_OPTIONS = [
+  { value: 'studio', label: 'Studio' },
+  { value: 'artist', label: 'Artist' },
+];
 
 function leadSourceLabel(value) {
   return LEAD_SOURCE_OPTIONS.find((option) => option.value === value)?.label || '—';
+}
+
+function ownerTypeLabel(value) {
+  return OWNER_TYPE_OPTIONS.find((option) => option.value === value)?.label || '—';
 }
 
 function truncate(str, max = 25) {
@@ -199,9 +200,11 @@ export function Studio() {
     bookingId: '',
     amount: '',
     currency: 'IDR',
-    method: 'BCA',
     type: 'down_payment',
-    transferDestination: '',
+    paymentDestinationId: '',
+    receiverType: 'studio',
+    receiverStudioId: '',
+    receiverArtistId: '',
     status: 'pending',
   });
 
@@ -227,7 +230,7 @@ export function Studio() {
   const [destPage, setDestPage] = useState(1);
   const [showDestForm, setShowDestForm] = useState(false);
   const [editingDest, setEditingDest] = useState(null);
-  const [destForm, setDestForm] = useState({ name: '', account: '', type: 'Bank', isActive: true });
+  const [destForm, setDestForm] = useState({ name: '', account: '', type: 'Bank', ownerType: 'studio', studioId: '', artistId: '', isActive: true });
 
   const [bookingPage, setBookingPage] = useState(1);
   const [paymentPage, setPaymentPage] = useState(1);
@@ -285,6 +288,23 @@ export function Studio() {
   const paginatedLeads = leadProfiles.slice((leadPage - 1) * ROWS_PER_PAGE, leadPage * ROWS_PER_PAGE);
   const paginatedSpecialities = specialitiesList.slice((specPage - 1) * ROWS_PER_PAGE, specPage * ROWS_PER_PAGE);
   const paginatedDests = destList.slice((destPage - 1) * ROWS_PER_PAGE, destPage * ROWS_PER_PAGE);
+  const selectedPaymentBooking = useMemo(
+    () => bookings.find((booking) => booking.id === paymentForm.bookingId) || null,
+    [bookings, paymentForm.bookingId],
+  );
+  const paymentDestinationsForForm = useMemo(() => {
+    return paymentDestinations.filter((destination) => {
+      if (!destination.isActive && destination.id !== paymentForm.paymentDestinationId) return false;
+      if (paymentForm.receiverType === 'studio') {
+        if (destination.ownerType !== 'studio') return false;
+        if (selectedPaymentBooking?.studioId) return destination.studioId === selectedPaymentBooking.studioId;
+        return true;
+      }
+      if (destination.ownerType !== 'artist') return false;
+      if (selectedPaymentBooking?.artistId) return destination.artistId === selectedPaymentBooking.artistId;
+      return true;
+    });
+  }, [paymentDestinations, paymentForm.receiverType, paymentForm.paymentDestinationId, selectedPaymentBooking]);
 
   // High-level metrics for dashboard
   const todayStr = new Date().toISOString().slice(0, 10);
@@ -353,6 +373,15 @@ export function Studio() {
   const maxBookingsPerDay = Math.max(1, ...bookingsByDay.map((d) => d.count));
 
   const getCustomerBookings = (customerId) => bookings.filter((b) => b.customerId === customerId);
+  const paymentOwnerName = (ownerType, studioId, artistId) => {
+    if (ownerType === 'studio') return studios.find((studio) => studio.id === studioId)?.name || 'Studio';
+    if (ownerType === 'artist') return artists.find((artist) => artist.id === artistId)?.name || 'Artist';
+    return '—';
+  };
+  const paymentDestinationDisplay = (destination) => {
+    if (!destination) return '—';
+    return `${destination.name}${destination.account ? ` — ${destination.account}` : ''}`;
+  };
   const getLatestBooking = (customerId) => {
     const list = getCustomerBookings(customerId).sort((a, b) => {
       const da = a.date + (a.startTime || '');
@@ -371,11 +400,13 @@ export function Studio() {
       .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
   };
   /** Deposit total: completed down_payment only for this customer's bookings */
-  const getCustomerDeposit = (customerId) => {
+  const getCustomerDeposit = (customerId, ownerType = null) => {
     return payments
       .filter((p) => {
         const bid = p.booking?.customerId ?? p.booking?.customer?.id;
-        return bid === customerId && p.status === 'completed' && p.type === 'down_payment';
+        if (bid !== customerId || p.status !== 'completed' || p.type !== 'down_payment') return false;
+        if (ownerType && p.receiverType !== ownerType) return false;
+        return true;
       })
       .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
   };
@@ -424,6 +455,24 @@ export function Studio() {
     load();
   }, []);
 
+  useEffect(() => {
+    setPaymentForm((form) => {
+      const next = { ...form };
+      if (selectedPaymentBooking) {
+        if (form.receiverType === 'studio') {
+          next.receiverStudioId = selectedPaymentBooking.studioId || '';
+        } else {
+          next.receiverArtistId = selectedPaymentBooking.artistId || '';
+        }
+      }
+      if (form.paymentDestinationId) {
+        const stillValid = paymentDestinationsForForm.some((destination) => destination.id === form.paymentDestinationId);
+        if (!stillValid) next.paymentDestinationId = '';
+      }
+      return next;
+    });
+  }, [selectedPaymentBooking, paymentDestinationsForForm, paymentForm.receiverType]);
+
   const getCommissionFor = (artistId, studioId) =>
     commissions.find((c) => c.artistId === artistId && c.studioId === studioId);
 
@@ -438,14 +487,17 @@ export function Studio() {
   };
 
   const openNewPayment = (bookingId = null) => {
+    const booking = bookings.find((item) => item.id === (bookingId || bookings[0]?.id)) || null;
     setEditingPayment(null);
     setPaymentForm({
-      bookingId: bookingId || bookings[0]?.id || '',
+      bookingId: booking?.id || '',
       amount: '',
       currency: 'IDR',
-      method: 'BCA',
       type: 'down_payment',
-      transferDestination: '',
+      paymentDestinationId: '',
+      receiverType: booking?.studioId ? 'studio' : 'artist',
+      receiverStudioId: booking?.studioId || '',
+      receiverArtistId: booking?.artistId || '',
       status: 'pending',
     });
     setShowPaymentForm(true);
@@ -457,9 +509,11 @@ export function Studio() {
       bookingId: p.bookingId || '',
       amount: p.amount,
       currency: p.currency,
-      method: p.method || 'BCA',
       type: p.type || 'down_payment',
-      transferDestination: p.transferDestination || '',
+      paymentDestinationId: p.paymentDestinationId || '',
+      receiverType: p.receiverType || (p.receiverStudioId ? 'studio' : 'artist'),
+      receiverStudioId: p.receiverStudioId || p.booking?.studioId || '',
+      receiverArtistId: p.receiverArtistId || p.booking?.artistId || '',
       status: p.status,
     });
     setShowPaymentForm(true);
@@ -473,7 +527,9 @@ export function Studio() {
       amount: Number(paymentForm.amount),
       bookingId: paymentForm.bookingId || null,
       type: paymentForm.type || null,
-      transferDestination: paymentForm.transferDestination || null,
+      paymentDestinationId: paymentForm.paymentDestinationId || null,
+      receiverStudioId: paymentForm.receiverType === 'studio' ? paymentForm.receiverStudioId || null : null,
+      receiverArtistId: paymentForm.receiverType === 'artist' ? paymentForm.receiverArtistId || null : null,
     };
     try {
       if (editingPayment) {
@@ -649,6 +705,9 @@ export function Studio() {
           name,
           account: (destForm.account || '').trim() || undefined,
           type: destForm.type,
+          ownerType: destForm.ownerType,
+          studioId: destForm.ownerType === 'studio' ? destForm.studioId : null,
+          artistId: destForm.ownerType === 'artist' ? destForm.artistId : null,
           isActive: destForm.isActive,
         });
         setEditingDest(null);
@@ -657,10 +716,13 @@ export function Studio() {
           name,
           account: (destForm.account || '').trim() || undefined,
           type: destForm.type,
+          ownerType: destForm.ownerType,
+          studioId: destForm.ownerType === 'studio' ? destForm.studioId : null,
+          artistId: destForm.ownerType === 'artist' ? destForm.artistId : null,
           isActive: destForm.isActive,
         });
       }
-      setDestForm({ name: '', account: '', type: 'Bank', isActive: true });
+      setDestForm({ name: '', account: '', type: 'Bank', ownerType: 'studio', studioId: studios[0]?.id || '', artistId: artists[0]?.id || '', isActive: true });
       setShowDestForm(false);
       load();
     } catch (err) {
@@ -1000,9 +1062,9 @@ export function Studio() {
                   <th>No.</th>
                   <th>ID</th>
                   <th>Amount</th>
-                  <th>Method</th>
+                  <th>Receiver</th>
                   <th>Type</th>
-                  <th>Transfer to</th>
+                  <th>Account</th>
                   <th>Status</th>
                   <th>Booking</th>
                   <th></th>
@@ -1021,9 +1083,11 @@ export function Studio() {
                       <td>{rowNum}</td>
                       <td className={styles.cellId}><IdWithCopy id={p.id} /></td>
                       <td className={styles.cellAmount}>{formatRupiah(p.amount)} <span className={styles.convHint}>{formatWithConversion(p.amount).usd}</span></td>
-                      <td className={styles.cellEmphasis}>{p.method || '—'}</td>
+                      <td className={styles.cellEmphasis}>
+                        {ownerTypeLabel(p.receiverType)} · {paymentOwnerName(p.receiverType, p.receiverStudioId, p.receiverArtistId)}
+                      </td>
                       <td>{p.type || '—'}</td>
-                      <td>{p.transferDestination || '—'}</td>
+                      <td>{p.paymentDestination ? paymentDestinationDisplay(p.paymentDestination) : (p.transferDestination || '—')}</td>
                       <td><span className={styles[`status_${p.status}`]}>{p.status}</span></td>
                       <td className={styles.cellEmphasis}>
                         {p.booking
@@ -1184,7 +1248,7 @@ export function Studio() {
                   <th>Name</th>
                   <th>Email</th>
                   <th>Phone</th>
-                  <th>Deposit</th>
+                  <th>Deposits</th>
                   <th>Total paid</th>
                   <th>Orders</th>
                   <th>Latest project</th>
@@ -1201,7 +1265,8 @@ export function Studio() {
                   paginatedCustomers.map((c, i) => {
                     const customerBookings = getCustomerBookings(c.id);
                     const latest = getLatestBooking(c.id);
-                    const deposit = getCustomerDeposit(c.id);
+                    const studioDeposit = getCustomerDeposit(c.id, 'studio');
+                    const artistDeposit = getCustomerDeposit(c.id, 'artist');
                     const totalPaid = getCustomerTotalPaid(c.id);
                     const rowNum = (customerPage - 1) * ROWS_PER_PAGE + i + 1;
                     const createdDate = c.createdAt ? new Date(c.createdAt) : null;
@@ -1213,7 +1278,7 @@ export function Studio() {
                         <td className={styles.cellEmphasis}>{c.name || '—'}</td>
                         <td>{c.email || '—'}</td>
                         <td>{c.phone || '—'}</td>
-                        <td className={styles.cellAmount}>{formatRupiah(deposit)}</td>
+                        <td className={styles.cellAmount}>S {formatRupiah(studioDeposit)} · A {formatRupiah(artistDeposit)}</td>
                         <td className={styles.cellAmount}>{formatRupiah(totalPaid)}</td>
                         <td className={styles.cellAmount}>{customerBookings.length}</td>
                         <td>
@@ -1331,7 +1396,7 @@ export function Studio() {
               <h2>Payment options</h2>
               {destList.length > 0 && <span className={styles.countHint}>Showing {(destPage - 1) * ROWS_PER_PAGE + 1}–{Math.min(destPage * ROWS_PER_PAGE, destList.length)} of {destList.length}</span>}
             </div>
-            <button type="button" className={styles.addBtn} onClick={() => { setEditingDest(null); setDestForm({ name: '', account: '', type: 'Bank', isActive: true }); setShowDestForm(true); }}>+ Add</button>
+            <button type="button" className={styles.addBtn} onClick={() => { setEditingDest(null); setDestForm({ name: '', account: '', type: 'Bank', ownerType: 'studio', studioId: studios[0]?.id || '', artistId: artists[0]?.id || '', isActive: true }); setShowDestForm(true); }}>+ Add</button>
           </div>
           {showDestForm && (
             <form onSubmit={saveDest} className={styles.destForm}>
@@ -1349,6 +1414,30 @@ export function Studio() {
                   {DEST_TYPES.map((d) => <option key={d.value} value={d.value}>{d.label}</option>)}
                 </select>
               </label>
+              <label className={styles.destFormLabel}>
+                Owner
+                <select value={destForm.ownerType} onChange={(e) => setDestForm((f) => ({ ...f, ownerType: e.target.value }))}>
+                  {OWNER_TYPE_OPTIONS.map((owner) => <option key={owner.value} value={owner.value}>{owner.label}</option>)}
+                </select>
+              </label>
+              {destForm.ownerType === 'studio' && (
+                <label className={styles.destFormLabel}>
+                  Studio
+                  <select value={destForm.studioId} onChange={(e) => setDestForm((f) => ({ ...f, studioId: e.target.value }))}>
+                    <option value="">Select studio</option>
+                    {studios.map((studio) => <option key={studio.id} value={studio.id}>{studio.name}</option>)}
+                  </select>
+                </label>
+              )}
+              {destForm.ownerType === 'artist' && (
+                <label className={styles.destFormLabel}>
+                  Artist
+                  <select value={destForm.artistId} onChange={(e) => setDestForm((f) => ({ ...f, artistId: e.target.value }))}>
+                    <option value="">Select artist</option>
+                    {artists.map((artist) => <option key={artist.id} value={artist.id}>{artist.name}</option>)}
+                  </select>
+                </label>
+              )}
               <label className={styles.destFormCheck}>
                 <input type="checkbox" checked={destForm.isActive} onChange={(e) => setDestForm((f) => ({ ...f, isActive: e.target.checked }))} />
                 Active (shown in booking form)
@@ -1368,6 +1457,7 @@ export function Studio() {
                   <th>Bank name</th>
                   <th>Bank account</th>
                   <th>Type</th>
+                  <th>Owner</th>
                   <th>Status</th>
                   <th>Actions</th>
                 </tr>
@@ -1375,7 +1465,7 @@ export function Studio() {
               <tbody>
                 {paginatedDests.length === 0 ? (
                   <tr>
-                    <td colSpan={7}>No payment options yet. Add one to show in the booking form.</td>
+                    <td colSpan={8}>No payment options yet. Add one to show in the booking form.</td>
                   </tr>
                 ) : (
                   paginatedDests.map((d, i) => {
@@ -1387,9 +1477,10 @@ export function Studio() {
                         <td className={styles.cellEmphasis}>{d.name || '—'}</td>
                         <td>{d.account || '—'}</td>
                         <td>{d.type || '—'}</td>
+                        <td>{ownerTypeLabel(d.ownerType)} · {d.ownerType === 'studio' ? d.studio?.name || '—' : d.artist?.name || '—'}</td>
                         <td>{d.isActive ? 'Active' : 'Inactive'}</td>
                         <td>
-                          <button type="button" onClick={() => { setEditingDest(d); setDestForm({ name: d.name || '', account: d.account || '', type: d.type || 'Bank', isActive: d.isActive !== false }); setShowDestForm(true); }} className={styles.smBtn}>Edit</button>
+                          <button type="button" onClick={() => { setEditingDest(d); setDestForm({ name: d.name || '', account: d.account || '', type: d.type || 'Bank', ownerType: d.ownerType || 'studio', studioId: d.studioId || '', artistId: d.artistId || '', isActive: d.isActive !== false }); setShowDestForm(true); }} className={styles.smBtn}>Edit</button>
                           <button type="button" onClick={() => removeDest(d.id)} className={styles.smBtnDanger}>Delete</button>
                         </td>
                       </tr>
@@ -1536,19 +1627,21 @@ export function Studio() {
             {(() => {
               const tx = getCustomerTransactions(customerHistoryModal.id);
               const totalPaid = getCustomerTotalPaid(customerHistoryModal.id);
-              const depositTotal = getCustomerDeposit(customerHistoryModal.id);
+              const studioDepositTotal = getCustomerDeposit(customerHistoryModal.id, 'studio');
+              const artistDepositTotal = getCustomerDeposit(customerHistoryModal.id, 'artist');
               const depositPayments = getCustomerDepositPayments(customerHistoryModal.id);
               return (
                 <>
                   <h4>Deposit information</h4>
-                  <p className={styles.transactionSummary}><strong>Total deposits (down payments):</strong> {formatRupiah(depositTotal)}</p>
+                  <p className={styles.transactionSummary}><strong>Studio deposits:</strong> {formatRupiah(studioDepositTotal)}</p>
+                  <p className={styles.transactionSummary}><strong>Artist deposits:</strong> {formatRupiah(artistDepositTotal)}</p>
                   {depositPayments.length === 0 ? (
                     <p className={styles.help}>No deposit payments yet.</p>
                   ) : (
                     <ul className={styles.paymentList}>
                       {depositPayments.map((p) => (
                         <li key={p.id}>
-                          {p.createdAt ? new Date(p.createdAt).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' }) : '—'} — {formatRupiah(p.amount)} ({p.status})
+                          {p.createdAt ? new Date(p.createdAt).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' }) : '—'} — {formatRupiah(p.amount)} ({ownerTypeLabel(p.receiverType)} · {paymentOwnerName(p.receiverType, p.receiverStudioId, p.receiverArtistId)} · {p.status})
                           {p.bookingId && (
                             <> · <Link to={`/manage/bookings/${p.booking?.id}`} className={styles.cellLatest}>Booking {p.booking?.shortCode || p.booking?.date || p.bookingId.slice(0, 8)}</Link></>
                           )}
@@ -1566,7 +1659,7 @@ export function Studio() {
                           <span className={styles.transactionDate}>{p.createdAt ? new Date(p.createdAt).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' }) : '—'}</span>
                           <span className={styles.cellAmount}>{formatRupiah(p.amount)}</span>
                           <span>{p.type || '—'}</span>
-                          <span>{p.method || '—'}</span>
+                          <span>{ownerTypeLabel(p.receiverType)} · {paymentOwnerName(p.receiverType, p.receiverStudioId, p.receiverArtistId)}</span>
                           <span className={styles[`status_${p.status}`]}>{p.status}</span>
                           {p.bookingId ? (
                             <Link to={`/manage/bookings/${p.booking?.id}`} className={styles.cellLatest}>
@@ -1598,7 +1691,7 @@ export function Studio() {
                 Booking (optional)
                 <select
                   value={paymentForm.bookingId}
-                  onChange={(e) => setPaymentForm((f) => ({ ...f, bookingId: e.target.value }))}
+                  onChange={(e) => setPaymentForm((f) => ({ ...f, bookingId: e.target.value, paymentDestinationId: '' }))}
                 >
                   <option value="">—</option>
                   {bookings.map((b) => (
@@ -1635,23 +1728,66 @@ export function Studio() {
                 </select>
               </label>
               <label>
-                Method (where payment is sent)
+                Receiver
                 <select
-                  value={paymentForm.method}
-                  onChange={(e) => setPaymentForm((f) => ({ ...f, method: e.target.value }))}
+                  value={paymentForm.receiverType}
+                  onChange={(e) => setPaymentForm((f) => ({
+                    ...f,
+                    receiverType: e.target.value,
+                    paymentDestinationId: '',
+                    receiverStudioId: e.target.value === 'studio' ? (selectedPaymentBooking?.studioId || f.receiverStudioId) : '',
+                    receiverArtistId: e.target.value === 'artist' ? (selectedPaymentBooking?.artistId || f.receiverArtistId) : '',
+                  }))}
                 >
-                  {PAYMENT_METHODS.map((m) => (
-                    <option key={m.value} value={m.value}>{m.label}</option>
+                  {OWNER_TYPE_OPTIONS.map((owner) => (
+                    <option key={owner.value} value={owner.value}>{owner.label}</option>
                   ))}
                 </select>
               </label>
+              {!selectedPaymentBooking && paymentForm.receiverType === 'studio' && (
+                <label>
+                  Studio
+                  <select
+                    value={paymentForm.receiverStudioId}
+                    onChange={(e) => setPaymentForm((f) => ({ ...f, receiverStudioId: e.target.value, paymentDestinationId: '' }))}
+                  >
+                    <option value="">Select studio</option>
+                    {studios.map((studio) => (
+                      <option key={studio.id} value={studio.id}>{studio.name}</option>
+                    ))}
+                  </select>
+                </label>
+              )}
+              {!selectedPaymentBooking && paymentForm.receiverType === 'artist' && (
+                <label>
+                  Artist
+                  <select
+                    value={paymentForm.receiverArtistId}
+                    onChange={(e) => setPaymentForm((f) => ({ ...f, receiverArtistId: e.target.value, paymentDestinationId: '' }))}
+                  >
+                    <option value="">Select artist</option>
+                    {artists.map((artist) => (
+                      <option key={artist.id} value={artist.id}>{artist.name}</option>
+                    ))}
+                  </select>
+                </label>
+              )}
               <label>
-                Transfer destination (e.g. BCA 1234567890)
-                <input
-                  placeholder="Account number or reference"
-                  value={paymentForm.transferDestination}
-                  onChange={(e) => setPaymentForm((f) => ({ ...f, transferDestination: e.target.value }))}
-                />
+                Owned account
+                <select
+                  value={paymentForm.paymentDestinationId}
+                  onChange={(e) => setPaymentForm((f) => ({ ...f, paymentDestinationId: e.target.value }))}
+                >
+                  <option value="">Select account</option>
+                  {paymentDestinationsForForm.map((destination) => (
+                    <option key={destination.id} value={destination.id}>
+                      {paymentDestinationDisplay(destination)} · {paymentOwnerName(destination.ownerType, destination.studioId, destination.artistId)}
+                    </option>
+                  ))}
+                </select>
+                {paymentDestinationsForForm.length === 0 && (
+                  <p className={styles.help}>No active owned accounts match this payment yet.</p>
+                )}
               </label>
               <label>
                 Status

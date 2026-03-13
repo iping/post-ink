@@ -357,6 +357,60 @@
   color: var(--muted);
 }
 
+.searchSuggestionList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin: -0.1rem 0 0.8rem;
+}
+
+.searchSuggestionItem {
+  width: 100%;
+  text-align: left;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.75rem 0.9rem;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.searchSuggestionItem:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(201, 168, 124, 0.12);
+  transform: translateY(-1px);
+}
+
+.searchSuggestionTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.searchSuggestionBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  background: var(--bg-warm);
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.searchSuggestionMeta {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
 .radioRow,
 .timeSourceRow {
   display: flex;
@@ -602,6 +656,39 @@
   margin-top: 1.25rem;
   padding-top: 1.25rem;
   border-top: 1px solid var(--border);
+}
+
+.ownerSplitGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.splitPreviewCard {
+  margin-bottom: 1rem;
+  padding: 0.85rem 1rem;
+  background: var(--bg-warm);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.splitPreviewRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.splitPreviewRow + .splitPreviewRow {
+  margin-top: 0.45rem;
+}
+
+.splitPreviewRow strong {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
 }
 
 /* Legacy estimation option classes (keep for any other usage) */

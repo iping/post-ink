@@ -1,6 +1,10 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
 import crypto from 'crypto';
+import {
+  decorateBookingFinancials,
+  syncBookingReceivableCache,
+} from '../utils/booking-finance.js';
 
 const prisma = new PrismaClient();
 export const bookingsRouter = Router();
@@ -35,18 +39,6 @@ async function promoteLeadCustomer(tx, customerId) {
   }
 }
 
-/** For hourly pricing: total = sum of (hourlyRate × agreedHours) across projects (accumulative). */
-function computedTotalForBooking(booking) {
-  if (booking.pricingType === 'hourly' && Array.isArray(booking.projects) && booking.projects.length > 0) {
-    const sum = booking.projects.reduce(
-      (acc, p) => acc + (Number(p.hourlyRate) || 0) * (Number(p.agreedHours) || 0),
-      0
-    );
-    return sum > 0 ? sum : null;
-  }
-  return booking.totalAmount != null ? Number(booking.totalAmount) : null;
-}
-
 // GET /api/bookings — list all (with artist, customer). Default sort: latest first.
 bookingsRouter.get('/', async (req, res) => {
   try {
@@ -66,7 +58,19 @@ bookingsRouter.get('/', async (req, res) => {
       : [{ createdAt: 'desc' }];
     let bookings = await prisma.booking.findMany({
       where,
-      include: { artist: true, customer: true, studio: true, payments: true, projects: { include: { sessions: true } } },
+      include: {
+        artist: true,
+        customer: true,
+        studio: true,
+        payments: {
+          include: {
+            paymentDestination: { include: { studio: true, artist: true } },
+            receiverStudio: true,
+            receiverArtist: true,
+          },
+        },
+        projects: { include: { sessions: true } },
+      },
       orderBy: orderByCreation,
     });
     for (const b of bookings) {
@@ -76,12 +80,7 @@ bookingsRouter.get('/', async (req, res) => {
         b.shortCode = code;
       }
     }
-    const withTotals = bookings.map((b) => {
-      const paidTotal = (b.payments || []).filter((p) => p.status === 'completed').reduce((s, p) => s + p.amount, 0);
-      const totalAmount = computedTotalForBooking(b);
-      const remainingAmount = totalAmount != null && totalAmount > 0 ? Math.max(0, totalAmount - paidTotal) : null;
-      return { ...b, paidTotal, remainingAmount };
-    });
+    const withTotals = bookings.map((b) => decorateBookingFinancials(b));
     res.json(withTotals);
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -93,13 +92,22 @@ bookingsRouter.get('/:id', async (req, res) => {
   try {
     const booking = await prisma.booking.findUnique({
       where: { id: req.params.id },
-      include: { artist: true, customer: true, studio: true, payments: true, projects: { include: { sessions: true } } },
+      include: {
+        artist: true,
+        customer: true,
+        studio: true,
+        payments: {
+          include: {
+            paymentDestination: { include: { studio: true, artist: true } },
+            receiverStudio: true,
+            receiverArtist: true,
+          },
+        },
+        projects: { include: { sessions: true } },
+      },
     });
     if (!booking) return res.status(404).json({ error: 'Booking not found' });
-    const paidTotal = (booking.payments || []).filter((p) => p.status === 'completed').reduce((s, p) => s + p.amount, 0);
-    const totalAmount = computedTotalForBooking(booking);
-    const remainingAmount = totalAmount != null && totalAmount > 0 ? Math.max(0, totalAmount - paidTotal) : null;
-    res.json({ ...booking, paidTotal, remainingAmount });
+    res.json(decorateBookingFinancials(booking));
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -108,8 +116,10 @@ bookingsRouter.get('/:id', async (req, res) => {
 // POST /api/bookings
 bookingsRouter.post('/', async (req, res) => {
   try {
-    const { artistId, customerId, studioId, date, startTime, endTime, status, notes, totalAmount, placement, preference, pricingType, projectName } = req.body;
+    const { artistId, customerId, studioId, date, startTime, endTime, notes, totalAmount, placement, preference, pricingType, projectName } = req.body;
     const shortCode = await ensureUniqueShortCode();
+    const normalizedPricingType = pricingType === 'fixed' || pricingType === 'hourly' ? pricingType : null;
+    const numericTotalAmount = totalAmount != null ? Number(totalAmount) : null;
     const data = {
       shortCode,
       artistId,
@@ -118,29 +128,49 @@ bookingsRouter.post('/', async (req, res) => {
       date,
       startTime: startTime || '09:00',
       endTime: endTime || '17:00',
-      status: (status === 'Paid' || status === 'Unpaid') ? status : 'Unpaid',
+      status: 'Unpaid',
       notes: notes || null,
-      totalAmount: totalAmount != null ? Number(totalAmount) : null,
+      totalAmount: numericTotalAmount,
       placement: placement || null,
       preference: preference || null,
       projectName: projectName || null,
     };
-    if (pricingType === 'fixed' || pricingType === 'hourly') data.pricingType = pricingType;
+    if (normalizedPricingType) data.pricingType = normalizedPricingType;
     const booking = await prisma.$transaction(async (tx) => {
       await promoteLeadCustomer(tx, data.customerId);
       return tx.booking.create({
         data,
-        include: { artist: true, customer: true, studio: true, payments: true },
+        include: {
+          artist: true,
+          customer: true,
+          studio: true,
+          payments: {
+            include: {
+              paymentDestination: { include: { studio: true, artist: true } },
+              receiverStudio: true,
+              receiverArtist: true,
+            },
+          },
+        },
       });
     });
     const withProjects = await prisma.booking.findUnique({
       where: { id: booking.id },
-      include: { artist: true, customer: true, studio: true, payments: true, projects: true },
+      include: {
+        artist: true,
+        customer: true,
+        studio: true,
+        payments: {
+          include: {
+            paymentDestination: { include: { studio: true, artist: true } },
+            receiverStudio: true,
+            receiverArtist: true,
+          },
+        },
+        projects: { include: { sessions: true } },
+      },
     });
-    const paidTotal = 0;
-    const computedTotal = withProjects ? computedTotalForBooking(withProjects) : (booking.totalAmount ?? null);
-    const remainingAmount = computedTotal != null ? Math.max(0, computedTotal - paidTotal) : null;
-    res.status(201).json({ ...withProjects, paidTotal, remainingAmount });
+    res.status(201).json(withProjects ? decorateBookingFinancials(withProjects) : decorateBookingFinancials(booking));
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -157,7 +187,6 @@ bookingsRouter.patch('/:id', async (req, res) => {
     if (body.date != null) data.date = body.date;
     if (body.startTime != null) data.startTime = body.startTime;
     if (body.endTime != null) data.endTime = body.endTime;
-    if (body.status === 'Paid' || body.status === 'Unpaid') data.status = body.status;
     if (body.notes !== undefined) data.notes = body.notes || null;
     if (body.totalAmount !== undefined) data.totalAmount = body.totalAmount == null ? null : Number(body.totalAmount);
     if (body.placement !== undefined) data.placement = body.placement || null;
@@ -166,16 +195,26 @@ bookingsRouter.patch('/:id', async (req, res) => {
     if (body.pricingType === 'fixed' || body.pricingType === 'hourly') data.pricingType = body.pricingType;
     const booking = await prisma.$transaction(async (tx) => {
       if (data.customerId) await promoteLeadCustomer(tx, data.customerId);
-      return tx.booking.update({
+      await tx.booking.update({
         where: { id: req.params.id },
         data,
-        include: { artist: true, customer: true, studio: true, payments: true, projects: true },
+        include: {
+          artist: true,
+          customer: true,
+          studio: true,
+          payments: {
+            include: {
+              paymentDestination: { include: { studio: true, artist: true } },
+              receiverStudio: true,
+              receiverArtist: true,
+            },
+          },
+          projects: { include: { sessions: true } },
+        },
       });
+      return syncBookingReceivableCache(tx, req.params.id);
     });
-    const paidTotal = (booking.payments || []).filter((p) => p.status === 'completed').reduce((s, p) => s + p.amount, 0);
-    const totalAmount = computedTotalForBooking(booking);
-    const remainingAmount = totalAmount != null && totalAmount > 0 ? Math.max(0, totalAmount - paidTotal) : null;
-    res.json({ ...booking, paidTotal, remainingAmount });
+    res.json(decorateBookingFinancials(booking));
   } catch (e) {
     if (e.code === 'P2025') return res.status(404).json({ error: 'Booking not found' });
     res.status(500).json({ error: e.message });

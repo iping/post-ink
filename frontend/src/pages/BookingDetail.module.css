@@ -418,6 +418,26 @@
   color: var(--text-secondary);
 }
 
+.arSplitCard {
+  margin-top: 0.6rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-warm);
+}
+
+.arSplitRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.82rem;
+}
+
+.arSplitRow + .arSplitRow {
+  margin-top: 0.3rem;
+}
+
 /* Project & sessions */
 .projectSection {
   display: flex;
