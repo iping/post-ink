@@ -348,10 +348,11 @@ export function BookingForm() {
 
   const paymentDestinationLabel = (destination) => {
     if (!destination) return '—';
+    const ownerLabel = destination.ownerType === 'studio' ? 'Studio' : 'Artist';
     const ownerName = destination.ownerType === 'studio'
       ? destination.studio?.name || 'Studio'
       : destination.artist?.name || 'Artist';
-    return `${destination.name}${destination.account ? ` — ${destination.account}` : ''} (${ownerName})`;
+    return `[${ownerLabel}] ${destination.name}${destination.account ? ` — ${destination.account}` : ''} · ${ownerName}`;
   };
 
   const buildPayload = (statusOverride) => {
@@ -777,15 +778,22 @@ export function BookingForm() {
                     {filteredExistingCustomers.map((c) => {
                       const studioDeposit = getCustomerDeposit(c.id, 'studio');
                       const artistDeposit = getCustomerDeposit(c.id, 'artist');
+                      const hasAnyDeposit = studioDeposit > 0 || artistDeposit > 0;
                       return (
                         <option key={c.id} value={c.id}>
-                          {c.name} — Studio {formatRupiah(studioDeposit)} · Artist {formatRupiah(artistDeposit)}
+                          {c.name}
+                          {hasAnyDeposit
+                            ? ` — S ${formatRupiah(studioDeposit)} · A ${formatRupiah(artistDeposit)}`
+                            : ' — No deposit yet'}
                         </option>
                       );
                     })}
                   </select>
                   {filteredExistingCustomers.length === 0 && (
                     <p className={styles.helper}>No customers match your search.</p>
+                  )}
+                  {filteredExistingCustomers.length > 0 && (
+                    <p className={styles.helper}>S = Studio deposit, A = Artist deposit.</p>
                   )}
                 </label>
               )}

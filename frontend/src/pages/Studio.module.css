@@ -893,6 +893,94 @@
   font-size: 1rem;
 }
 
+.depositInfoBanner {
+  margin: 0 0 1rem;
+  padding: 0.6rem 0.9rem;
+  border-radius: var(--radius);
+  border: 1px dashed rgba(251, 191, 36, 0.7);
+  background: linear-gradient(90deg, rgba(251, 191, 36, 0.08), rgba(59, 130, 246, 0.05));
+  font-size: 0.86rem;
+  color: var(--text-secondary);
+}
+
+.depositLabelStudio {
+  padding: 0.1rem 0.35rem;
+  border-radius: 999px;
+  background: rgba(34, 197, 94, 0.16);
+  color: #166534;
+}
+
+.depositLabelArtist {
+  padding: 0.1rem 0.35rem;
+  border-radius: 999px;
+  background: rgba(59, 130, 246, 0.16);
+  color: #1d4ed8;
+}
+
+.depositPillRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.depositPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.18rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.depositPillStudio {
+  background: rgba(34, 197, 94, 0.16);
+  color: #166534;
+}
+
+.depositPillArtist {
+  background: rgba(59, 130, 246, 0.16);
+  color: #1d4ed8;
+}
+
+.depositBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: rgba(251, 191, 36, 0.22);
+  color: #92400e;
+}
+
+.depositInfoBanner {
+  margin: 0 0 1rem;
+  padding: 0.6rem 0.9rem;
+  border-radius: var(--radius);
+  border: 1px dashed rgba(251, 191, 36, 0.7);
+  background: linear-gradient(90deg, rgba(251, 191, 36, 0.08), rgba(59, 130, 246, 0.05));
+  font-size: 0.86rem;
+  color: var(--text-secondary);
+}
+
+.depositLabelStudio {
+  padding: 0.1rem 0.35rem;
+  border-radius: 999px;
+  background: rgba(34, 197, 94, 0.16);
+  color: #166534;
+}
+
+.depositLabelArtist {
+  padding: 0.1rem 0.35rem;
+  border-radius: 999px;
+  background: rgba(59, 130, 246, 0.16);
+  color: #1d4ed8;
+}
+
 .transactionList {
   list-style: none;
   margin: 0 0 1rem;
@@ -1193,6 +1281,34 @@
   display: flex;
   gap: 0.5rem;
   align-items: center;
+}
+
+.ownerTag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.16rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-right: 0.35rem;
+}
+
+.ownerTagStudio {
+  background: rgba(34, 197, 94, 0.18);
+  color: #166534;
+}
+
+.ownerTagArtist {
+  background: rgba(59, 130, 246, 0.18);
+  color: #1d4ed8;
+}
+
+.ownerTagName {
+  font-size: 0.86rem;
+  color: var(--text-secondary);
 }
 @media (max-width: 700px) {
   .destForm { grid-template-columns: 1fr; }

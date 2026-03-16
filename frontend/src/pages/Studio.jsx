@@ -380,7 +380,9 @@ export function Studio() {
   };
   const paymentDestinationDisplay = (destination) => {
     if (!destination) return '—';
-    return `${destination.name}${destination.account ? ` — ${destination.account}` : ''}`;
+    const ownerLabel = ownerTypeLabel(destination.ownerType);
+    const ownerName = destination.ownerType === 'studio' ? destination.studio?.name || 'Studio' : destination.artist?.name || 'Artist';
+    return `[${ownerLabel}] ${destination.name}${destination.account ? ` — ${destination.account}` : ''} · ${ownerName}`;
   };
   const getLatestBooking = (customerId) => {
     const list = getCustomerBookings(customerId).sort((a, b) => {
@@ -1086,7 +1088,13 @@ export function Studio() {
                       <td className={styles.cellEmphasis}>
                         {ownerTypeLabel(p.receiverType)} · {paymentOwnerName(p.receiverType, p.receiverStudioId, p.receiverArtistId)}
                       </td>
-                      <td>{p.type || '—'}</td>
+                      <td>
+                        {p.type === 'down_payment' ? (
+                          <span className={styles.depositBadge} title="Deposit stored with studio or tattoo artist">
+                            Deposit
+                          </span>
+                        ) : (p.type || '—')}
+                      </td>
                       <td>{p.paymentDestination ? paymentDestinationDisplay(p.paymentDestination) : (p.transferDestination || '—')}</td>
                       <td><span className={styles[`status_${p.status}`]}>{p.status}</span></td>
                       <td className={styles.cellEmphasis}>
@@ -1239,6 +1247,9 @@ export function Studio() {
               {bookedCustomers.length > 0 && <span className={styles.countHint}>Showing {(customerPage - 1) * ROWS_PER_PAGE + 1}–{Math.min(customerPage * ROWS_PER_PAGE, bookedCustomers.length)} of {bookedCustomers.length}</span>}
             </div>
           </div>
+          <p className={styles.depositInfoBanner}>
+            <strong>Deposit highlight:</strong> deposits are stored either with the <span className={styles.depositLabelStudio}>Studio</span> or the <span className={styles.depositLabelArtist}>Tattoo artist</span>. Use them as a customer&apos;s first payment before charging new money.
+          </p>
           <div className={styles.tableWrap}>
             <table className={styles.table}>
               <thead>
@@ -1278,7 +1289,18 @@ export function Studio() {
                         <td className={styles.cellEmphasis}>{c.name || '—'}</td>
                         <td>{c.email || '—'}</td>
                         <td>{c.phone || '—'}</td>
-                        <td className={styles.cellAmount}>S {formatRupiah(studioDeposit)} · A {formatRupiah(artistDeposit)}</td>
+                        <td className={styles.cellAmount}>
+                          <div className={styles.depositPillRow}>
+                            <span className={`${styles.depositPill} ${styles.depositPillStudio}`}>
+                              Studio deposit&nbsp;
+                              <strong>{formatRupiah(studioDeposit)}</strong>
+                            </span>
+                            <span className={`${styles.depositPill} ${styles.depositPillArtist}`}>
+                              Artist deposit&nbsp;
+                              <strong>{formatRupiah(artistDeposit)}</strong>
+                            </span>
+                          </div>
+                        </td>
                         <td className={styles.cellAmount}>{formatRupiah(totalPaid)}</td>
                         <td className={styles.cellAmount}>{customerBookings.length}</td>
                         <td>
@@ -1393,19 +1415,19 @@ export function Studio() {
         <section className={styles.section}>
           <div className={styles.sectionHead}>
             <div>
-              <h2>Payment options</h2>
+              <h2>Payment accounts</h2>
               {destList.length > 0 && <span className={styles.countHint}>Showing {(destPage - 1) * ROWS_PER_PAGE + 1}–{Math.min(destPage * ROWS_PER_PAGE, destList.length)} of {destList.length}</span>}
             </div>
-            <button type="button" className={styles.addBtn} onClick={() => { setEditingDest(null); setDestForm({ name: '', account: '', type: 'Bank', ownerType: 'studio', studioId: studios[0]?.id || '', artistId: artists[0]?.id || '', isActive: true }); setShowDestForm(true); }}>+ Add</button>
+            <button type="button" className={styles.addBtn} onClick={() => { setEditingDest(null); setDestForm({ name: '', account: '', type: 'Bank', ownerType: 'studio', studioId: studios[0]?.id || '', artistId: artists[0]?.id || '', isActive: true }); setShowDestForm(true); }}>+ Add account</button>
           </div>
           {showDestForm && (
             <form onSubmit={saveDest} className={styles.destForm}>
               <label className={styles.destFormLabel}>
-                Bank name / display name *
-                <input value={destForm.name} onChange={(e) => setDestForm((f) => ({ ...f, name: e.target.value }))} placeholder="e.g. BCA, Mandiri" required />
+                Payment account name *
+                <input value={destForm.name} onChange={(e) => setDestForm((f) => ({ ...f, name: e.target.value }))} placeholder="e.g. BCA Studio, Dana Artist" required />
               </label>
               <label className={styles.destFormLabel}>
-                Bank account / reference
+                Account number / reference
                 <input value={destForm.account} onChange={(e) => setDestForm((f) => ({ ...f, account: e.target.value }))} placeholder="e.g. 1234567890" />
               </label>
               <label className={styles.destFormLabel}>
@@ -1440,10 +1462,10 @@ export function Studio() {
               )}
               <label className={styles.destFormCheck}>
                 <input type="checkbox" checked={destForm.isActive} onChange={(e) => setDestForm((f) => ({ ...f, isActive: e.target.checked }))} />
-                Active (shown in booking form)
+                Active (shown in booking form as a payment account)
               </label>
               <div className={styles.destFormActions}>
-                <button type="submit" className={styles.addBtn}>{editingDest ? 'Update' : 'Add'}</button>
+                <button type="submit" className={styles.addBtn}>{editingDest ? 'Update account' : 'Add account'}</button>
                 <button type="button" className={styles.smBtn} onClick={() => { setShowDestForm(false); setEditingDest(null); }}>Cancel</button>
               </div>
             </form>
@@ -1454,8 +1476,8 @@ export function Studio() {
                 <tr>
                   <th>No.</th>
                   <th>ID</th>
-                  <th>Bank name</th>
-                  <th>Bank account</th>
+                  <th>Payment account</th>
+                  <th>Account number</th>
                   <th>Type</th>
                   <th>Owner</th>
                   <th>Status</th>
@@ -1477,7 +1499,14 @@ export function Studio() {
                         <td className={styles.cellEmphasis}>{d.name || '—'}</td>
                         <td>{d.account || '—'}</td>
                         <td>{d.type || '—'}</td>
-                        <td>{ownerTypeLabel(d.ownerType)} · {d.ownerType === 'studio' ? d.studio?.name || '—' : d.artist?.name || '—'}</td>
+                        <td>
+                          <span className={`${styles.ownerTag} ${d.ownerType === 'studio' ? styles.ownerTagStudio : styles.ownerTagArtist}`}>
+                            {ownerTypeLabel(d.ownerType)}
+                          </span>
+                          <span className={styles.ownerTagName}>
+                            {d.ownerType === 'studio' ? d.studio?.name || '—' : d.artist?.name || '—'}
+                          </span>
+                        </td>
                         <td>{d.isActive ? 'Active' : 'Inactive'}</td>
                         <td>
                           <button type="button" onClick={() => { setEditingDest(d); setDestForm({ name: d.name || '', account: d.account || '', type: d.type || 'Bank', ownerType: d.ownerType || 'studio', studioId: d.studioId || '', artistId: d.artistId || '', isActive: d.isActive !== false }); setShowDestForm(true); }} className={styles.smBtn}>Edit</button>
