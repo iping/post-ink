@@ -5,6 +5,7 @@ import {
   decorateBookingFinancials,
   syncBookingReceivableCache,
 } from '../utils/booking-finance.js';
+import { getStudioId } from '../middleware/auth.js';
 
 const prisma = new PrismaClient();
 export const bookingsRouter = Router();
@@ -39,14 +40,15 @@ async function promoteLeadCustomer(tx, customerId) {
   }
 }
 
-// GET /api/bookings — list all (with artist, customer). Default sort: latest first.
+// GET /api/bookings — list (scoped by studio)
 bookingsRouter.get('/', async (req, res) => {
   try {
-    const { status, artistId, studioId, customerId, from, to, sort } = req.query;
-    const where = {};
+    const effectiveStudioId = getStudioId(req);
+    if (!effectiveStudioId) return res.status(400).json({ error: 'studioId required' });
+    const { status, artistId, customerId, from, to, sort } = req.query;
+    const where = { studioId: effectiveStudioId };
     if (status) where.status = status;
     if (artistId) where.artistId = artistId;
-    if (studioId) where.studioId = studioId;
     if (customerId) where.customerId = customerId;
     if (from || to) {
       where.date = {};
@@ -90,8 +92,10 @@ bookingsRouter.get('/', async (req, res) => {
 // GET /api/bookings/:id
 bookingsRouter.get('/:id', async (req, res) => {
   try {
-    const booking = await prisma.booking.findUnique({
-      where: { id: req.params.id },
+    const effectiveStudioId = getStudioId(req);
+    if (!effectiveStudioId) return res.status(400).json({ error: 'studioId required' });
+    const booking = await prisma.booking.findFirst({
+      where: { id: req.params.id, studioId: effectiveStudioId },
       include: {
         artist: true,
         customer: true,
@@ -116,7 +120,9 @@ bookingsRouter.get('/:id', async (req, res) => {
 // POST /api/bookings
 bookingsRouter.post('/', async (req, res) => {
   try {
-    const { artistId, customerId, studioId, date, startTime, endTime, notes, totalAmount, placement, preference, pricingType, projectName } = req.body;
+    const effectiveStudioId = getStudioId(req);
+    if (!effectiveStudioId) return res.status(400).json({ error: 'studioId required' });
+    const { artistId, customerId, date, startTime, endTime, notes, totalAmount, placement, preference, pricingType, projectName } = req.body;
     const shortCode = await ensureUniqueShortCode();
     const normalizedPricingType = pricingType === 'fixed' || pricingType === 'hourly' ? pricingType : null;
     const numericTotalAmount = totalAmount != null ? Number(totalAmount) : null;
@@ -124,7 +130,7 @@ bookingsRouter.post('/', async (req, res) => {
       shortCode,
       artistId,
       customerId: customerId || null,
-      studioId: studioId || null,
+      studioId: effectiveStudioId,
       date,
       startTime: startTime || '09:00',
       endTime: endTime || '17:00',
@@ -179,11 +185,16 @@ bookingsRouter.post('/', async (req, res) => {
 // PATCH /api/bookings/:id
 bookingsRouter.patch('/:id', async (req, res) => {
   try {
+    const effectiveStudioId = getStudioId(req);
+    if (!effectiveStudioId) return res.status(400).json({ error: 'studioId required' });
+    const existing = await prisma.booking.findFirst({ where: { id: req.params.id, studioId: effectiveStudioId } });
+    if (!existing) return res.status(404).json({ error: 'Booking not found' });
     const body = req.body;
     const data = {};
     if (body.artistId != null) data.artistId = body.artistId;
     if (body.customerId !== undefined) data.customerId = body.customerId || null;
-    if (body.studioId !== undefined) data.studioId = body.studioId || null;
+    // studio user cannot change studioId; super_admin could allow via body - keep same studio for simplicity
+    if (body.studioId !== undefined && body.studioId !== effectiveStudioId) return res.status(403).json({ error: 'Cannot change booking studio' });
     if (body.date != null) data.date = body.date;
     if (body.startTime != null) data.startTime = body.startTime;
     if (body.endTime != null) data.endTime = body.endTime;
@@ -224,6 +235,10 @@ bookingsRouter.patch('/:id', async (req, res) => {
 // DELETE /api/bookings/:id
 bookingsRouter.delete('/:id', async (req, res) => {
   try {
+    const effectiveStudioId = getStudioId(req);
+    if (!effectiveStudioId) return res.status(400).json({ error: 'studioId required' });
+    const existing = await prisma.booking.findFirst({ where: { id: req.params.id, studioId: effectiveStudioId } });
+    if (!existing) return res.status(404).json({ error: 'Booking not found' });
     await prisma.booking.delete({ where: { id: req.params.id } });
     res.status(204).end();
   } catch (e) {

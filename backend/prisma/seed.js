@@ -93,247 +93,64 @@ async function main() {
   await prisma.studioCommission.deleteMany({});
   await prisma.artistAvailability.deleteMany({});
   await prisma.tattooArtist.deleteMany({});
+  await prisma.studioCustomer.deleteMany({});
   await prisma.customer.deleteMany({});
   await prisma.tattooStudio.deleteMany({});
   await prisma.speciality.deleteMany({});
   await prisma.paymentDestination.deleteMany({});
   await prisma.user.deleteMany({});
 
-  // ─── Platform users (login to management) ───
-  const adminHash = await bcrypt.hash('admin123', await bcrypt.genSalt(10));
-  await prisma.user.create({
-    data: {
-      email: 'admin@post.ink',
-      passwordHash: adminHash,
-      name: 'Admin',
-      role: 'admin',
-    },
-  });
-
-  // ─── Specialities (master list) ───
-  const specialityNames = [
-    'Fine Line', 'Botanical', 'Minimalist', 'American Traditional', 'Neo-Traditional',
-    'Japanese Irezumi', 'Black & Grey Realism', 'Geometric', 'Dotwork', 'Sacred Geometry',
-    'Watercolor', 'Illustrative', 'Color Realism', 'Blackwork', 'Tribal', 'Polynesian',
-    'Ornamental', 'Lettering', 'Cover-up', 'Portrait', 'Surrealism', 'Trash Polka',
-  ];
-  for (const name of specialityNames) {
-    await prisma.speciality.create({ data: { name } });
-  }
-
-  // ─── 10 Tattoo Artists ───
-  const artists = [
-    {
-      name: 'Maya Chen',
-      shortDescription: 'Award-winning artist known for intricate fine-line botanicals and delicate geometric patterns. Her work blends East Asian calligraphy influences with modern minimalism.',
-      experiences: '8 years',
-      speciality: 'Fine Line, Botanical, Minimalist',
-      rate: 750000,
-      photos: JSON.stringify([img.maya.profile, img.maya.profile2]),
-      portfolio: JSON.stringify([img.maya.work1, img.maya.work2, img.maya.work3]),
-    },
-    {
-      name: 'Jake Rivera',
-      shortDescription: 'Old-school meets new-school. Jake brings bold traditional Americana to life with vibrant saturated colors and thick confident lines. Featured in Inked Magazine.',
-      experiences: '12 years',
-      speciality: 'American Traditional, Neo-Traditional',
-      rate: 1000000,
-      photos: JSON.stringify([img.jake.profile]),
-      portfolio: JSON.stringify([img.jake.work1, img.jake.work2, img.jake.work3, img.jake.work4]),
-    },
-    {
-      name: 'Luna Park',
-      shortDescription: 'Specializing in large-scale Japanese irezumi and photorealistic black & grey portraits. Every piece is custom-designed through close client collaboration.',
-      experiences: '6 years',
-      speciality: 'Japanese Irezumi, Black & Grey Realism',
-      rate: 850000,
-      photos: JSON.stringify([img.luna.profile, img.luna.profile2]),
-      portfolio: JSON.stringify([img.luna.work1, img.luna.work2]),
-    },
-    {
-      name: 'Riko Tanaka',
-      shortDescription: 'Geometric and dotwork specialist from Osaka. Riko creates hypnotic sacred geometry pieces, mandalas, and ornamental designs using precision hand-poke and machine techniques.',
-      experiences: '10 years',
-      speciality: 'Geometric, Dotwork, Sacred Geometry, Ornamental',
-      rate: 900000,
-      photos: JSON.stringify([img.riko.profile, img.riko.profile2]),
-      portfolio: JSON.stringify([img.riko.work1, img.riko.work2, img.riko.work3]),
-    },
-    {
-      name: 'Nina Sari',
-      shortDescription: 'Watercolor and illustrative tattoo artist based in Bali. Nina\'s signature style combines soft washes of color with bold linework, creating pieces that look like paintings on skin.',
-      experiences: '5 years',
-      speciality: 'Watercolor, Illustrative, Color Realism',
-      rate: 650000,
-      photos: JSON.stringify([img.nina.profile]),
-      portfolio: JSON.stringify([img.nina.work1, img.nina.work2, img.nina.work3]),
-    },
-    {
-      name: 'Dimas Prasetyo',
-      shortDescription: 'Blackwork and tribal fusion artist. Dimas draws from Polynesian, Dayak, and Mentawai tribal traditions to create bold contemporary pieces rooted in Indonesian heritage.',
-      experiences: '15 years',
-      speciality: 'Blackwork, Tribal, Polynesian, Cover-up',
-      rate: 1200000,
-      photos: JSON.stringify([img.dimas.profile, img.dimas.profile2]),
-      portfolio: JSON.stringify([img.dimas.work1, img.dimas.work2, img.dimas.work3, img.dimas.work4]),
-    },
-    {
-      name: 'Arief Gunawan',
-      shortDescription: 'Photorealistic portrait specialist with a background in fine arts. Arief transforms photographs into breathtaking skin art, from celebrity likenesses to beloved family members and pets.',
-      experiences: '9 years',
-      speciality: 'Portrait, Realism, Black & Grey, Surrealism',
-      rate: 1100000,
-      photos: JSON.stringify([img.arief.profile, img.arief.profile2]),
-      portfolio: JSON.stringify([img.arief.work1, img.arief.work2, img.arief.work3]),
-    },
-    {
-      name: 'Karin Wolff',
-      shortDescription: 'Berlin-trained artist who merges European illustration with Southeast Asian motifs. Known for intricate floral sleeves, whimsical animal pieces, and bold color palettes that pop.',
-      experiences: '7 years',
-      speciality: 'Illustrative, Floral, Color Realism, Neo-Traditional',
-      rate: 800000,
-      photos: JSON.stringify([img.karin.profile]),
-      portfolio: JSON.stringify([img.karin.work1, img.karin.work2, img.karin.work3, img.karin.work4]),
-    },
-    {
-      name: 'Hendra Kusuma',
-      shortDescription: 'Lettering and script master. From elegant calligraphy to street-style graffiti lettering, Hendra crafts custom typography tattoos that tell stories through words and flourishes.',
-      experiences: '11 years',
-      speciality: 'Lettering, Script, Chicano, Calligraphy',
-      rate: 700000,
-      photos: JSON.stringify([img.hendra.profile, img.hendra.profile2]),
-      portfolio: JSON.stringify([img.hendra.work1, img.hendra.work2, img.hendra.work3]),
-      isActive: false,
-    },
-    {
-      name: 'Siska Maharani',
-      shortDescription: 'Trash Polka and abstract expressionist. Siska combines chaotic brushstrokes, newspaper clippings, and photorealism into raw, emotional compositions that defy convention.',
-      experiences: '4 years',
-      speciality: 'Trash Polka, Abstract, Surrealism, Mixed Media',
-      rate: 600000,
-      photos: JSON.stringify([img.siska.profile, img.siska.profile2]),
-      portfolio: JSON.stringify([img.siska.work1, img.siska.work2, img.siska.work3, img.siska.work4]),
-      isActive: false,
-    },
-  ];
-
-  // 1 slot = 1 hour, 9am to 9pm (12 slots per day)
-  const ONE_HOUR_SLOTS = [];
-  for (let h = 9; h < 21; h++) {
-    const start = `${String(h).padStart(2, '0')}:00`;
-    const end = `${String(h + 1).padStart(2, '0')}:00`;
-    ONE_HOUR_SLOTS.push({ start, end });
-  }
-
-  // Per-artist: off days (no slots), booked days (all 12 slots unavailable), partial days (first 4 slots unavailable)
-  const schedules = [
-    { offDays: [0, 3], bookedDays: [1, 4, 8, 11], partialDays: [2, 5, 9, 12] },
-    { offDays: [0, 1], bookedDays: [2, 6, 10], partialDays: [3, 7, 13] },
-    { offDays: [0, 5], bookedDays: [1, 3, 7, 9, 12], partialDays: [4, 6, 10] },
-    { offDays: [0, 6], bookedDays: [2, 5, 9, 14, 18], partialDays: [1, 6, 11, 15] },
-    { offDays: [0, 1], bookedDays: [3, 7, 10, 16], partialDays: [2, 8, 13, 17] },
-    { offDays: [0], bookedDays: [1, 4, 8, 11, 15, 19], partialDays: [2, 5, 9, 13, 16, 20] },
-    { offDays: [0, 6], bookedDays: [1, 5, 10, 14], partialDays: [3, 7, 12, 16] },
-    { offDays: [0, 1], bookedDays: [2, 6, 9, 13], partialDays: [4, 8, 11, 15] },
-    { offDays: [0, 3], bookedDays: [1, 5, 8, 12, 17], partialDays: [2, 6, 10, 14, 18] },
-    { offDays: [0, 1], bookedDays: [3, 7, 11, 15], partialDays: [2, 5, 9, 13, 16] },
-  ];
-
-  const createdArtists = [];
-  for (let ai = 0; ai < artists.length; ai++) {
-    const artist = await prisma.tattooArtist.create({ data: artists[ai] });
-    createdArtists.push(artist);
-    const sched = schedules[ai];
-
-    const today = new Date();
-    for (let d = 0; d < 21; d++) {
-      const date = new Date(today);
-      date.setDate(date.getDate() + d);
-      const day = date.getDay();
-      if (sched.offDays.includes(day)) continue;
-
-      const dateStr = date.toISOString().slice(0, 10);
-      const isFullyBooked = sched.bookedDays.includes(d);
-      const isPartial = sched.partialDays.includes(d);
-
-      for (let si = 0; si < ONE_HOUR_SLOTS.length; si++) {
-        const slot = ONE_HOUR_SLOTS[si];
-        let available = true;
-        if (isFullyBooked) available = false;
-        else if (isPartial && si < 4) available = false; // first 4 slots (9am–1pm) unavailable on partial days
-
-        await prisma.artistAvailability.create({
-          data: { artistId: artist.id, date: dateStr, startTime: slot.start, endTime: slot.end, isAvailable: available },
-        });
-      }
-    }
-  }
-
-  // ─── 3 Studios ───
+  // ─── Studios first (tenants) ───
   const studios = await Promise.all([
     prisma.tattooStudio.create({ data: { name: 'Ink Haven Studio', address: 'Jl. Kemang Raya No. 45, Jakarta Selatan' } }),
     prisma.tattooStudio.create({ data: { name: 'Black Lotus Tattoo', address: 'Jl. Petitenget No. 12, Seminyak, Bali' } }),
     prisma.tattooStudio.create({ data: { name: 'Sacred Skin Collective', address: 'Jl. Braga No. 88, Bandung' } }),
   ]);
+  const firstStudioId = studios[0].id;
 
-  const studioDestinations = {};
-  for (let i = 0; i < studios.length; i++) {
-    const studio = studios[i];
-    studioDestinations[studio.id] = await Promise.all([
-      prisma.paymentDestination.create({
-        data: {
-          name: `${studio.name} BCA`,
-          account: `BCA-${String(i + 1).padStart(4, '0')}123456`,
-          type: 'Bank',
-          ownerType: 'studio',
-          studioId: studio.id,
-          isActive: true,
-        },
-      }),
-      prisma.paymentDestination.create({
-        data: {
-          name: `${studio.name} Cash`,
-          account: null,
-          type: 'Cash',
-          ownerType: 'studio',
-          studioId: studio.id,
-          isActive: true,
-        },
-      }),
-    ]);
+  // ─── Platform users: 1 super_admin (no studio), 1 admin + staff per studio (studio column complete) ───
+  const adminHash = await bcrypt.hash('admin123', await bcrypt.genSalt(10));
+  await prisma.user.create({
+    data: {
+      email: 'superadmin@post.ink',
+      passwordHash: adminHash,
+      name: 'Super Admin',
+      role: 'super_admin',
+    },
+  });
+  await prisma.user.create({
+    data: {
+      email: 'admin@post.ink',
+      passwordHash: adminHash,
+      name: 'Studio Admin',
+      role: 'admin',
+      studioId: firstStudioId,
+    },
+  });
+  await prisma.user.create({
+    data: { email: 'staff@post.ink', passwordHash: adminHash, name: 'Staff Ink Haven', role: 'staff', studioId: firstStudioId },
+  });
+  await prisma.user.create({
+    data: { email: 'staff2@post.ink', passwordHash: adminHash, name: 'Reception Ink Haven', role: 'staff', studioId: firstStudioId },
+  });
+  for (let i = 1; i < studios.length; i++) {
+    await prisma.user.create({
+      data: {
+        email: `admin${i + 1}@post.ink`,
+        passwordHash: adminHash,
+        name: `Admin ${studios[i].name}`,
+        role: 'admin',
+        studioId: studios[i].id,
+      },
+    });
+    await prisma.user.create({
+      data: { email: `staff${i + 2}@post.ink`, passwordHash: adminHash, name: `Staff ${studios[i].name}`, role: 'staff', studioId: studios[i].id },
+    });
   }
 
-  const artistDestinations = {};
-  for (let i = 0; i < createdArtists.length; i++) {
-    const artist = createdArtists[i];
-    artistDestinations[artist.id] = await Promise.all([
-      prisma.paymentDestination.create({
-        data: {
-          name: `${artist.name} Mandiri`,
-          account: `ART-${String(i + 1).padStart(4, '0')}778899`,
-          type: 'Bank',
-          ownerType: 'artist',
-          artistId: artist.id,
-          isActive: true,
-        },
-      }),
-      prisma.paymentDestination.create({
-        data: {
-          name: `${artist.name} Cash`,
-          account: null,
-          type: 'Cash',
-          ownerType: 'artist',
-          artistId: artist.id,
-          isActive: true,
-        },
-      }),
-    ]);
-  }
-
-  // 6-digit numeric IDs for Customer, Project, Session (schema requires app-set id)
   const usedNumericIds = { customer: new Set(), project: new Set(), session: new Set() };
   function genNumericId(model) {
-    for (let attempt = 0; attempt < 100; attempt++) {
+    for (let attempt = 0; attempt < 200; attempt++) {
       const id = String(100000 + Math.floor(Math.random() * 900000));
       if (!usedNumericIds[model].has(id)) {
         usedNumericIds[model].add(id);
@@ -342,38 +159,6 @@ async function main() {
     }
     throw new Error(`Could not generate unique 6-digit id for ${model}`);
   }
-
-  // ─── Customers + leads ───
-  const customerData = [
-    { name: 'Andi Pratama', email: 'andi@example.com', phone: '+62 812-3456-7890' },
-    { name: 'Sari Dewi', email: 'sari@example.com', phone: '+62 813-9876-5432' },
-    { name: 'Budi Santoso', email: 'budi@example.com', phone: '+62 811-2233-4455' },
-    { name: 'Rina Wijaya', email: 'rina@example.com', phone: '+62 856-7788-9900' },
-    { name: 'Fajar Kurniawan', email: 'fajar@example.com', phone: '+62 878-1122-3344' },
-    { name: 'Mela Putri', email: 'mela@example.com', phone: '+62 821-5566-7788' },
-    { name: 'Doni Hermawan', email: 'doni@example.com', phone: '+62 852-9900-1122' },
-    { name: 'Yuni Lestari', email: 'yuni@example.com', phone: '+62 819-3344-5566' },
-    { name: 'Tommy Adriansyah', email: 'tommy@example.com', phone: '+62 815-6677-8899' },
-    { name: 'Dewi Anggraini', email: 'dewi.a@example.com', phone: '+62 838-0011-2233' },
-    { name: 'Rizky Fadillah', email: 'rizky@example.com', phone: '+62 857-4455-6677' },
-    { name: 'Ayu Puspita', email: 'ayu@example.com', phone: '+62 822-7788-9900' },
-    { name: 'Kevin Wijaya', email: 'kevin@example.com', phone: '+62 812-1100-2233' },
-    { name: 'Nadia Rahmawati', email: 'nadia@example.com', phone: '+62 831-3344-5566' },
-    { name: 'Oscar Setiawan', email: 'oscar@example.com', phone: '+62 878-6677-8899' },
-    { name: 'Rani Kusuma', email: 'rani.lead@example.com', phone: '+62 813-4455-6677', type: 'lead', leadSource: 'instagram' },
-    { name: 'Tomi Saputra', email: null, phone: '+62 822-6677-8899', type: 'lead', leadSource: 'whatsapp' },
-    { name: 'Vera Lestari', email: 'vera.lead@example.com', phone: '+62 857-9988-7766', type: 'lead', leadSource: 'artist', referredArtistId: createdArtists[0].id },
-    { name: 'Bagas Mahendra', email: 'bagas.lead@example.com', phone: null, type: 'lead', leadSource: 'website' },
-    { name: 'Clara Adisty', email: 'clara.lead@example.com', phone: '+62 813-2200-1144', type: 'lead', leadSource: 'tiktok' },
-    { name: 'Dian Puspa', email: null, phone: '+62 878-4400-6611', type: 'lead', leadSource: 'walkin' },
-    { name: 'Eko Prabowo', email: 'eko.prospect@example.com', phone: '+62 852-7111-8899', type: 'lead', leadSource: 'artist', referredArtistId: createdArtists[2].id },
-    { name: 'Fina Maharani', email: 'fina.dm@example.com', phone: null, type: 'lead', leadSource: 'instagram' },
-    { name: 'Galih Saptono', email: null, phone: '+62 821-3900-5522', type: 'lead', leadSource: 'website' },
-    { name: 'Hana Cahyani', email: 'hana.cahyani@example.com', phone: '+62 812-6633-2244', type: 'lead', leadSource: 'artist', referredArtistId: createdArtists[4].id },
-  ];
-  const customers = await Promise.all(
-    customerData.map((c) => prisma.customer.create({ data: { id: genNumericId('customer'), ...c } })),
-  );
 
   const futureDate = (daysAhead) => {
     const d = new Date();
@@ -387,341 +172,248 @@ async function main() {
   };
   const SHORT_CODE_CHARS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   const usedShortCodes = new Set();
-  function generateShortCode() {
-    let s = '';
-    for (let i = 0; i < 5; i++) s += SHORT_CODE_CHARS[Math.floor(Math.random() * 36)];
-    return s;
-  }
   function uniqueShortCode() {
-    for (let attempt = 0; attempt < 50; attempt++) {
-      const code = generateShortCode();
-      if (!usedShortCodes.has(code)) {
-        usedShortCodes.add(code);
-        return code;
+    for (let attempt = 0; attempt < 100; attempt++) {
+      let s = '';
+      for (let i = 0; i < 5; i++) s += SHORT_CODE_CHARS[Math.floor(Math.random() * 36)];
+      if (!usedShortCodes.has(s)) {
+        usedShortCodes.add(s);
+        return s;
       }
     }
-    throw new Error('Could not generate unique short code in seed');
+    throw new Error('Could not generate unique short code');
   }
 
-  // ─── Active Bookings: Paid = has payment evidence; Unpaid = not yet paid ───
-  const activeBookings = [
-    { artistIdx: 0, customerIdx: 0, studioIdx: 0, days: 1, start: '10:00', end: '12:00', hasPayment: true, amount: 5000000, placement: 'Forearm', preference: 'Reference: wildflower sleeve from Pinterest. Want similar fine-line style, pastel tones.', notes: 'Half sleeve botanical — wildflowers. Customer sent reference images.' },
-    { artistIdx: 1, customerIdx: 1, studioIdx: 0, days: 1, start: '14:00', end: '17:00', hasPayment: false, amount: 3500000, placement: 'Chest', preference: 'Eagle and roses, American traditional. Reference photo attached.', notes: 'Traditional eagle & roses. Agreed on design in consultation.' },
-    { artistIdx: 2, customerIdx: 8, studioIdx: 0, days: 2, start: '09:00', end: '12:30', hasPayment: true, amount: 4800000, placement: 'Back', preference: 'Japanese dragon with waves. Full back, irezumi style.', notes: 'Japanese dragon back piece — first of 3 sessions. Outline today.' },
-    { artistIdx: 3, customerIdx: 9, studioIdx: 2, days: 3, start: '10:00', end: '13:00', hasPayment: false, amount: 3200000, placement: 'Forearm', preference: 'Geometric band, fibonacci spiral. Black only.', notes: 'Geometric band with fibonacci spiral. Single session.' },
-    { artistIdx: 4, customerIdx: 10, studioIdx: 1, days: 2, start: '11:00', end: '14:00', hasPayment: true, amount: 2800000, placement: 'Upper arm', preference: 'Watercolor phoenix, vibrant reds and oranges.', notes: 'Watercolor phoenix. Deposit received via BCA.' },
-    { artistIdx: 5, customerIdx: 11, studioIdx: 0, days: 4, start: '09:00', end: '14:00', hasPayment: true, amount: 9500000, placement: 'Arm', preference: 'Polynesian + Dayak motifs. Full sleeve.', notes: 'Full sleeve Polynesian tribal — session 2 of 4. Shading block.' },
-    { artistIdx: 6, customerIdx: 12, studioIdx: 2, days: 3, start: '09:00', end: '13:00', hasPayment: false, amount: 5500000, placement: 'Upper arm', preference: 'Photorealistic portrait — will send high-res photo.', notes: 'Photorealistic portrait. Customer will send high-res photo.' },
-    { artistIdx: 7, customerIdx: 13, studioIdx: 1, days: 5, start: '10:00', end: '14:00', hasPayment: true, amount: 4200000, placement: 'Thigh', preference: 'Neo-trad fox with floral wreath. Design approved.', notes: 'Neo-traditional fox with floral wreath. Design approved.' },
-    { artistIdx: 8, customerIdx: 14, studioIdx: 0, days: 4, start: '10:00', end: '13:00', hasPayment: false, amount: 3000000, placement: 'Forearm', preference: 'Script "Strength" with ornamental frame. Font: Old English.', notes: 'Script "Strength" with ornamental frame. Font chosen.' },
-    { artistIdx: 9, customerIdx: 2, studioIdx: 2, days: 6, start: '11:00', end: '15:00', hasPayment: true, amount: 3800000, placement: 'Calf', preference: 'Trash Polka compass, red and black. Reference sent.', notes: 'Trash Polka compass with red splatter. Second session for color.' },
+  // ─── Per-studio counts: artists/customers/bookings/payment accounts (each studio gets unique data) ───
+  const studioCounts = [5, 7, 10];
+  const leadsPerStudio = 3; // each studio gets this many leads (type=lead); the rest are customers
+  const leadSources = ['instagram', 'website', 'walkin', 'whatsapp'];
+  const allSpecialityNames = [
+    'Fine Line', 'Botanical', 'American Traditional', 'Japanese Irezumi', 'Blackwork',
+    'Neo-Traditional', 'Portrait', 'Geometric', 'Watercolor', 'Lettering',
+    'Dotwork', 'Tribal', 'Realism', 'Minimalist', 'Trash Polka', 'Script', 'Cover-up', 'Floral', 'Animal', 'Sacred Geometry',
+  ];
+  const artistPool = [
+    { name: 'Maya Chen', speciality: 'Fine Line, Botanical', rate: 750000, imgKey: 'maya' },
+    { name: 'Jake Rivera', speciality: 'American Traditional', rate: 1000000, imgKey: 'jake' },
+    { name: 'Luna Park', speciality: 'Japanese Irezumi', rate: 850000, imgKey: 'luna' },
+    { name: 'Riko Tanaka', speciality: 'Geometric, Dotwork', rate: 900000, imgKey: 'riko' },
+    { name: 'Nina Sari', speciality: 'Watercolor', rate: 650000, imgKey: 'nina' },
+    { name: 'Dimas Prasetyo', speciality: 'Blackwork, Tribal', rate: 1200000, imgKey: 'dimas' },
+    { name: 'Arief Gunawan', speciality: 'Portrait, Realism', rate: 1100000, imgKey: 'arief' },
+    { name: 'Karin Wolff', speciality: 'Neo-Traditional', rate: 800000, imgKey: 'karin' },
+    { name: 'Hendra Kusuma', speciality: 'Lettering, Script', rate: 700000, imgKey: 'hendra' },
+    { name: 'Siska Maharani', speciality: 'Trash Polka', rate: 600000, imgKey: 'siska' },
+    { name: 'Budi Artawan', speciality: 'Minimalist', rate: 550000, imgKey: 'maya' },
+    { name: 'Dewi Tattoo', speciality: 'Floral', rate: 720000, imgKey: 'nina' },
+    { name: 'Eko Inks', speciality: 'Realism', rate: 950000, imgKey: 'arief' },
+    { name: 'Fina Styles', speciality: 'Dotwork', rate: 880000, imgKey: 'riko' },
+    { name: 'Gilang Art', speciality: 'Tribal', rate: 780000, imgKey: 'dimas' },
+    { name: 'Hana Ink', speciality: 'Portrait', rate: 920000, imgKey: 'luna' },
+    { name: 'Ivan Flash', speciality: 'American Traditional', rate: 810000, imgKey: 'jake' },
+    { name: 'Julia Lines', speciality: 'Fine Line', rate: 690000, imgKey: 'karin' },
+    { name: 'Kevin Script', speciality: 'Lettering', rate: 660000, imgKey: 'hendra' },
+    { name: 'Lia Abstract', speciality: 'Abstract', rate: 620000, imgKey: 'siska' },
+    { name: 'Mario Bold', speciality: 'Blackwork', rate: 1100000, imgKey: 'dimas' },
+    { name: 'Nia Color', speciality: 'Color Realism', rate: 870000, imgKey: 'nina' },
+  ];
+  const customerPool = [
+    { name: 'Andi Pratama', email: 'andi1@gmail.com', phone: '+62 812-1000-001' },
+    { name: 'Sari Dewi', email: 'sari1@gmail.com', phone: '+62 813-1000-002' },
+    { name: 'Budi Santoso', email: 'budi1@gmail.com', phone: '+62 811-1000-003' },
+    { name: 'Rina Wijaya', email: 'rina1@gmail.com', phone: '+62 856-1000-004' },
+    { name: 'Fajar Kurniawan', email: 'fajar1@gmail.com', phone: '+62 878-1000-005' },
+    { name: 'Mela Putri', email: 'mela1@gmail.com', phone: '+62 821-1000-006' },
+    { name: 'Doni Hermawan', email: 'doni1@gmail.com', phone: '+62 852-1000-007' },
+    { name: 'Yuni Lestari', email: 'yuni1@gmail.com', phone: '+62 819-1000-008' },
+    { name: 'Tommy Adriansyah', email: 'tommy1@gmail.com', phone: '+62 815-1000-009' },
+    { name: 'Dewi Anggraini', email: 'dewi1@gmail.com', phone: '+62 838-1000-010' },
+    { name: 'Rizky Fadillah', email: 'rizky1@gmail.com', phone: '+62 857-1000-011' },
+    { name: 'Ayu Puspita', email: 'ayu1@gmail.com', phone: '+62 822-1000-012' },
+    { name: 'Kevin Wijaya', email: 'kevin1@gmail.com', phone: '+62 812-1000-013' },
+    { name: 'Nadia Rahmawati', email: 'nadia1@gmail.com', phone: '+62 831-1000-014' },
+    { name: 'Oscar Setiawan', email: 'oscar1@gmail.com', phone: '+62 878-1000-015' },
+    { name: 'Putri Maharani', email: 'putri1@gmail.com', phone: '+62 813-1000-016' },
+    { name: 'Bambang Susilo', email: 'bambang1@gmail.com', phone: '+62 822-1000-017' },
+    { name: 'Citra Dewi', email: 'citra1@gmail.com', phone: '+62 857-1000-018' },
+    { name: 'Dedi Kurniawan', email: 'dedi1@gmail.com', phone: '+62 819-1000-019' },
+    { name: 'Eka Saputra', email: 'eka1@gmail.com', phone: '+62 852-1000-020' },
+    { name: 'Fitri Handayani', email: 'fitri1@gmail.com', phone: '+62 811-1000-021' },
+    { name: 'Gita Permatasari', email: 'gita1@gmail.com', phone: '+62 838-1000-022' },
   ];
 
-  const createdActiveBookings = [];
-  for (const ab of activeBookings) {
-    const prefStr = ab.preference ? JSON.stringify({ text: ab.preference }) : null;
-    const depositAmount = Math.round(ab.amount * 0.3);
-    const booking = await prisma.booking.create({
-      data: {
-        shortCode: uniqueShortCode(),
-        artistId: createdArtists[ab.artistIdx].id,
-        customerId: customers[ab.customerIdx].id,
-        studioId: studios[ab.studioIdx].id,
-        date: futureDate(ab.days),
-        startTime: ab.start,
-        endTime: ab.end,
-        status: 'Unpaid',
-        pricingType: 'fixed',
-        totalAmount: ab.amount,
-        placement: ab.placement || null,
-        preference: prefStr,
-        notes: ab.notes,
-      },
-    });
-    createdActiveBookings.push(booking);
+  const today = new Date();
+  const studioArtists = [];
+  const studioCustomers = [];
+  const studioStudioBca = {};
+  const studioArtistDests = {};
+  let artistGlobalIdx = 0;
+  let customerGlobalIdx = 0;
 
-    if (ab.hasPayment) {
-      const studioAccount = studioDestinations[studios[ab.studioIdx].id][0];
-      await prisma.payment.create({
-        data: {
-          bookingId: booking.id,
-          paymentDestinationId: studioAccount.id,
-          amount: depositAmount,
-          currency: 'IDR',
-          method: studioAccount.type,
-          type: 'down_payment',
-          transferDestination: studioAccount.account,
-          receiverType: 'studio',
-          receiverStudioId: studios[ab.studioIdx].id,
-          status: 'completed',
-        },
-      });
+  for (let sIdx = 0; sIdx < studios.length; sIdx++) {
+    const studio = studios[sIdx];
+    const n = studioCounts[sIdx];
+    const shortStudioName = studio.name.replace(/\s+(Studio|Tattoo|Collective)$/i, '').trim();
+
+    for (let i = 0; i < n; i++) {
+      await prisma.speciality.create({ data: { studioId: studio.id, name: allSpecialityNames[(sIdx * 10 + i) % allSpecialityNames.length] } });
     }
-  }
 
-  // ─── Projects + Sessions (each project has min 1 session); names from booking context ───
-  // First active booking: one fixed project + first session
-  if (createdActiveBookings.length > 0) {
-    const b0 = createdActiveBookings[0];
-    const artist0 = createdArtists[activeBookings[0].artistIdx];
-    const customer0 = customers[activeBookings[0].customerIdx];
-    const month0 = b0.date ? new Date(b0.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '';
-    const projectName0 = [artist0.name.split(/\s+/).map((n) => n[0]).join(''), customer0.name, month0].filter(Boolean).join(' – ');
-    const p1 = await prisma.project.create({
-      data: {
-        id: genNumericId('project'),
-        bookingId: b0.id,
-        name: projectName0,
-        pricingType: 'fixed',
-        fixedAmount: b0.totalAmount ?? 5000000,
-        notes: 'Half sleeve botanical — agreed total. First session: outline and base shading.',
-      },
-    });
-    await prisma.session.create({
-      data: {
-        id: genNumericId('session'),
-        projectId: p1.id,
-        date: b0.date,
-        startTime: b0.startTime || '09:00',
-        endTime: b0.endTime || '17:00',
-        actualHours: 2,
-        notes: 'Outline and wildflower details. Client comfortable, no touch-ups needed.',
-      },
-    });
-  }
-  // Second active booking: hourly, 2 projects each with 1 session
-  if (createdActiveBookings.length > 1) {
-    const hourlyBooking = createdActiveBookings[1];
-    const artistForHourly = createdArtists[activeBookings[1].artistIdx];
-    const customerH = customers[activeBookings[1].customerIdx];
-    const rate = artistForHourly.rate ?? 500000;
-    const monthH = hourlyBooking.date ? new Date(hourlyBooking.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '';
-    const baseName = [artistForHourly.name.split(/\s+/).map((n) => n[0]).join(''), customerH.name, monthH].filter(Boolean).join(' – ');
-    await prisma.booking.update({
-      where: { id: hourlyBooking.id },
-      data: { pricingType: 'hourly', totalAmount: null },
-    });
-    const p2 = await prisma.project.create({
-      data: {
-        id: genNumericId('project'),
-        bookingId: hourlyBooking.id,
-        name: baseName + ' (Session 1)',
-        pricingType: 'hourly',
-        hourlyRate: rate,
-        agreedHours: 2,
-        notes: 'Traditional eagle — outline and black fill. Session 1 of 2.',
-      },
-    });
-    await prisma.session.create({
-      data: {
-        id: genNumericId('session'),
-        projectId: p2.id,
-        date: hourlyBooking.date,
-        startTime: hourlyBooking.startTime || '09:00',
-        endTime: hourlyBooking.endTime || '17:00',
-        actualHours: 2,
-        notes: 'Eagle outline completed. Next session: roses and color.',
-      },
-    });
-    const p3 = await prisma.project.create({
-      data: {
-        id: genNumericId('project'),
-        bookingId: hourlyBooking.id,
-        name: baseName + ' (Session 2)',
-        pricingType: 'hourly',
-        hourlyRate: rate,
-        agreedHours: 1.5,
-        notes: 'Roses and shading. Final session for this piece.',
-      },
-    });
-    await prisma.session.create({
-      data: {
-        id: genNumericId('session'),
-        projectId: p3.id,
-        date: hourlyBooking.date,
-        startTime: '14:00',
-        endTime: '17:00',
-        actualHours: 1.5,
-        notes: 'Roses and background shading. Client very happy.',
-      },
-    });
-  }
-
-  // ─── Cancelled Bookings ───
-  const cancelledBookings = [
-    { artistIdx: 1, customerIdx: 3, studioIdx: 0, daysAgo: 5, start: '14:00', end: '17:00', amount: 4000000, placement: 'Forearm', notes: 'Traditional anchor — customer rescheduled' },
-    { artistIdx: 4, customerIdx: 6, studioIdx: 1, daysAgo: 8, start: '11:00', end: '14:00', amount: 2500000, placement: 'Shoulder', notes: 'Watercolor butterfly — cancelled by customer' },
-    { artistIdx: 8, customerIdx: 10, studioIdx: 0, daysAgo: 12, start: '14:00', end: '17:00', amount: 2800000, placement: 'Forearm', notes: 'Chicano lettering — customer no-show' },
-  ];
-
-  for (const cb of cancelledBookings) {
-    const depositAmount = Math.round(cb.amount * 0.3);
-    const booking = await prisma.booking.create({
-      data: {
-        shortCode: uniqueShortCode(),
-        artistId: createdArtists[cb.artistIdx].id,
-        customerId: customers[cb.customerIdx].id,
-        studioId: studios[cb.studioIdx].id,
-        date: pastDate(cb.daysAgo),
-        startTime: cb.start,
-        endTime: cb.end,
-        status: 'Unpaid',
-        pricingType: 'fixed',
-        totalAmount: cb.amount,
-        placement: cb.placement || null,
-        notes: cb.notes,
-      },
-    });
-    // Refunded down payment for first cancelled
-    if (cb === cancelledBookings[0]) {
-      const studioAccount = studioDestinations[studios[cb.studioIdx].id][0];
-      await prisma.payment.create({
+    const artistsForStudio = [];
+    for (let i = 0; i < n; i++) {
+      const ap = artistPool[artistGlobalIdx % artistPool.length];
+      const imgRef = img[ap.imgKey] || img.maya;
+      const artist = await prisma.tattooArtist.create({
         data: {
-          bookingId: booking.id,
-          paymentDestinationId: studioAccount.id,
-          amount: 1200000,
-          currency: 'IDR',
-          method: studioAccount.type,
-          transferDestination: studioAccount.account,
-          receiverType: 'studio',
-          receiverStudioId: studios[cb.studioIdx].id,
-          type: 'down_payment',
-          status: 'refunded',
+          name: `${ap.name} (${studio.name})`,
+          shortDescription: `${ap.speciality} artist at ${studio.name}.`,
+          experiences: `${5 + (i % 8)} years`,
+          speciality: ap.speciality,
+          rate: ap.rate,
+          photos: JSON.stringify([imgRef.profile]),
+          portfolio: JSON.stringify([imgRef.work1, imgRef.work2]),
+          studioId: studio.id,
         },
       });
+      artistsForStudio.push(artist);
+      artistGlobalIdx++;
     }
-  }
+    studioArtists.push(artistsForStudio);
 
-  // ─── Completed Bookings with Reviews (spread across all 10 artists & 3 studios) ───
-  const completedBookings = [
-    { artistIdx: 0, customerIdx: 2, studioIdx: 0, daysAgo: 14, start: '09:00', end: '12:00', amount: 4500000, placement: 'Forearm', preference: 'Peony sleeve reference from Instagram. Fine-line, delicate.', notes: 'Delicate peony sleeve — inner forearm', rating: 5, comment: 'Maya is incredibly talented! The fine-line work is so precise and beautiful. She took the time to understand exactly what I wanted and the result exceeded my expectations.' },
-    { artistIdx: 0, customerIdx: 3, studioIdx: 0, daysAgo: 28, start: '13:00', end: '16:00', amount: 3800000, placement: 'Back', preference: 'Mandala with leaves and flowers.', notes: 'Geometric mandala with botanical elements', rating: 5, comment: 'Absolutely stunning work. Maya has such a steady hand and the level of detail is remarkable.' },
-    { artistIdx: 0, customerIdx: 4, studioIdx: 0, daysAgo: 45, start: '10:00', end: '13:00', amount: 5200000, placement: 'Ribs', preference: 'Wildflower bouquet, minimalist style.', notes: 'Minimalist wildflower bouquet — ribcage', rating: 4, comment: 'Beautiful work, very delicate and exactly the style I was looking for. The end result is perfect.' },
-    { artistIdx: 1, customerIdx: 0, studioIdx: 0, daysAgo: 7, start: '10:00', end: '14:00', amount: 6000000, notes: 'Traditional panther on thigh', rating: 5, comment: 'Jake is the GOAT of traditional tattooing. Bold lines, perfect color saturation. The panther looks like it\'s about to jump off my skin!' },
-    { artistIdx: 1, customerIdx: 5, studioIdx: 0, daysAgo: 21, start: '14:00', end: '18:00', amount: 7500000, notes: 'Neo-traditional rose and dagger — full forearm', rating: 4, comment: 'Really solid work. Jake knows his craft and the colors are vibrant.' },
-    { artistIdx: 1, customerIdx: 6, studioIdx: 0, daysAgo: 35, start: '11:00', end: '15:00', amount: 5500000, notes: 'American traditional eagle chest piece', rating: 5, comment: 'Incredible experience from start to finish. Jake\'s design was even better than what I had in mind.' },
-    { artistIdx: 2, customerIdx: 1, studioIdx: 0, daysAgo: 10, start: '09:00', end: '12:30', amount: 5000000, notes: 'Japanese koi fish half sleeve', rating: 5, comment: 'Luna\'s Japanese work is on another level. The flow of the koi with the water and waves is seamless.' },
-    { artistIdx: 2, customerIdx: 7, studioIdx: 0, daysAgo: 30, start: '14:00', end: '17:00', amount: 4200000, notes: 'Black and grey portrait of my dog', rating: 4, comment: 'The realism is amazing — it looks exactly like my dog! Luna captured every little detail.' },
-    { artistIdx: 3, customerIdx: 3, studioIdx: 2, daysAgo: 5, start: '10:00', end: '13:00', amount: 4000000, notes: 'Sacred geometry sleeve — upper arm', rating: 5, comment: 'Riko\'s precision is mind-blowing. Every line is perfectly straight, every dot perfectly placed.' },
-    { artistIdx: 3, customerIdx: 6, studioIdx: 2, daysAgo: 18, start: '14:00', end: '17:00', amount: 3500000, notes: 'Dotwork mandala on back', rating: 5, comment: 'The mandala is absolutely perfect. Riko spent hours getting every single dot just right.' },
-    { artistIdx: 4, customerIdx: 0, studioIdx: 1, daysAgo: 12, start: '11:00', end: '14:00', amount: 3200000, notes: 'Watercolor hummingbird on shoulder', rating: 4, comment: 'Nina\'s watercolor technique is beautiful. The colors blend so naturally.' },
-    { artistIdx: 4, customerIdx: 7, studioIdx: 1, daysAgo: 25, start: '15:00', end: '18:00', amount: 2800000, notes: 'Illustrative cat portrait with flowers', rating: 5, comment: 'I\'m in love with this tattoo! Nina perfectly captured my cat\'s personality with the illustrative style.' },
-    { artistIdx: 5, customerIdx: 2, studioIdx: 0, daysAgo: 3, start: '09:00', end: '14:00', amount: 8500000, notes: 'Polynesian tribal half sleeve with Dayak motifs', rating: 5, comment: 'Dimas is a master of tribal work. He incorporated both Polynesian and Dayak elements seamlessly.' },
-    { artistIdx: 5, customerIdx: 4, studioIdx: 0, daysAgo: 15, start: '13:00', end: '17:00', amount: 6000000, notes: 'Blackwork cover-up — old tattoo on forearm', rating: 5, comment: 'Dimas transformed my terrible old tattoo into something incredible. His cover-up skills are legendary.' },
-    { artistIdx: 5, customerIdx: 5, studioIdx: 0, daysAgo: 40, start: '10:00', end: '15:00', amount: 7200000, notes: 'Full back Mentawai tribal pattern', rating: 4, comment: 'Massive piece that took multiple sessions. Dimas was patient and the final result is powerful.' },
-    { artistIdx: 6, customerIdx: 8, studioIdx: 2, daysAgo: 6, start: '09:00', end: '13:00', amount: 6500000, notes: 'Photorealistic portrait of grandmother', rating: 5, comment: 'Arief captured my grandmother\'s smile perfectly. The detail in the eyes is extraordinary. I cried when I saw the result. A true master of realism.' },
-    { artistIdx: 6, customerIdx: 9, studioIdx: 2, daysAgo: 20, start: '13:00', end: '17:00', amount: 5800000, notes: 'Surrealist melting clock with eye', rating: 5, comment: 'Arief turned my Salvador Dali inspiration into something uniquely mine. The depth and shading are insane.' },
-    { artistIdx: 6, customerIdx: 14, studioIdx: 2, daysAgo: 42, start: '10:00', end: '14:00', amount: 7000000, notes: 'Black & grey lion portrait on chest', rating: 4, comment: 'The lion looks incredibly lifelike. Arief\'s shading technique creates amazing depth. Solid work.' },
-    { artistIdx: 7, customerIdx: 10, studioIdx: 1, daysAgo: 8, start: '10:00', end: '14:00', amount: 4500000, notes: 'Neo-traditional wolf with wildflower crown', rating: 5, comment: 'Karin\'s use of color is unlike anything I\'ve seen. The wolf looks majestic with the floral elements. Absolutely breathtaking!' },
-    { artistIdx: 7, customerIdx: 11, studioIdx: 1, daysAgo: 22, start: '14:00', end: '18:00', amount: 5000000, notes: 'Illustrative bird of paradise full sleeve', rating: 5, comment: 'Karin designed the most beautiful sleeve I could imagine. Every angle reveals new details. Worth flying to Bali for!' },
-    { artistIdx: 7, customerIdx: 13, studioIdx: 1, daysAgo: 38, start: '10:00', end: '13:00', amount: 3500000, notes: 'Colorful botanical wrist band', rating: 4, comment: 'The colors are vibrant and the design wraps my wrist perfectly. Karin has a great eye for placement.' },
-    { artistIdx: 8, customerIdx: 12, studioIdx: 0, daysAgo: 9, start: '10:00', end: '13:00', amount: 3000000, notes: 'Arabic calligraphy script on forearm', rating: 5, comment: 'Hendra\'s lettering is flawless. The Arabic script flows beautifully and the line weight variation is masterful.' },
-    { artistIdx: 8, customerIdx: 1, studioIdx: 0, daysAgo: 24, start: '14:00', end: '18:00', amount: 3800000, notes: 'Chicano-style "Family First" with roses', rating: 5, comment: 'The Chicano style lettering is authentic and clean. Hendra added roses and filigree that tied it all together. True artistry.' },
-    { artistIdx: 8, customerIdx: 4, studioIdx: 0, daysAgo: 50, start: '10:00', end: '14:00', amount: 4200000, notes: 'Full chest "Through Hell and Back" script', rating: 4, comment: 'Bold lettering that reads perfectly from every angle. Hendra took time to adjust sizing and spacing. Great results.' },
-    { artistIdx: 9, customerIdx: 3, studioIdx: 2, daysAgo: 4, start: '11:00', end: '15:00', amount: 3500000, notes: 'Trash Polka heart with geometric fragments', rating: 5, comment: 'Siska\'s Trash Polka is raw and emotional. The contrast between the realistic heart and the abstract splatter is powerful.' },
-    { artistIdx: 9, customerIdx: 5, studioIdx: 2, daysAgo: 16, start: '15:00', end: '19:00', amount: 4000000, notes: 'Abstract expressionist raven full back', rating: 4, comment: 'The raven looks both beautiful and chaotic — exactly what I wanted. Siska has a unique vision that stands out.' },
-    { artistIdx: 9, customerIdx: 14, studioIdx: 2, daysAgo: 32, start: '12:00', end: '16:00', amount: 3200000, notes: 'Mixed media compass with newspaper texture', rating: 5, comment: 'Unlike any tattoo I\'ve ever seen. The newspaper texture and red accents make it look like a living collage on my arm.' },
-  ];
-
-  for (let idx = 0; idx < completedBookings.length; idx++) {
-    const cb = completedBookings[idx];
-    const preference = cb.preference ? JSON.stringify({ text: cb.preference }) : null;
-    const depositAmount = Math.round(cb.amount * 0.3);
-    const bookingFeeReceiverType = idx % 2 === 0 ? 'studio' : 'artist';
-    const balanceReceiverType = bookingFeeReceiverType === 'studio' ? 'artist' : 'studio';
-    const studioAccount = studioDestinations[studios[cb.studioIdx].id][idx % studioDestinations[studios[cb.studioIdx].id].length];
-    const artistAccount = artistDestinations[createdArtists[cb.artistIdx].id][idx % artistDestinations[createdArtists[cb.artistIdx].id].length];
-    const booking = await prisma.booking.create({
-      data: {
-        shortCode: uniqueShortCode(),
-        artistId: createdArtists[cb.artistIdx].id,
-        customerId: customers[cb.customerIdx].id,
-        studioId: studios[cb.studioIdx].id,
-        date: pastDate(cb.daysAgo),
-        startTime: cb.start,
-        endTime: cb.end,
-        status: 'Paid',
-        pricingType: 'fixed',
-        totalAmount: cb.amount,
-        placement: cb.placement || null,
-        preference,
-        notes: cb.notes,
-      },
-    });
-
-    // Full payment for completed bookings (some with split down_payment + final)
-    if (idx % 3 === 0) {
-      const dp = Math.round(cb.amount * 0.3);
-      await prisma.payment.create({
-        data: {
-          bookingId: booking.id,
-          paymentDestinationId: bookingFeeReceiverType === 'studio' ? studioAccount.id : artistAccount.id,
-          amount: dp,
-          currency: 'IDR',
-          method: bookingFeeReceiverType === 'studio' ? studioAccount.type : artistAccount.type,
-          type: 'down_payment',
-          transferDestination: bookingFeeReceiverType === 'studio' ? studioAccount.account : artistAccount.account,
-          receiverType: bookingFeeReceiverType,
-          receiverStudioId: bookingFeeReceiverType === 'studio' ? studios[cb.studioIdx].id : null,
-          receiverArtistId: bookingFeeReceiverType === 'artist' ? createdArtists[cb.artistIdx].id : null,
-          status: 'completed',
-        },
-      });
-      await prisma.payment.create({
-        data: {
-          bookingId: booking.id,
-          paymentDestinationId: balanceReceiverType === 'studio' ? studioAccount.id : artistAccount.id,
-          amount: cb.amount - dp,
-          currency: 'IDR',
-          method: balanceReceiverType === 'studio' ? studioAccount.type : artistAccount.type,
-          transferDestination: balanceReceiverType === 'studio' ? studioAccount.account : artistAccount.account,
-          type: 'final',
-          receiverType: balanceReceiverType,
-          receiverStudioId: balanceReceiverType === 'studio' ? studios[cb.studioIdx].id : null,
-          receiverArtistId: balanceReceiverType === 'artist' ? createdArtists[cb.artistIdx].id : null,
-          status: 'completed',
-        },
-      });
-    } else {
-      await prisma.payment.create({
-        data: {
-          bookingId: booking.id,
-          paymentDestinationId: balanceReceiverType === 'studio' ? studioAccount.id : artistAccount.id,
-          amount: cb.amount,
-          currency: 'IDR',
-          method: balanceReceiverType === 'studio' ? studioAccount.type : artistAccount.type,
-          transferDestination: balanceReceiverType === 'studio' ? studioAccount.account : artistAccount.account,
-          type: 'final',
-          receiverType: balanceReceiverType,
-          receiverStudioId: balanceReceiverType === 'studio' ? studios[cb.studioIdx].id : null,
-          receiverArtistId: balanceReceiverType === 'artist' ? createdArtists[cb.artistIdx].id : null,
-          status: 'completed',
-        },
-      });
+    for (const artist of artistsForStudio) {
+      for (let d = 0; d < 5; d++) {
+        const date = new Date(today);
+        date.setDate(date.getDate() + d);
+        const dateStr = date.toISOString().slice(0, 10);
+        for (const h of [10, 14]) {
+          await prisma.artistAvailability.create({
+            data: { artistId: artist.id, date: dateStr, startTime: `${String(h).padStart(2, '0')}:00`, endTime: `${String(h + 2).padStart(2, '0')}:00`, isAvailable: true },
+          });
+        }
+      }
     }
-  }
 
-  // ─── Commission agreements (across studios) ───
-  const commissionRates = [20, 25, 20, 22, 18, 25, 23, 20, 18, 15];
-  for (let i = 0; i < createdArtists.length; i++) {
-    // Each artist has commission with their primary studio
-    const primaryStudio = i < 6 ? 0 : i < 8 ? 1 : 2;
-    await prisma.studioCommission.create({
-      data: { studioId: studios[primaryStudio].id, artistId: createdArtists[i].id, commissionPercent: commissionRates[i] },
+    const studioBcaDest = await prisma.paymentDestination.create({
+      data: { name: `${shortStudioName} BCA`, account: `BCA-${String(sIdx + 1).padStart(4, '0')}123456`, type: 'Bank', ownerType: 'studio', studioId: studio.id, isActive: true },
     });
-    // Some artists also work at a second studio
-    if (i % 3 === 0 && primaryStudio !== 2) {
+    studioStudioBca[studio.id] = studioBcaDest;
+    const dests = {};
+    artistsForStudio.forEach((art, i) => {
+      dests[art.id] = null;
+    });
+    for (let i = 0; i < artistsForStudio.length; i++) {
+      const art = artistsForStudio[i];
+      const d = await prisma.paymentDestination.create({
+        data: { name: `${art.name} Mandiri`, account: `ART-${String(artistGlobalIdx - n + i).padStart(4, '0')}999`, type: 'Bank', ownerType: 'artist', artistId: art.id, isActive: true },
+      });
+      dests[art.id] = d;
+    }
+    studioArtistDests[studio.id] = dests;
+
+    for (const artist of artistsForStudio) {
       await prisma.studioCommission.create({
-        data: { studioId: studios[2].id, artistId: createdArtists[i].id, commissionPercent: commissionRates[i] + 5 },
+        data: { studioId: studio.id, artistId: artist.id, commissionPercent: 18 + (artistGlobalIdx % 10) },
+      });
+    }
+
+    // Customers + leads for this studio (names include studio so switching location shows different data)
+    const customersForStudio = [];
+    for (let i = 0; i < n; i++) {
+      const cp = customerPool[customerGlobalIdx % customerPool.length];
+      const isLead = i < leadsPerStudio;
+      const c = await prisma.customer.create({
+        data: {
+          id: genNumericId('customer'),
+          name: `${cp.name} · ${shortStudioName}`,
+          email: cp.email.replace('1@gmail', `s${sIdx}_${i}@gmail`),
+          phone: cp.phone.replace('1000', `${1000 + sIdx * 100 + i}`),
+          type: isLead ? 'lead' : 'customer',
+          leadSource: isLead ? leadSources[i % leadSources.length] : null,
+          studioCustomers: { create: { studioId: studio.id } },
+        },
+      });
+      customersForStudio.push(c);
+      customerGlobalIdx++;
+    }
+    studioCustomers.push(customersForStudio);
+
+    const placements = ['Forearm', 'Chest', 'Back', 'Upper arm', 'Calf', 'Thigh', 'Arm', 'Shoulder', 'Ribs', 'Wrist'];
+    const amounts = [2800000, 3200000, 3500000, 4200000, 4800000, 5000000, 5500000, 3800000, 4500000, 5200000];
+    for (let i = 0; i < n; i++) {
+      const artist = artistsForStudio[i % artistsForStudio.length];
+      const customer = customersForStudio[i % customersForStudio.length];
+      const booking = await prisma.booking.create({
+        data: {
+          shortCode: uniqueShortCode(),
+          artistId: artist.id,
+          customerId: customer.id,
+          studioId: studio.id,
+          date: futureDate(i + 1),
+          startTime: '10:00',
+          endTime: '12:00',
+          status: 'Paid',
+          pricingType: 'fixed',
+          totalAmount: amounts[i % amounts.length],
+          placement: placements[i % placements.length],
+          notes: `Booking ${i + 1} at ${studio.name}.`,
+        },
+      });
+      const dest = i % 2 === 0 ? studioBcaDest : dests[artist.id];
+      await prisma.payment.create({
+        data: {
+          bookingId: booking.id,
+          paymentDestinationId: dest.id,
+          amount: amounts[i % amounts.length],
+          currency: 'IDR',
+          method: 'Bank',
+          type: 'final',
+          transferDestination: dest.account,
+          receiverType: i % 2 === 0 ? 'studio' : 'artist',
+          receiverStudioId: i % 2 === 0 ? studio.id : null,
+          receiverArtistId: i % 2 === 0 ? null : artist.id,
+          status: 'completed',
+        },
+      });
+      const project = await prisma.project.create({
+        data: {
+          id: genNumericId('project'),
+          bookingId: booking.id,
+          name: `${artist.name} – ${customer.name}`,
+          pricingType: 'fixed',
+          fixedAmount: amounts[i % amounts.length],
+          notes: 'Session 1.',
+        },
+      });
+      await prisma.session.create({
+        data: {
+          id: genNumericId('session'),
+          projectId: project.id,
+          date: booking.date,
+          startTime: '10:00',
+          endTime: '12:00',
+          actualHours: 2,
+          notes: 'Completed.',
+          status: 'completed',
+        },
       });
     }
   }
 
-  const totalBookings = activeBookings.length + cancelledBookings.length + completedBookings.length;
-  const totalProjects = await prisma.project.count();
+  const totalSpecialities = await prisma.speciality.count();
+  const totalArtists = await prisma.tattooArtist.count();
+  const totalAvailability = await prisma.artistAvailability.count();
   const totalPayments = await prisma.payment.count();
-  console.log(`Seed complete: ${createdArtists.length} artists, ${studios.length} studios, ${customers.length} customers, ${totalBookings} bookings, ${totalProjects} projects, ${totalPayments} payments.`);
-  console.log('Default login: admin@post.ink / admin123');
+  const totalPaymentAccounts = await prisma.paymentDestination.count();
+  const totalCommissions = await prisma.studioCommission.count();
+  const totalCustomers = await prisma.customer.count();
+  const totalBookings = await prisma.booking.count();
+  const totalProjects = await prisma.project.count();
+  const totalSessions = await prisma.session.count();
+  const totalUsers = await prisma.user.count();
+  console.log('Seed complete — per studio: 5, 7, 10 (artists, customers, bookings, etc.)');
+  console.log(`  Studios: 3 | Users: ${totalUsers} | Specialities: ${totalSpecialities} | Artists: ${totalArtists} | Customers: ${totalCustomers}`);
+  console.log(`  Bookings: ${totalBookings} | Payments: ${totalPayments} | Projects: ${totalProjects} | Sessions: ${totalSessions} | Payment destinations: ${totalPaymentAccounts} | Commissions: ${totalCommissions}`);
+  console.log('Login: superadmin@post.ink or admin@post.ink / admin123');
 }
 
 main()

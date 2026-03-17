@@ -4,6 +4,7 @@ import './App.css';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { ManageLayout } from './components/ManageLayout';
 import { useAuth } from './context/AuthContext';
+import { getStudios, setApiStudioId, getApiStudioId } from './api';
 import { ArtistForm } from './pages/ArtistForm';
 import { ArtistDetail } from './pages/ArtistDetail';
 import { ArtistAvailability } from './pages/ArtistAvailability';
@@ -19,6 +20,28 @@ function App() {
   const navigate = useNavigate();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef(null);
+  const [studios, setStudios] = useState([]);
+  const [selectedStudioId, setSelectedStudioId] = useState(() => getApiStudioId());
+  const isSuperAdmin = user?.role === 'super_admin';
+
+  useEffect(() => {
+    if (isSuperAdmin) {
+      getStudios()
+        .then((list) => {
+          const arr = Array.isArray(list) ? list : [];
+          setStudios(arr);
+          if (!getApiStudioId() && arr.length > 0) {
+            setApiStudioId(arr[0].id);
+            setSelectedStudioId(arr[0].id);
+          }
+        })
+        .catch(() => setStudios([]));
+    }
+  }, [isSuperAdmin]);
+
+  useEffect(() => {
+    setSelectedStudioId(getApiStudioId());
+  }, [token]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -36,13 +59,34 @@ function App() {
 
   return (
     <div className="app">
-      <header className="header">
+      <header className="header main-menu" aria-label="Main navigation">
         <Link to="/" className="logo">
           <span className="logo-mark">I.</span>
           <span className="logo-text">InkedHub</span>
         </Link>
-        <nav>
+        <nav className="header-nav">
           <NavLink to="/" end>Discover</NavLink>
+          {token && isSuperAdmin && studios.length > 0 && (
+            <div className="header-studio-wrap">
+              <label htmlFor="header-studio-select" className="header-studio-label">Studio</label>
+              <select
+                id="header-studio-select"
+                className="header-studio-select"
+                value={selectedStudioId || ''}
+                onChange={(e) => {
+                  const id = e.target.value || null;
+                  setApiStudioId(id);
+                  setSelectedStudioId(id);
+                }}
+                aria-label="Select studio"
+              >
+                <option value="">Select studio</option>
+                {studios.map((s) => (
+                  <option key={s.id} value={s.id}>{s.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
           {token ? (
             <>
               <NavLink to="/manage" className={({ isActive }) => isActive ? 'active nav-manage' : 'nav-manage'}>
@@ -65,7 +109,7 @@ function App() {
                   <div className="header-user-dropdown" role="menu">
                     <Link to="/manage" className="header-user-item" role="menuitem" onClick={() => setUserMenuOpen(false)}>
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
-                      Dashboard
+                      Management
                     </Link>
                     <button type="button" className="header-user-item" role="menuitem" onClick={handleLogout}>
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
@@ -91,8 +135,8 @@ function App() {
           {/* Login (public) */}
           <Route path="/login" element={<Login />} />
 
-          {/* Management: single sidebar with pending bookings count */}
-          <Route element={<ProtectedRoute><ManageLayout /></ProtectedRoute>}>
+          {/* Management: single sidebar with pending bookings count; key forces re-load when studio changes */}
+          <Route element={<ProtectedRoute><ManageLayout key={selectedStudioId || 'no-studio'} /></ProtectedRoute>}>
             <Route path="/manage" element={<Studio />} />
             <Route path="/manage/studio" element={<Studio />} />
             <Route path="/manage/bookings/new" element={<BookingForm />} />

@@ -9,19 +9,26 @@ datasource db {
 }
 
 // ----- Platform User (login to management) -----
+// role: super_admin = platform admin (no studio); admin | staff = studio-scoped (see only their studio)
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
+  id           String        @id @default(cuid())
+  email        String        @unique
   passwordHash String
   name         String?
-  role         String   @default("staff") // admin, staff
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  role         String        @default("staff") // super_admin | admin | staff
+  studioId     String?
+  studio       TattooStudio? @relation(fields: [studioId], references: [id], onDelete: SetNull)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([studioId])
 }
 
-// ----- Tattoo Artist -----
+// ----- Tattoo Artist (belongs to one studio) -----
 model TattooArtist {
-  id               String   @id @default(cuid())
+  id               String        @id @default(cuid())
+  studioId         String?
+  studio           TattooStudio?  @relation(fields: [studioId], references: [id], onDelete: Cascade)
   name             String
   shortDescription String?
   experiences      String?  // years or text description
@@ -39,6 +46,8 @@ model TattooArtist {
   referredLeads Customer[] @relation("LeadReferralArtist")
   paymentDestinations PaymentDestination[] @relation("ArtistPaymentDestinations")
   receivedPayments Payment[] @relation("ArtistReceivedPayments")
+
+  @@index([studioId])
 }
 
 // Artist availability slots (date + time range)
@@ -58,20 +67,38 @@ model ArtistAvailability {
   @@index([date])
 }
 
-// ----- Tattoo Studio -----
+// ----- Tattoo Studio (tenant) -----
 model TattooStudio {
   id         String   @id @default(cuid())
   name       String
   address    String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+  users      User[]
+  artists    TattooArtist[]
+  studioCustomers StudioCustomer[]
   bookings   Booking[]
   commissions StudioCommission[]
   paymentDestinations PaymentDestination[] @relation("StudioPaymentDestinations")
   receivedPayments Payment[] @relation("StudioReceivedPayments")
+  specialities Speciality[]
 }
 
-// ----- Customer -----
+// ----- Customer–Studio: many-to-many (customer can belong to one or more studios) -----
+model StudioCustomer {
+  id         String       @id @default(cuid())
+  studioId   String
+  studio     TattooStudio @relation(fields: [studioId], references: [id], onDelete: Cascade)
+  customerId String
+  customer   Customer     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  createdAt  DateTime     @default(now())
+
+  @@unique([studioId, customerId])
+  @@index([studioId])
+  @@index([customerId])
+}
+
+// ----- Customer (can belong to one or more studios via StudioCustomer) -----
 model Customer {
   id        String   @id // 6-digit numeric, set in app
   name      String
@@ -84,6 +111,7 @@ model Customer {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   bookings  Booking[]
+  studioCustomers StudioCustomer[]
 
   @@index([type])
   @@index([leadSource])
@@ -226,11 +254,16 @@ model PaymentDestination {
   @@index([artistId])
 }
 
-// ----- Speciality (master list for artist speciality picker) -----
+// ----- Speciality (per-studio list for artist speciality picker) -----
 model Speciality {
-  id        String   @id @default(cuid())
-  name      String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        String        @id @default(cuid())
+  studioId  String?
+  studio    TattooStudio?  @relation(fields: [studioId], references: [id], onDelete: Cascade)
+  name      String
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@unique([studioId, name])
+  @@index([studioId])
 }
 

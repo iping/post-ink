@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { getStudioId } from '../middleware/auth.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const prisma = new PrismaClient();
@@ -29,13 +30,15 @@ export const artistsRouter = Router();
 
 artistsRouter.get('/', async (req, res) => {
   try {
+    const studioId = getStudioId(req);
+    if (!studioId) return res.status(400).json({ error: 'studioId required (query for super_admin, or use a studio-scoped user)' });
     const activeOnly = req.query.activeOnly === 'true';
+    const where = { studioId };
+    if (activeOnly) where.isActive = true;
     const artists = await prisma.tattooArtist.findMany({
-      where: activeOnly ? { isActive: true } : undefined,
+      where,
       orderBy: { createdAt: 'desc' },
-      include: {
-        availability: true,
-      },
+      include: { availability: true },
     });
     res.json(artists);
   } catch (e) {
@@ -43,14 +46,14 @@ artistsRouter.get('/', async (req, res) => {
   }
 });
 
-// GET /api/artists/:id — one artist
+// GET /api/artists/:id — one artist (must belong to user's studio)
 artistsRouter.get('/:id', async (req, res) => {
   try {
-    const artist = await prisma.tattooArtist.findUnique({
-      where: { id: req.params.id },
-      include: {
-        availability: { orderBy: [{ date: 'asc' }, { startTime: 'asc' }] },
-      },
+    const studioId = getStudioId(req);
+    if (!studioId) return res.status(400).json({ error: 'studioId required' });
+    const artist = await prisma.tattooArtist.findFirst({
+      where: { id: req.params.id, studioId },
+      include: { availability: { orderBy: [{ date: 'asc' }, { startTime: 'asc' }] } },
     });
     if (!artist) return res.status(404).json({ error: 'Artist not found' });
     res.json(artist);
@@ -66,7 +69,10 @@ artistsRouter.post('/', upload.fields([{ name: 'photos', maxCount: 10 }, { name:
     const portfolio = (req.files?.portfolio || []).map(f => `/uploads/${f.filename}`);
     const existingPhotos = parseJsonField(req.body.photos);
     const existingPortfolio = parseJsonField(req.body.portfolio);
+    const studioId = getStudioId(req);
+    if (!studioId) return res.status(400).json({ error: 'studioId required' });
     const data = {
+      studioId,
       name: req.body.name,
       shortDescription: req.body.shortDescription || null,
       experiences: req.body.experiences || null,
@@ -86,7 +92,9 @@ artistsRouter.post('/', upload.fields([{ name: 'photos', maxCount: 10 }, { name:
 // PATCH /api/artists/:id — update
 artistsRouter.patch('/:id', upload.fields([{ name: 'photos', maxCount: 10 }, { name: 'portfolio', maxCount: 20 }]), async (req, res) => {
   try {
-    const existing = await prisma.tattooArtist.findUnique({ where: { id: req.params.id } });
+    const studioId = getStudioId(req);
+    if (!studioId) return res.status(400).json({ error: 'studioId required' });
+    const existing = await prisma.tattooArtist.findFirst({ where: { id: req.params.id, studioId } });
     if (!existing) return res.status(404).json({ error: 'Artist not found' });
     const photos = (req.files?.photos || []).map(f => `/uploads/${f.filename}`);
     const portfolio = (req.files?.portfolio || []).map(f => `/uploads/${f.filename}`);
@@ -112,6 +120,10 @@ artistsRouter.patch('/:id', upload.fields([{ name: 'photos', maxCount: 10 }, { n
 // DELETE /api/artists/:id
 artistsRouter.delete('/:id', async (req, res) => {
   try {
+    const studioId = getStudioId(req);
+    if (!studioId) return res.status(400).json({ error: 'studioId required' });
+    const existing = await prisma.tattooArtist.findFirst({ where: { id: req.params.id, studioId } });
+    if (!existing) return res.status(404).json({ error: 'Artist not found' });
     await prisma.tattooArtist.delete({ where: { id: req.params.id } });
     res.status(204).end();
   } catch (e) {

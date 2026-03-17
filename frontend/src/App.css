@@ -1,21 +1,52 @@
+/* ===== Mobile-first: base = small screens, then enhance with min-width ===== */
+
 .app {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
 }
 
-.header {
+/* ----- Main menu (top / global navigation) ----- */
+.main-menu.header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 2rem;
-  height: 64px;
-  background: rgba(255, 255, 255, 0.85);
-  border-bottom: 1px solid var(--border);
+  padding: 0 0.75rem;
+  min-height: 56px;
+  height: auto;
+  background: rgba(255, 255, 255, 0.96);
+  border-bottom: 2px solid var(--accent);
+  box-shadow: 0 1px 0 0 rgba(0, 0, 0, 0.04);
   backdrop-filter: blur(12px);
   position: sticky;
   top: 0;
   z-index: 50;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+@media (min-width: 600px) {
+  .main-menu.header {
+    padding: 0 1.25rem;
+    min-height: 60px;
+  }
+}
+
+@media (min-width: 768px) {
+  .main-menu.header {
+    padding: 0 2rem;
+    height: 64px;
+    min-height: 64px;
+    flex-wrap: nowrap;
+  }
+}
+
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  flex-wrap: wrap;
 }
 
 .logo {
@@ -24,9 +55,17 @@
   gap: 0.15rem;
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 1.35rem;
+  font-size: 1.2rem;
   color: var(--text);
   letter-spacing: -0.02em;
+  min-height: 44px;
+  align-items: center;
+}
+
+@media (min-width: 768px) {
+  .logo {
+    font-size: 1.35rem;
+  }
 }
 
 .logo:hover {
@@ -35,36 +74,81 @@
 
 .logo-mark {
   color: var(--accent);
-  font-size: 1.5rem;
+  font-size: 1.35rem;
+}
+
+@media (min-width: 768px) {
+  .logo-mark {
+    font-size: 1.5rem;
+  }
 }
 
 .logo-text {
   color: var(--text);
 }
 
-.header nav {
-  display: flex;
-  gap: 0.25rem;
-}
-
-.header nav a {
+.header-nav a {
   color: var(--muted);
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 500;
-  padding: 0.45rem 0.9rem;
+  padding: 0.5rem 0.65rem;
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: var(--radius);
   transition: all var(--transition);
   letter-spacing: 0.01em;
 }
 
-.header nav a:hover {
+@media (min-width: 768px) {
+  .header-nav a {
+    font-size: 0.95rem;
+    padding: 0.45rem 0.9rem;
+    min-width: auto;
+  }
+}
+
+.header-nav a:hover {
   color: var(--text);
   background: var(--surface-hover);
 }
 
-.header nav a.active {
+.header-nav a.active {
   color: var(--accent);
   background: var(--accent-dim);
+}
+
+.header-studio-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.header-studio-label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.header-studio-select {
+  font-size: 0.9rem;
+  padding: 0.4rem 0.6rem;
+  min-height: 36px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+
+@media (min-width: 768px) {
+  .header-studio-select {
+    font-size: 0.9rem;
+    padding: 0.45rem 0.65rem;
+  }
 }
 
 .nav-manage {
@@ -81,14 +165,24 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   color: var(--text-secondary);
   background: none;
   border: none;
-  padding: 0.45rem 0.6rem;
+  padding: 0.5rem 0.65rem;
+  min-height: 44px;
+  min-width: 44px;
   border-radius: var(--radius);
   cursor: pointer;
   transition: color var(--transition), background var(--transition);
+}
+
+@media (min-width: 768px) {
+  .header-user-trigger {
+    font-size: 0.82rem;
+    padding: 0.45rem 0.6rem;
+    min-width: auto;
+  }
 }
 
 .header-user-trigger:hover {
@@ -97,10 +191,16 @@
 }
 
 .header-user {
-  max-width: 180px;
+  max-width: 120px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+@media (min-width: 768px) {
+  .header-user {
+    max-width: 180px;
+  }
 }
 
 .header-user-chevron {
@@ -137,7 +237,8 @@
   color: var(--muted);
   background: none;
   border: none;
-  padding: 0.5rem 0.75rem;
+  padding: 0.6rem 0.75rem;
+  min-height: 44px;
   border-radius: var(--radius);
   cursor: pointer;
   text-align: left;
@@ -157,18 +258,30 @@
 
 .main {
   flex: 1;
+  min-width: 0;
 }
 
-/* ===== Footer ===== */
+/* ----- Footer: mobile base ----- */
 .footer {
   border-top: 1px solid var(--border);
   background: var(--surface);
-  margin-top: 2rem;
+  margin-top: auto;
 }
 
 .footer-bottom {
-  padding: 1rem 2rem;
+  padding: 0.75rem 1rem;
   text-align: center;
   font-size: 0.75rem;
   color: var(--muted);
+  margin: 0;
+}
+
+@media (min-width: 768px) {
+  .footer {
+    margin-top: 2rem;
+  }
+
+  .footer-bottom {
+    padding: 1rem 2rem;
+  }
 }

@@ -14,7 +14,7 @@ authRouter.post('/login', async (req, res) => {
     if (!email || !password) {
       return res.status(400).json({ error: 'Email and password required' });
     }
-    const user = await prisma.user.findUnique({ where: { email: email.trim().toLowerCase() } });
+    let user = await prisma.user.findUnique({ where: { email: email.trim().toLowerCase() } });
     if (!user) {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
@@ -22,18 +22,35 @@ authRouter.post('/login', async (req, res) => {
     if (!ok) {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
+    // Safety net: if a non–super-admin user has no studio assigned, attach them
+    // to the first available studio so studio-scoped data loads instead of 400s.
+    if (user.role !== 'super_admin' && !user.studioId) {
+      const firstStudio = await prisma.tattooStudio.findFirst();
+      if (firstStudio) {
+        user = await prisma.user.update({
+          where: { id: user.id },
+          data: { studioId: firstStudio.id },
+        });
+      }
+    }
     const token = jwt.sign(
       { userId: user.id },
       JWT_SECRET,
       { expiresIn: '7d' },
     );
+    const userWithStudio = await prisma.user.findUnique({
+      where: { id: user.id },
+      include: { studio: true },
+    });
     res.json({
       token,
       user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
+        id: userWithStudio.id,
+        email: userWithStudio.email,
+        name: userWithStudio.name,
+        role: userWithStudio.role,
+        studioId: userWithStudio.studioId,
+        studio: userWithStudio.studio ? { id: userWithStudio.studio.id, name: userWithStudio.studio.name } : null,
       },
     });
   } catch (e) {
@@ -50,7 +67,10 @@ authRouter.get('/me', async (req, res) => {
       return res.status(401).json({ error: 'Authentication required' });
     }
     const decoded = jwt.verify(token, JWT_SECRET);
-    const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+      include: { studio: true },
+    });
     if (!user) {
       return res.status(401).json({ error: 'User not found' });
     }
@@ -59,6 +79,8 @@ authRouter.get('/me', async (req, res) => {
       email: user.email,
       name: user.name,
       role: user.role,
+      studioId: user.studioId,
+      studio: user.studio ? { id: user.studio.id, name: user.studio.name } : null,
     });
   } catch (e) {
     return res.status(401).json({ error: 'Invalid or expired token' });

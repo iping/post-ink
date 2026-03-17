@@ -2,15 +2,19 @@ import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { generateNumericId } from '../utils/id.js';
 import { syncBookingReceivableCache } from '../utils/booking-finance.js';
+import { getStudioId } from '../middleware/auth.js';
 
 const prisma = new PrismaClient();
 export const projectsRouter = Router();
 
-// GET /api/projects — list all (optional ?bookingId= to filter)
+// GET /api/projects — list (scoped by booking's studio)
 projectsRouter.get('/', async (req, res) => {
   try {
+    const effectiveStudioId = getStudioId(req);
+    if (!effectiveStudioId) return res.status(400).json({ error: 'studioId required' });
     const { bookingId } = req.query;
-    const where = bookingId ? { bookingId } : {};
+    const where = { booking: { studioId: effectiveStudioId } };
+    if (bookingId) where.bookingId = bookingId;
     const projects = await prisma.project.findMany({
       where,
       include: { booking: { include: { artist: true, customer: true, studio: true } }, sessions: true },
@@ -25,8 +29,10 @@ projectsRouter.get('/', async (req, res) => {
 // GET /api/projects/:id — get one project
 projectsRouter.get('/:id', async (req, res) => {
   try {
-    const project = await prisma.project.findUnique({
-      where: { id: req.params.id },
+    const effectiveStudioId = getStudioId(req);
+    if (!effectiveStudioId) return res.status(400).json({ error: 'studioId required' });
+    const project = await prisma.project.findFirst({
+      where: { id: req.params.id, booking: { studioId: effectiveStudioId } },
       include: { booking: { include: { artist: true, customer: true, studio: true } }, sessions: true },
     });
     if (!project) return res.status(404).json({ error: 'Project not found' });
@@ -36,9 +42,11 @@ projectsRouter.get('/:id', async (req, res) => {
   }
 });
 
-// POST /api/projects — create (bookingId required); creates project + first session (every project has min 1 session)
+// POST /api/projects — create (bookingId required); creates project + first session
 projectsRouter.post('/', async (req, res) => {
   try {
+    const effectiveStudioId = getStudioId(req);
+    if (!effectiveStudioId) return res.status(400).json({ error: 'studioId required' });
     const { bookingId, name, pricingType, fixedAmount, hourlyRate, agreedHours, notes, firstSession } = req.body;
     if (!bookingId || !name || !pricingType) {
       return res.status(400).json({ error: 'bookingId, name, and pricingType required' });
@@ -61,7 +69,7 @@ projectsRouter.post('/', async (req, res) => {
       data.agreedHours = agreedHours != null ? Number(agreedHours) : null;
       data.fixedAmount = null;
     }
-    const booking = await prisma.booking.findUnique({ where: { id: bookingId } });
+    const booking = await prisma.booking.findFirst({ where: { id: bookingId, studioId: effectiveStudioId } });
     if (!booking) return res.status(400).json({ error: 'Booking not found' });
     const projectId = await generateNumericId(prisma, 'project');
     const projectWithSessions = await prisma.$transaction(async (tx) => {
@@ -112,8 +120,11 @@ projectsRouter.post('/', async (req, res) => {
 // PATCH /api/projects/:id
 projectsRouter.patch('/:id', async (req, res) => {
   try {
-    const { name, pricingType, fixedAmount, hourlyRate, agreedHours, notes } = req.body;
-    const existing = await prisma.project.findUnique({ where: { id: req.params.id } });
+    const effectiveStudioId = getStudioId(req);
+    if (!effectiveStudioId) return res.status(400).json({ error: 'studioId required' });
+    const existing = await prisma.project.findFirst({
+      where: { id: req.params.id, booking: { studioId: effectiveStudioId } },
+    });
     if (!existing) return res.status(404).json({ error: 'Project not found' });
     const data = {};
     if (name !== undefined) data.name = String(name).trim();
@@ -161,7 +172,11 @@ projectsRouter.patch('/:id', async (req, res) => {
 // DELETE /api/projects/:id
 projectsRouter.delete('/:id', async (req, res) => {
   try {
-    const existing = await prisma.project.findUnique({ where: { id: req.params.id } });
+    const effectiveStudioId = getStudioId(req);
+    if (!effectiveStudioId) return res.status(400).json({ error: 'studioId required' });
+    const existing = await prisma.project.findFirst({
+      where: { id: req.params.id, booking: { studioId: effectiveStudioId } },
+    });
     await prisma.$transaction(async (tx) => {
       await tx.project.delete({ where: { id: req.params.id } });
       if (existing?.bookingId) await syncBookingReceivableCache(tx, existing.bookingId);

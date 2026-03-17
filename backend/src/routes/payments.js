@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { RECEIVER_TYPES, syncBookingReceivableCache } from '../utils/booking-finance.js';
+import { getStudioId, isSuperAdmin } from '../middleware/auth.js';
 
 const prisma = new PrismaClient();
 export const paymentsRouter = Router();
@@ -126,13 +127,27 @@ async function buildPaymentPayload(tx, body, existingPayment = null) {
   return data;
 }
 
-// GET /api/payments — list all (with booking)
+// GET /api/payments — list
+// - studio users: scoped by their studio only
+// - super admin:
+//   - with ?studioId=XYZ → that studio only
+//   - without studioId   → all studios
 paymentsRouter.get('/', async (req, res) => {
   try {
+    const effectiveStudioId = getStudioId(req);
+    const superAdmin = isSuperAdmin(req);
     const { status, bookingId } = req.query;
     const where = {};
+    if (effectiveStudioId) {
+      where.booking = { studioId: effectiveStudioId };
+    } else if (!superAdmin) {
+      // Studio user without a studio is a misconfiguration
+      return res.status(400).json({ error: 'studioId required' });
+    }
+    if (bookingId) {
+      where.bookingId = bookingId;
+    }
     if (status) where.status = status;
-    if (bookingId) where.bookingId = bookingId;
     const payments = await prisma.payment.findMany({
       where,
       include: await getPaymentInclude(),
@@ -147,8 +162,13 @@ paymentsRouter.get('/', async (req, res) => {
 // GET /api/payments/:id
 paymentsRouter.get('/:id', async (req, res) => {
   try {
-    const payment = await prisma.payment.findUnique({
-      where: { id: req.params.id },
+    const effectiveStudioId = getStudioId(req);
+    if (!effectiveStudioId) return res.status(400).json({ error: 'studioId required' });
+    const payment = await prisma.payment.findFirst({
+      where: {
+        id: req.params.id,
+        booking: { studioId: effectiveStudioId },
+      },
       include: await getPaymentInclude(),
     });
     if (!payment) return res.status(404).json({ error: 'Payment not found' });
@@ -161,8 +181,18 @@ paymentsRouter.get('/:id', async (req, res) => {
 // POST /api/payments
 paymentsRouter.post('/', async (req, res) => {
   try {
+    const effectiveStudioId = getStudioId(req);
+    if (!effectiveStudioId) return res.status(400).json({ error: 'studioId required' });
     const payment = await prisma.$transaction(async (tx) => {
       const data = await buildPaymentPayload(tx, req.body);
+      if (data.bookingId) {
+        const booking = await tx.booking.findFirst({ where: { id: data.bookingId, studioId: effectiveStudioId } });
+        if (!booking) {
+          const err = new Error('Booking not found or access denied');
+          err.statusCode = 403;
+          throw err;
+        }
+      }
       if (!Number.isFinite(data.amount)) {
         const error = new Error('Amount is required');
         error.statusCode = 400;
@@ -200,8 +230,15 @@ paymentsRouter.post('/', async (req, res) => {
 // PATCH /api/payments/:id
 paymentsRouter.patch('/:id', async (req, res) => {
   try {
+    const effectiveStudioId = getStudioId(req);
+    if (!effectiveStudioId) return res.status(400).json({ error: 'studioId required' });
     const payment = await prisma.$transaction(async (tx) => {
-      const existing = await tx.payment.findUnique({ where: { id: req.params.id } });
+      const existing = await tx.payment.findFirst({
+        where: {
+          id: req.params.id,
+          booking: { studioId: effectiveStudioId },
+        },
+      });
       if (!existing) {
         const error = new Error('Payment not found');
         error.code = 'P2025';
@@ -230,8 +267,20 @@ paymentsRouter.patch('/:id', async (req, res) => {
 // DELETE /api/payments/:id
 paymentsRouter.delete('/:id', async (req, res) => {
   try {
+    const effectiveStudioId = getStudioId(req);
+    if (!effectiveStudioId) return res.status(400).json({ error: 'studioId required' });
     await prisma.$transaction(async (tx) => {
-      const existing = await tx.payment.findUnique({ where: { id: req.params.id } });
+      const existing = await tx.payment.findFirst({
+        where: {
+          id: req.params.id,
+          booking: { studioId: effectiveStudioId },
+        },
+      });
+      if (!existing) {
+        const err = new Error('Payment not found');
+        err.code = 'P2025';
+        throw err;
+      }
       await tx.payment.delete({ where: { id: req.params.id } });
       if (existing?.bookingId) await syncBookingReceivableCache(tx, existing.bookingId);
     });

@@ -6,6 +6,7 @@
     "dev": "npx prisma generate && node src/index.js",
     "start": "npx prisma generate && node src/index.js",
     "seed": "node prisma/seed.js",
+    "clear-data": "node prisma/clear-data.js",
     "export-seed": "node prisma/export-seed.js"
   },
   "prisma": {

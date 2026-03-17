@@ -9,9 +9,10 @@ import {
   updateCustomer,
   deleteCustomer,
   getStudios,
+  getStudio,
+  updateStudio,
+  getApiStudioId,
   deleteBooking,
-  createPayment,
-  updatePayment,
   getCommissions,
   createCommission,
   updateCommission,
@@ -29,10 +30,10 @@ import {
   updateUser,
   deleteUser,
 } from '../api';
-import { formatRupiah, formatWithConversion, formatNumberWithDots, parseNumberInput } from '../currency';
+import { useAuth } from '../context/AuthContext';
+import { formatRupiah } from '../currency';
 import styles from './Studio.module.css';
 import { ArtistList } from './ArtistList';
-import { IdWithCopy } from '../components/IdWithCopy';
 
 const ROWS_PER_PAGE = 8;
 
@@ -97,12 +98,6 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
 }
 
 const BOOKING_STATUSES = ['Unpaid', 'Paid'];
-const PAYMENT_STATUSES = ['pending', 'completed', 'refunded'];
-const PAYMENT_TYPES = [
-  { value: 'down_payment', label: 'Down payment' },
-  { value: 'final', label: 'Final payment' },
-  { value: 'other', label: 'Other' },
-];
 const LEAD_SOURCE_OPTIONS = [
   { value: 'website', label: 'Website' },
   { value: 'instagram', label: 'Instagram' },
@@ -154,15 +149,16 @@ function artistTagColor(artistId) {
 
 export function Studio() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isSuperAdmin = user?.role === 'super_admin';
   const [searchParams, setSearchParams] = useSearchParams();
-  const tabParam = searchParams.get('tab') || 'dashboard';
+  const tabParam = searchParams.get('tab') || 'bookings';
   const [tab, setTab] = useState(tabParam);
   const [createdToast, setCreatedToast] = useState(false);
-  const [artistLeaderboardMetric, setArtistLeaderboardMetric] = useState('orders');
 
   useEffect(() => {
-    const t = searchParams.get('tab') || 'dashboard';
-    if (['dashboard', 'bookings', 'artists', 'payments', 'commissions', 'customers', 'leads', 'specialities', 'payment-destinations', 'users'].includes(t)) {
+    const t = searchParams.get('tab') || 'bookings';
+    if (['profile', 'bookings', 'artists', 'commissions', 'customers', 'leads', 'specialities', 'payment-destinations', 'users'].includes(t)) {
       setTab(t);
     }
   }, [searchParams]);
@@ -179,7 +175,7 @@ export function Studio() {
 
   const switchTab = (t) => {
     setTab(t);
-    setSearchParams(t === 'dashboard' ? {} : { tab: t }, { replace: true });
+    setSearchParams(t === 'bookings' ? {} : { tab: t }, { replace: true });
   };
   const [payments, setPayments] = useState([]);
   const [commissions, setCommissions] = useState([]);
@@ -192,21 +188,8 @@ export function Studio() {
   const [error, setError] = useState(null);
   const [showUserForm, setShowUserForm] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
-  const [userForm, setUserForm] = useState({ email: '', name: '', password: '', role: 'staff' });
+  const [userForm, setUserForm] = useState({ email: '', name: '', password: '', role: 'staff', studioId: '' });
 
-  const [showPaymentForm, setShowPaymentForm] = useState(false);
-  const [editingPayment, setEditingPayment] = useState(null);
-  const [paymentForm, setPaymentForm] = useState({
-    bookingId: '',
-    amount: '',
-    currency: 'IDR',
-    type: 'down_payment',
-    paymentDestinationId: '',
-    receiverType: 'studio',
-    receiverStudioId: '',
-    receiverArtistId: '',
-    status: 'pending',
-  });
 
   const [showCommissionForm, setShowCommissionForm] = useState(false);
   const [editingCommission, setEditingCommission] = useState(null);
@@ -233,13 +216,22 @@ export function Studio() {
   const [destForm, setDestForm] = useState({ name: '', account: '', type: 'Bank', ownerType: 'studio', studioId: '', artistId: '', isActive: true });
 
   const [bookingPage, setBookingPage] = useState(1);
-  const [paymentPage, setPaymentPage] = useState(1);
   const [commissionPage, setCommissionPage] = useState(1);
   const [customerPage, setCustomerPage] = useState(1);
   const [leadPage, setLeadPage] = useState(1);
   const [customerHistoryModal, setCustomerHistoryModal] = useState(null);
 
+  const [studioProfile, setStudioProfile] = useState(null);
+  const [profileForm, setProfileForm] = useState({ name: '', address: '' });
+  const [showProfileForm, setShowProfileForm] = useState(false);
+  const [profileLoading, setProfileLoading] = useState(false);
+
   const [bookingSearch, setBookingSearch] = useState('');
+  const [showEditDisabledDialog, setShowEditDisabledDialog] = useState(false);
+
+  /** True if any session under any project is completed (booking is then non-editable). */
+  const bookingHasCompletedSession = (b) =>
+    (b?.projects ?? []).some((p) => (p?.sessions ?? []).some((s) => s?.status === 'completed'));
 
   const filterBookingsBySearch = (list, query) => {
     const q = (query || '').trim().toLowerCase();
@@ -271,7 +263,6 @@ export function Studio() {
   const leadProfiles = customers.filter((c) => c.type === 'lead');
   const bookedCustomers = customers.filter((c) => c.type !== 'lead');
   const bookingTotalPages = Math.max(1, Math.ceil(filteredBookings.length / ROWS_PER_PAGE));
-  const paymentTotalPages = Math.max(1, Math.ceil(payments.length / ROWS_PER_PAGE));
   const commissionTotalPages = Math.max(1, Math.ceil(commissions.length / ROWS_PER_PAGE));
   const customerTotalPages = Math.max(1, Math.ceil(bookedCustomers.length / ROWS_PER_PAGE));
   const leadTotalPages = Math.max(1, Math.ceil(leadProfiles.length / ROWS_PER_PAGE));
@@ -282,29 +273,11 @@ export function Studio() {
   const destTotalPages = Math.max(1, Math.ceil(destList.length / ROWS_PER_PAGE));
 
   const paginatedBookings = filteredBookings.slice((bookingPage - 1) * ROWS_PER_PAGE, bookingPage * ROWS_PER_PAGE);
-  const paginatedPayments = payments.slice((paymentPage - 1) * ROWS_PER_PAGE, paymentPage * ROWS_PER_PAGE);
   const paginatedCommissions = commissions.slice((commissionPage - 1) * ROWS_PER_PAGE, commissionPage * ROWS_PER_PAGE);
   const paginatedCustomers = bookedCustomers.slice((customerPage - 1) * ROWS_PER_PAGE, customerPage * ROWS_PER_PAGE);
   const paginatedLeads = leadProfiles.slice((leadPage - 1) * ROWS_PER_PAGE, leadPage * ROWS_PER_PAGE);
   const paginatedSpecialities = specialitiesList.slice((specPage - 1) * ROWS_PER_PAGE, specPage * ROWS_PER_PAGE);
   const paginatedDests = destList.slice((destPage - 1) * ROWS_PER_PAGE, destPage * ROWS_PER_PAGE);
-  const selectedPaymentBooking = useMemo(
-    () => bookings.find((booking) => booking.id === paymentForm.bookingId) || null,
-    [bookings, paymentForm.bookingId],
-  );
-  const paymentDestinationsForForm = useMemo(() => {
-    return paymentDestinations.filter((destination) => {
-      if (!destination.isActive && destination.id !== paymentForm.paymentDestinationId) return false;
-      if (paymentForm.receiverType === 'studio') {
-        if (destination.ownerType !== 'studio') return false;
-        if (selectedPaymentBooking?.studioId) return destination.studioId === selectedPaymentBooking.studioId;
-        return true;
-      }
-      if (destination.ownerType !== 'artist') return false;
-      if (selectedPaymentBooking?.artistId) return destination.artistId === selectedPaymentBooking.artistId;
-      return true;
-    });
-  }, [paymentDestinations, paymentForm.receiverType, paymentForm.paymentDestinationId, selectedPaymentBooking]);
 
   // High-level metrics for dashboard
   const todayStr = new Date().toISOString().slice(0, 10);
@@ -319,6 +292,29 @@ export function Studio() {
   const totalRevenue = payments
     .filter((p) => p.status === 'completed')
     .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+
+  // Revenue split: Account Receivable Studio vs Artist (high-level to details)
+  const revenueSummary = useMemo(() => {
+    const completed = payments.filter((p) => p.status === 'completed');
+    const total = completed.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+    const byReceiver = { studio: { total: 0, byType: {} }, artist: { total: 0, byType: {} } };
+    completed.forEach((p) => {
+      const amount = Number(p.amount) || 0;
+      const type = p.receiverType === 'studio' ? 'studio' : p.receiverType === 'artist' ? 'artist' : null;
+      const typeLabel = p.type || 'other';
+      if (type) {
+        byReceiver[type].total += amount;
+        byReceiver[type].byType[typeLabel] = (byReceiver[type].byType[typeLabel] || 0) + amount;
+      }
+    });
+    return {
+      total,
+      studio: byReceiver.studio.total,
+      artist: byReceiver.artist.total,
+      studioByType: byReceiver.studio.byType,
+      artistByType: byReceiver.artist.byType,
+    };
+  }, [payments]);
 
   // Artist performance (orders + revenue)
   const artistStats = useMemo(() => {
@@ -341,36 +337,6 @@ export function Studio() {
       };
     });
   }, [artists, bookings, payments]);
-
-  const maxArtistOrders = Math.max(1, ...artistStats.map((a) => a.orders || 0));
-  const maxArtistRevenue = Math.max(1, ...artistStats.map((a) => a.revenue || 0));
-
-  const artistLeaderboard = useMemo(() => {
-    const sorted = [...artistStats];
-    if (artistLeaderboardMetric === 'revenue') {
-      sorted.sort((a, b) => (b.revenue - a.revenue) || (b.orders - a.orders));
-    } else {
-      sorted.sort((a, b) => (b.orders - a.orders) || (b.revenue - a.revenue));
-    }
-    return sorted;
-  }, [artistStats, artistLeaderboardMetric]);
-
-  // Bookings per day for the last 7 days (for simple chart)
-  const bookingsByDay = (() => {
-    const daysBack = 6;
-    const result = [];
-    const today = new Date();
-    for (let i = daysBack; i >= 0; i--) {
-      const d = new Date(today);
-      d.setDate(today.getDate() - i);
-      const dateStr = d.toISOString().slice(0, 10);
-      const label = d.toLocaleDateString('en-GB', { weekday: 'short' });
-      const count = bookings.filter((b) => b.date === dateStr).length;
-      result.push({ date: dateStr, label, count });
-    }
-    return result;
-  })();
-  const maxBookingsPerDay = Math.max(1, ...bookingsByDay.map((d) => d.count));
 
   const getCustomerBookings = (customerId) => bookings.filter((b) => b.customerId === customerId);
   const paymentOwnerName = (ownerType, studioId, artistId) => {
@@ -453,27 +419,25 @@ export function Studio() {
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => {
-    load();
-  }, []);
+  const effectiveStudioId = isSuperAdmin ? getApiStudioId() : (user?.studio?.id || user?.studioId);
 
   useEffect(() => {
-    setPaymentForm((form) => {
-      const next = { ...form };
-      if (selectedPaymentBooking) {
-        if (form.receiverType === 'studio') {
-          next.receiverStudioId = selectedPaymentBooking.studioId || '';
-        } else {
-          next.receiverArtistId = selectedPaymentBooking.artistId || '';
-        }
-      }
-      if (form.paymentDestinationId) {
-        const stillValid = paymentDestinationsForForm.some((destination) => destination.id === form.paymentDestinationId);
-        if (!stillValid) next.paymentDestinationId = '';
-      }
-      return next;
-    });
-  }, [selectedPaymentBooking, paymentDestinationsForForm, paymentForm.receiverType]);
+    if (effectiveStudioId) load();
+  }, [effectiveStudioId]);
+  useEffect(() => {
+    if (tab !== 'profile' || !effectiveStudioId) {
+      setStudioProfile(null);
+      return;
+    }
+    setProfileLoading(true);
+    getStudio(effectiveStudioId)
+      .then((s) => {
+        setStudioProfile(s);
+        setProfileForm({ name: s?.name ?? '', address: s?.address ?? '' });
+      })
+      .catch(() => setStudioProfile(null))
+      .finally(() => setProfileLoading(false));
+  }, [tab, effectiveStudioId]);
 
   const getCommissionFor = (artistId, studioId) =>
     commissions.find((c) => c.artistId === artistId && c.studioId === studioId);
@@ -488,68 +452,11 @@ export function Studio() {
     }
   };
 
-  const openNewPayment = (bookingId = null) => {
-    const booking = bookings.find((item) => item.id === (bookingId || bookings[0]?.id)) || null;
-    setEditingPayment(null);
-    setPaymentForm({
-      bookingId: booking?.id || '',
-      amount: '',
-      currency: 'IDR',
-      type: 'down_payment',
-      paymentDestinationId: '',
-      receiverType: booking?.studioId ? 'studio' : 'artist',
-      receiverStudioId: booking?.studioId || '',
-      receiverArtistId: booking?.artistId || '',
-      status: 'pending',
-    });
-    setShowPaymentForm(true);
-  };
-
-  const openEditPayment = (p) => {
-    setEditingPayment(p);
-    setPaymentForm({
-      bookingId: p.bookingId || '',
-      amount: p.amount,
-      currency: p.currency,
-      type: p.type || 'down_payment',
-      paymentDestinationId: p.paymentDestinationId || '',
-      receiverType: p.receiverType || (p.receiverStudioId ? 'studio' : 'artist'),
-      receiverStudioId: p.receiverStudioId || p.booking?.studioId || '',
-      receiverArtistId: p.receiverArtistId || p.booking?.artistId || '',
-      status: p.status,
-    });
-    setShowPaymentForm(true);
-  };
-
-  const savePayment = async (e) => {
-    e.preventDefault();
-    setError(null);
-    const payload = {
-      ...paymentForm,
-      amount: Number(paymentForm.amount),
-      bookingId: paymentForm.bookingId || null,
-      type: paymentForm.type || null,
-      paymentDestinationId: paymentForm.paymentDestinationId || null,
-      receiverStudioId: paymentForm.receiverType === 'studio' ? paymentForm.receiverStudioId || null : null,
-      receiverArtistId: paymentForm.receiverType === 'artist' ? paymentForm.receiverArtistId || null : null,
-    };
-    try {
-      if (editingPayment) {
-        await updatePayment(editingPayment.id, payload);
-      } else {
-        await createPayment(payload);
-      }
-      setShowPaymentForm(false);
-      load();
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
   const openNewCommission = () => {
     setEditingCommission(null);
+    const defaultStudioId = isSuperAdmin ? (studios[0]?.id || '') : (user?.studio?.id || '');
     setCommissionForm({
-      studioId: studios[0]?.id || '',
+      studioId: defaultStudioId,
       artistId: artists[0]?.id || '',
       commissionPercent: '',
     });
@@ -724,7 +631,7 @@ export function Studio() {
           isActive: destForm.isActive,
         });
       }
-      setDestForm({ name: '', account: '', type: 'Bank', ownerType: 'studio', studioId: studios[0]?.id || '', artistId: artists[0]?.id || '', isActive: true });
+      setDestForm({ name: '', account: '', type: 'Bank', ownerType: 'studio', studioId: isSuperAdmin ? (studios[0]?.id || '') : (user?.studio?.id || ''), artistId: artists[0]?.id || '', isActive: true });
       setShowDestForm(false);
       load();
     } catch (err) {
@@ -751,14 +658,18 @@ export function Studio() {
       if (editingUser) {
         const data = { email, name: (userForm.name || '').trim() || null, role: userForm.role };
         if (userForm.password) data.password = userForm.password;
+        if (isSuperAdmin && userForm.studioId !== undefined) data.studioId = userForm.studioId || null;
         await updateUser(editingUser.id, data);
       } else {
         if (!userForm.password || userForm.password.length < 6) return setError('Password required (min 6 characters)');
-        await createUser({ email, name: (userForm.name || '').trim() || null, password: userForm.password, role: userForm.role });
+        const createPayload = { email, name: (userForm.name || '').trim() || null, password: userForm.password, role: userForm.role };
+        if (isSuperAdmin) createPayload.studioId = userForm.studioId || null;
+        else if (user?.studio?.id) createPayload.studioId = user.studio.id;
+        await createUser(createPayload);
       }
       setShowUserForm(false);
       setEditingUser(null);
-      setUserForm({ email: '', name: '', password: '', role: 'staff' });
+      setUserForm({ email: '', name: '', password: '', role: 'staff', studioId: '' });
       load();
     } catch (err) {
       setError(err.message || 'Failed to save user');
@@ -789,148 +700,91 @@ export function Studio() {
 
       <div className={styles.adminCard}>
         <div className={styles.adminContent}>
-      {tab === 'dashboard' && (
+      {isSuperAdmin && !effectiveStudioId ? (
+        <section className={styles.section}>
+          <p className={styles.help}>
+            Select a studio from the header dropdown to view its data. All lists (bookings, payments, customers, leads, artists, etc.) refer to the selected studio.
+          </p>
+        </section>
+      ) : (
+      <>
+      {tab === 'profile' && (
         <section className={styles.section}>
           <div className={styles.sectionHead}>
             <div>
-              <h2>Dashboard</h2>
-              <span className={styles.countHint}>Overview of bookings, revenue, customers, and leads</span>
+              <h2>Studio profile</h2>
             </div>
+            {studioProfile && !showProfileForm && (
+              <button type="button" className={styles.addBtn} onClick={() => { setProfileForm({ name: studioProfile.name ?? '', address: studioProfile.address ?? '' }); setShowProfileForm(true); }}>Edit</button>
+            )}
           </div>
-          <div className={styles.dashboardRow}>
-            <div className={styles.dashboardCard}>
-              <span className={styles.dashboardLabel}>Total bookings</span>
-              <span className={styles.dashboardValue}>{totalBookings}</span>
-              <span className={styles.dashboardSub}>
-                {todayBookings} today · {upcomingBookings} upcoming
-              </span>
-            </div>
-            <button
-              type="button"
-              className={`${styles.dashboardCard} ${styles.dashboardCardClickable}`}
-              onClick={() => { switchTab('bookings'); setBookingSearch('Paid'); setBookingPage(1); }}
+          {!effectiveStudioId ? (
+            <p className={styles.help}>
+              {isSuperAdmin ? 'Select a studio from the header dropdown to view and edit its profile.' : 'You are not assigned to a studio.'}
+            </p>
+          ) : profileLoading ? (
+            <p className={styles.help}>Loading studio…</p>
+          ) : !studioProfile ? (
+            <p className={styles.help}>Could not load studio.</p>
+          ) : showProfileForm ? (
+            <form
+              className={styles.destForm}
+              onSubmit={async (e) => {
+                e.preventDefault();
+                setError(null);
+                try {
+                  const updated = await updateStudio(studioProfile.id, {
+                    name: (profileForm.name || '').trim() || studioProfile.name,
+                    address: (profileForm.address || '').trim() || null,
+                  });
+                  setStudioProfile(updated);
+                  setShowProfileForm(false);
+                  load();
+                } catch (err) {
+                  setError(err.message || 'Failed to update');
+                }
+              }}
             >
-              <span className={styles.dashboardLabel}>Paid bookings</span>
-              <span className={styles.dashboardValue}>{totalPaidBookings}</span>
-              <span className={styles.dashboardSub}>Go to table filtered by Paid</span>
-            </button>
-            <button
-              type="button"
-              className={`${styles.dashboardCard} ${styles.dashboardCardClickable}`}
-              onClick={() => { switchTab('bookings'); setBookingSearch('Unpaid'); setBookingPage(1); }}
-            >
-              <span className={styles.dashboardLabel}>Unpaid bookings</span>
-              <span className={styles.dashboardValue}>{totalUnpaidBookings}</span>
-              <span className={styles.dashboardSub}>Go to table filtered by Unpaid</span>
-            </button>
-            <div className={styles.dashboardCard}>
-              <span className={styles.dashboardLabel}>Total revenue</span>
-              <span className={styles.dashboardValue}>{formatRupiah(totalRevenue)}</span>
-              <span className={styles.dashboardSub}>Completed payments</span>
-            </div>
-            <div className={styles.dashboardCard}>
-              <span className={styles.dashboardLabel}>Customers</span>
-              <span className={styles.dashboardValue}>{totalCustomers}</span>
-              <span className={styles.dashboardSub}>Active profiles</span>
-            </div>
-            <div className={styles.dashboardCard}>
-              <span className={styles.dashboardLabel}>Leads</span>
-              <span className={styles.dashboardValue}>{totalLeads}</span>
-              <span className={styles.dashboardSub}>Potential customers</span>
-            </div>
-            <div className={styles.dashboardCard}>
-              <span className={styles.dashboardLabel}>Artists</span>
-              <span className={styles.dashboardValue}>{totalArtists}</span>
-              <span className={styles.dashboardSub}>Tattoo artists in studio</span>
-            </div>
-          </div>
-          <div className={styles.chartRow}>
-            <div className={styles.chartCard}>
-              <div className={styles.chartHeader}>
-                <span className={styles.chartTitle}>Bookings last 7 days</span>
-                <span className={styles.chartSubtitle}>Daily count</span>
+              <label className={styles.destFormLabel}>
+                Studio name *
+                <input
+                  value={profileForm.name}
+                  onChange={(e) => setProfileForm((f) => ({ ...f, name: e.target.value }))}
+                  placeholder="e.g. Ink Haven Studio"
+                  required
+                />
+              </label>
+              <label className={styles.destFormLabel}>
+                Address
+                <input
+                  value={profileForm.address}
+                  onChange={(e) => setProfileForm((f) => ({ ...f, address: e.target.value }))}
+                  placeholder="e.g. Jl. Kemang Raya No. 45"
+                />
+              </label>
+              <div className={styles.formActions}>
+                <button type="submit">Save</button>
+                <button type="button" onClick={() => setShowProfileForm(false)}>Cancel</button>
               </div>
-              <div className={styles.chartBars}>
-                {bookingsByDay.map((d) => (
-                  <div key={d.date} className={styles.chartBar}>
-                    <div className={styles.chartBarFillWrapper}>
-                      <div
-                        className={styles.chartBarFill}
-                        style={{ height: `${(d.count / maxBookingsPerDay) * 100 || 0}%` }}
-                        title={`${d.count} bookings on ${d.date}`}
-                      />
-                    </div>
-                    <span className={styles.chartBarLabel}>{d.label}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-          {artistStats.length > 0 && (
-            <div className={styles.chartRow}>
-              <div className={styles.leaderboardCard}>
-                <div className={styles.leaderboardHeader}>
-                  <div>
-                    <span className={styles.chartTitle}>Artist performance</span>
-                    <span className={styles.chartSubtitle}>Top contributors by orders and revenue</span>
-                  </div>
-                  <div
-                    className={styles.leaderboardToggle}
-                    role="tablist"
-                    aria-label="Artist leaderboard metric"
-                  >
-                    <button
-                      type="button"
-                      className={`${styles.leaderboardToggleBtn} ${artistLeaderboardMetric === 'orders' ? styles.leaderboardToggleBtnActive : ''}`}
-                      onClick={() => setArtistLeaderboardMetric('orders')}
-                      role="tab"
-                      aria-selected={artistLeaderboardMetric === 'orders'}
-                    >
-                      By orders
-                    </button>
-                    <button
-                      type="button"
-                      className={`${styles.leaderboardToggleBtn} ${artistLeaderboardMetric === 'revenue' ? styles.leaderboardToggleBtnActive : ''}`}
-                      onClick={() => setArtistLeaderboardMetric('revenue')}
-                      role="tab"
-                      aria-selected={artistLeaderboardMetric === 'revenue'}
-                    >
-                      By revenue
-                    </button>
-                  </div>
-                </div>
-                <ol className={styles.leaderboardList}>
-                  {artistLeaderboard.slice(0, 6).map((a, index) => {
-                    const value = artistLeaderboardMetric === 'revenue' ? a.revenue : a.orders;
-                    const max = artistLeaderboardMetric === 'revenue' ? maxArtistRevenue : maxArtistOrders;
-                    const width = max ? (value / max) * 100 : 0;
-                    return (
-                      <li key={a.id} className={styles.leaderboardItem}>
-                        <div className={styles.leaderboardMeta}>
-                          <span className={styles.leaderboardRank}>{index + 1}</span>
-                          <div className={styles.leaderboardText}>
-                            <span className={styles.leaderboardName}>{a.name}</span>
-                            <span className={styles.leaderboardSmall}>
-                              {a.orders} orders · {formatRupiah(a.revenue)}
-                            </span>
-                          </div>
-                          <span className={styles.leaderboardValue}>
-                            {artistLeaderboardMetric === 'revenue'
-                              ? formatRupiah(a.revenue)
-                              : `${a.orders} orders`}
-                          </span>
-                        </div>
-                        <div className={styles.leaderboardBarTrack}>
-                          <div
-                            className={styles.leaderboardBarFill}
-                            style={{ width: `${width || 0}%` }}
-                          />
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ol>
-              </div>
+            </form>
+          ) : (
+            <div className={styles.tableWrap}>
+              <table className={styles.table}>
+                <tbody>
+                  <tr>
+                    <th className={styles.cellEmphasis}>Name</th>
+                    <td>{studioProfile.name || '—'}</td>
+                  </tr>
+                  <tr>
+                    <th className={styles.cellEmphasis}>Address</th>
+                    <td>{studioProfile.address || '—'}</td>
+                  </tr>
+                  <tr>
+                    <th className={styles.cellEmphasis}>Created</th>
+                    <td>{studioProfile.createdAt ? new Date(studioProfile.createdAt).toLocaleDateString('en-GB', { dateStyle: 'medium' }) : '—'}</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           )}
         </section>
@@ -941,7 +795,6 @@ export function Studio() {
           <div className={styles.sectionHead}>
             <div>
               <h2>Bookings</h2>
-              {filteredBookings.length > 0 && <span className={styles.countHint}>Showing {(bookingPage - 1) * ROWS_PER_PAGE + 1}–{Math.min(bookingPage * ROWS_PER_PAGE, filteredBookings.length)} of {filteredBookings.length}</span>}
             </div>
             <Link to="/manage/bookings/new" className={styles.addBtn}>
               + New booking
@@ -962,7 +815,6 @@ export function Studio() {
               <thead>
                 <tr>
                   <th>No.</th>
-                  <th>ID</th>
                   <th>Project name</th>
                   <th>Customer</th>
                   <th>Artist</th>
@@ -980,7 +832,7 @@ export function Studio() {
               <tbody>
                 {paginatedBookings.length === 0 ? (
                   <tr>
-                    <td colSpan={15}>
+                    <td colSpan={14}>
                       {bookings.length === 0
                         ? 'No bookings yet. Create one above.'
                         : 'No bookings match your search.'}
@@ -996,7 +848,6 @@ export function Studio() {
                     return (
                       <tr key={b.id}>
                         <td>{rowNum}</td>
-                        <td className={styles.cellId}><IdWithCopy id={b.id} /></td>
                         <td title={b.projectName || ''} className={styles.cellNotes}>{truncate(b.projectName, 22)}</td>
                         <td className={styles.cellEmphasis}>{b.customer?.name || '—'}</td>
                         <td>
@@ -1028,7 +879,11 @@ export function Studio() {
                         <td>
                           <span className={styles.tableActions}>
                             <Link to={`/manage/bookings/${b.id}`} className={styles.smBtn}>Detail</Link>
-                            <Link to={`/manage/bookings/${b.id}/edit`} className={styles.smBtn}>Edit</Link>
+                            {bookingHasCompletedSession(b) ? (
+                              <button type="button" className={`${styles.smBtn} ${styles.smBtnDisabled}`} onClick={() => setShowEditDisabledDialog(true)} title="Edit is disabled for completed bookings">Edit</button>
+                            ) : (
+                              <Link to={`/manage/bookings/${b.id}/edit`} className={styles.smBtn}>Edit</Link>
+                            )}
                             <button type="button" onClick={() => removeBooking(b.id)} className={styles.smBtnDanger}>Delete</button>
                             {commission && <span className={styles.commissionBadge} title="Commission set">{commission.commissionPercent}%</span>}
                           </span>
@@ -1046,82 +901,11 @@ export function Studio() {
 
       {tab === 'artists' && <ArtistList />}
 
-      {tab === 'payments' && (
-        <section className={styles.section}>
-          <div className={styles.sectionHead}>
-            <div>
-              <h2>Payments</h2>
-              {payments.length > 0 && <span className={styles.countHint}>Showing {(paymentPage - 1) * ROWS_PER_PAGE + 1}–{Math.min(paymentPage * ROWS_PER_PAGE, payments.length)} of {payments.length}</span>}
-            </div>
-            <button type="button" onClick={openNewPayment} className={styles.addBtn}>
-              + New payment
-            </button>
-          </div>
-          <div className={styles.tableWrap}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>No.</th>
-                  <th>ID</th>
-                  <th>Amount</th>
-                  <th>Receiver</th>
-                  <th>Type</th>
-                  <th>Account</th>
-                  <th>Status</th>
-                  <th>Booking</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedPayments.length === 0 ? (
-                  <tr>
-                    <td colSpan={9}>No payments yet. Create one above or add a down payment from a booking.</td>
-                  </tr>
-                ) : (
-                  paginatedPayments.map((p, i) => {
-                    const rowNum = (paymentPage - 1) * ROWS_PER_PAGE + i + 1;
-                    return (
-                    <tr key={p.id}>
-                      <td>{rowNum}</td>
-                      <td className={styles.cellId}><IdWithCopy id={p.id} /></td>
-                      <td className={styles.cellAmount}>{formatRupiah(p.amount)} <span className={styles.convHint}>{formatWithConversion(p.amount).usd}</span></td>
-                      <td className={styles.cellEmphasis}>
-                        {ownerTypeLabel(p.receiverType)} · {paymentOwnerName(p.receiverType, p.receiverStudioId, p.receiverArtistId)}
-                      </td>
-                      <td>
-                        {p.type === 'down_payment' ? (
-                          <span className={styles.depositBadge} title="Deposit stored with studio or tattoo artist">
-                            Deposit
-                          </span>
-                        ) : (p.type || '—')}
-                      </td>
-                      <td>{p.paymentDestination ? paymentDestinationDisplay(p.paymentDestination) : (p.transferDestination || '—')}</td>
-                      <td><span className={styles[`status_${p.status}`]}>{p.status}</span></td>
-                      <td className={styles.cellEmphasis}>
-                        {p.booking
-                          ? `${p.booking.date} – ${p.booking.artist?.name || ''}`
-                          : '—'}
-                      </td>
-                      <td>
-                        <button type="button" onClick={() => openEditPayment(p)} className={styles.smBtn}>Edit</button>
-                      </td>
-                    </tr>
-                  );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
-          <Pagination currentPage={paymentPage} totalPages={paymentTotalPages} onPageChange={setPaymentPage} />
-        </section>
-      )}
-
       {tab === 'commissions' && (
         <section className={styles.section}>
           <div className={styles.sectionHead}>
             <div>
               <h2>Studio commission (artist agreement %)</h2>
-              {commissions.length > 0 && <span className={styles.countHint}>Showing {(commissionPage - 1) * ROWS_PER_PAGE + 1}–{Math.min(commissionPage * ROWS_PER_PAGE, commissions.length)} of {commissions.length}</span>}
             </div>
             <button type="button" onClick={openNewCommission} className={styles.addBtn}>
               + Add commission
@@ -1132,7 +916,6 @@ export function Studio() {
               <thead>
                 <tr>
                   <th>No.</th>
-                  <th>ID</th>
                   <th>Studio</th>
                   <th>Artist</th>
                   <th>Studio commission %</th>
@@ -1142,7 +925,7 @@ export function Studio() {
               <tbody>
                 {paginatedCommissions.length === 0 ? (
                   <tr>
-                    <td colSpan={6}>No commission agreements. Add one to set the % the studio takes per artist.</td>
+                    <td colSpan={5}>No commission agreements. Add one to set the % the studio takes per artist.</td>
                   </tr>
                 ) : (
                   paginatedCommissions.map((c, i) => {
@@ -1150,7 +933,6 @@ export function Studio() {
                     return (
                     <tr key={c.id}>
                       <td>{rowNum}</td>
-                      <td className={styles.cellId}><IdWithCopy id={c.id} /></td>
                       <td className={styles.cellEmphasis}>{c.studio?.name || '—'}</td>
                       <td className={styles.cellEmphasis}>{c.artist?.name || '—'}</td>
                       <td className={styles.cellAmount}>{c.commissionPercent}%</td>
@@ -1174,7 +956,6 @@ export function Studio() {
           <div className={styles.sectionHead}>
             <div>
               <h2>Leads</h2>
-              {leadProfiles.length > 0 && <span className={styles.countHint}>Showing {(leadPage - 1) * ROWS_PER_PAGE + 1}–{Math.min(leadPage * ROWS_PER_PAGE, leadProfiles.length)} of {leadProfiles.length}</span>}
             </div>
             <button type="button" onClick={openNewLead} className={styles.addBtn}>
               + Add lead
@@ -1185,10 +966,10 @@ export function Studio() {
               <thead>
                 <tr>
                   <th>No.</th>
-                  <th>ID</th>
                   <th>Name</th>
                   <th>Email</th>
                   <th>Phone</th>
+                  <th>Studio</th>
                   <th>Source</th>
                   <th>Artist</th>
                   <th>Bookings</th>
@@ -1206,13 +987,14 @@ export function Studio() {
                     const rowNum = (leadPage - 1) * ROWS_PER_PAGE + i + 1;
                     const bookingCount = getCustomerBookings(lead.id).length;
                     const createdStr = lead.createdAt ? new Date(lead.createdAt).toLocaleDateString('en-GB', { dateStyle: 'short' }) : '—';
+                    const leadStudioNames = (lead.studioCustomers || []).map((sc) => sc.studio?.name).filter(Boolean).join(', ') || '—';
                     return (
                       <tr key={lead.id}>
                         <td>{rowNum}</td>
-                        <td className={styles.cellId}><IdWithCopy id={lead.id} /></td>
                         <td className={styles.cellEmphasis}>{lead.name || '—'}</td>
                         <td>{lead.email || '—'}</td>
                         <td>{lead.phone || '—'}</td>
+                        <td>{leadStudioNames}</td>
                         <td><span className={styles.status_lead}>{leadSourceLabel(lead.leadSource)}</span></td>
                         <td>{lead.referredArtist?.name || '—'}</td>
                         <td className={styles.cellAmount}>{bookingCount}</td>
@@ -1244,21 +1026,17 @@ export function Studio() {
           <div className={styles.sectionHead}>
             <div>
               <h2>Customer profiles</h2>
-              {bookedCustomers.length > 0 && <span className={styles.countHint}>Showing {(customerPage - 1) * ROWS_PER_PAGE + 1}–{Math.min(customerPage * ROWS_PER_PAGE, bookedCustomers.length)} of {bookedCustomers.length}</span>}
             </div>
           </div>
-          <p className={styles.depositInfoBanner}>
-            <strong>Deposit highlight:</strong> deposits are stored either with the <span className={styles.depositLabelStudio}>Studio</span> or the <span className={styles.depositLabelArtist}>Tattoo artist</span>. Use them as a customer&apos;s first payment before charging new money.
-          </p>
           <div className={styles.tableWrap}>
             <table className={styles.table}>
               <thead>
                 <tr>
                   <th>No.</th>
-                  <th>ID</th>
                   <th>Name</th>
                   <th>Email</th>
                   <th>Phone</th>
+                  <th>Studios</th>
                   <th>Deposits</th>
                   <th>Total paid</th>
                   <th>Orders</th>
@@ -1282,13 +1060,14 @@ export function Studio() {
                     const rowNum = (customerPage - 1) * ROWS_PER_PAGE + i + 1;
                     const createdDate = c.createdAt ? new Date(c.createdAt) : null;
                     const createdStr = createdDate ? createdDate.toLocaleDateString('en-GB', { dateStyle: 'short' }) : '—';
+                    const studioNames = (c.studioCustomers || []).map((sc) => sc.studio?.name).filter(Boolean).join(', ') || '—';
                     return (
                       <tr key={c.id}>
                         <td>{rowNum}</td>
-                        <td className={styles.cellId}><IdWithCopy id={c.id} /></td>
                         <td className={styles.cellEmphasis}>{c.name || '—'}</td>
                         <td>{c.email || '—'}</td>
                         <td>{c.phone || '—'}</td>
+                        <td>{studioNames}</td>
                         <td className={styles.cellAmount}>
                           <div className={styles.depositPillRow}>
                             <span className={`${styles.depositPill} ${styles.depositPillStudio}`}>
@@ -1307,7 +1086,6 @@ export function Studio() {
                           {latest ? (
                             <Link to={`/manage/bookings/${latest.id}`} className={styles.cellLatest}>
                               {latest.date} {latest.startTime} – {latest.artist?.name || '—'}
-                              {latest.shortCode && <span className={styles.cellShortCode}> #{latest.shortCode}</span>}
                             </Link>
                           ) : (
                             '—'
@@ -1334,7 +1112,6 @@ export function Studio() {
           <div className={styles.sectionHead}>
             <div>
               <h2>Specialities</h2>
-              {specialitiesList.length > 0 && <span className={styles.countHint}>Showing {(specPage - 1) * ROWS_PER_PAGE + 1}–{Math.min(specPage * ROWS_PER_PAGE, specialitiesList.length)} of {specialitiesList.length}</span>}
             </div>
           </div>
           <div className={styles.specAddBar}>
@@ -1356,7 +1133,6 @@ export function Studio() {
               <thead>
                 <tr>
                   <th>No.</th>
-                  <th>ID</th>
                   <th>Name</th>
                   <th>Actions</th>
                 </tr>
@@ -1364,7 +1140,7 @@ export function Studio() {
               <tbody>
                 {paginatedSpecialities.length === 0 ? (
                   <tr>
-                    <td colSpan={4}>No specialities yet. Add one above.</td>
+                    <td colSpan={3}>No specialities yet. Add one above.</td>
                   </tr>
                 ) : (
                   paginatedSpecialities.map((sp, i) => {
@@ -1372,7 +1148,6 @@ export function Studio() {
                     return (
                       <tr key={sp.id}>
                         <td>{rowNum}</td>
-                        <td className={styles.cellId}><IdWithCopy id={sp.id} /></td>
                         <td>
                           {specEditId === sp.id ? (
                             <input
@@ -1416,9 +1191,8 @@ export function Studio() {
           <div className={styles.sectionHead}>
             <div>
               <h2>Payment accounts</h2>
-              {destList.length > 0 && <span className={styles.countHint}>Showing {(destPage - 1) * ROWS_PER_PAGE + 1}–{Math.min(destPage * ROWS_PER_PAGE, destList.length)} of {destList.length}</span>}
             </div>
-            <button type="button" className={styles.addBtn} onClick={() => { setEditingDest(null); setDestForm({ name: '', account: '', type: 'Bank', ownerType: 'studio', studioId: studios[0]?.id || '', artistId: artists[0]?.id || '', isActive: true }); setShowDestForm(true); }}>+ Add account</button>
+            <button type="button" className={styles.addBtn} onClick={() => { setEditingDest(null); setDestForm({ name: '', account: '', type: 'Bank', ownerType: 'studio', studioId: isSuperAdmin ? (studios[0]?.id || '') : (user?.studio?.id || ''), artistId: artists[0]?.id || '', isActive: true }); setShowDestForm(true); }}>+ Add account</button>
           </div>
           {showDestForm && (
             <form onSubmit={saveDest} className={styles.destForm}>
@@ -1438,18 +1212,34 @@ export function Studio() {
               </label>
               <label className={styles.destFormLabel}>
                 Owner
-                <select value={destForm.ownerType} onChange={(e) => setDestForm((f) => ({ ...f, ownerType: e.target.value }))}>
+                <select
+                  value={destForm.ownerType}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setDestForm((f) => ({
+                      ...f,
+                      ownerType: v,
+                      ...(v === 'studio' && !isSuperAdmin && user?.studio?.id ? { studioId: user.studio.id } : {}),
+                    }));
+                  }}
+                >
                   {OWNER_TYPE_OPTIONS.map((owner) => <option key={owner.value} value={owner.value}>{owner.label}</option>)}
                 </select>
               </label>
               {destForm.ownerType === 'studio' && (
-                <label className={styles.destFormLabel}>
-                  Studio
-                  <select value={destForm.studioId} onChange={(e) => setDestForm((f) => ({ ...f, studioId: e.target.value }))}>
-                    <option value="">Select studio</option>
-                    {studios.map((studio) => <option key={studio.id} value={studio.id}>{studio.name}</option>)}
-                  </select>
-                </label>
+                isSuperAdmin ? (
+                  <label className={styles.destFormLabel}>
+                    Studio
+                    <select value={destForm.studioId} onChange={(e) => setDestForm((f) => ({ ...f, studioId: e.target.value }))}>
+                      <option value="">Select studio</option>
+                      {studios.map((studio) => <option key={studio.id} value={studio.id}>{studio.name}</option>)}
+                    </select>
+                  </label>
+                ) : (
+                  user?.studio?.name && (
+                    <p className={styles.help}>Studio: <strong>{user.studio.name}</strong></p>
+                  )
+                )
               )}
               {destForm.ownerType === 'artist' && (
                 <label className={styles.destFormLabel}>
@@ -1475,7 +1265,6 @@ export function Studio() {
               <thead>
                 <tr>
                   <th>No.</th>
-                  <th>ID</th>
                   <th>Payment account</th>
                   <th>Account number</th>
                   <th>Type</th>
@@ -1487,7 +1276,7 @@ export function Studio() {
               <tbody>
                 {paginatedDests.length === 0 ? (
                   <tr>
-                    <td colSpan={8}>No payment options yet. Add one to show in the booking form.</td>
+                    <td colSpan={7}>No payment options yet. Add one to show in the booking form.</td>
                   </tr>
                 ) : (
                   paginatedDests.map((d, i) => {
@@ -1495,7 +1284,6 @@ export function Studio() {
                     return (
                       <tr key={d.id}>
                         <td>{rowNum}</td>
-                        <td className={styles.cellId}><IdWithCopy id={d.id} /></td>
                         <td className={styles.cellEmphasis}>{d.name || '—'}</td>
                         <td>{d.account || '—'}</td>
                         <td>{d.type || '—'}</td>
@@ -1528,19 +1316,18 @@ export function Studio() {
           <div className={styles.sectionHead}>
             <div>
               <h2>User management</h2>
-              {users.length > 0 && <span className={styles.countHint}>{users.length} user{users.length !== 1 ? 's' : ''}</span>}
             </div>
-            <button type="button" className={styles.addBtn} onClick={() => { setEditingUser(null); setUserForm({ email: '', name: '', password: '', role: 'staff' }); setShowUserForm(true); }}>+ Add user</button>
+            <button type="button" className={styles.addBtn} onClick={() => { setEditingUser(null); setUserForm({ email: '', name: '', password: '', role: 'staff', studioId: isSuperAdmin && studios.length ? studios[0].id : (user?.studio?.id || '') }); setShowUserForm(true); }}>+ Add user</button>
           </div>
           <div className={styles.tableWrap}>
             <table className={styles.table}>
               <thead>
                 <tr>
                   <th>No.</th>
-                  <th>ID</th>
                   <th>Email</th>
                   <th>Name</th>
                   <th>Role</th>
+                  <th>Studio</th>
                   <th>Created</th>
                   <th></th>
                 </tr>
@@ -1553,16 +1340,17 @@ export function Studio() {
                 ) : (
                   users.map((u, i) => {
                     const createdStr = u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-GB', { dateStyle: 'short' }) : '—';
+                    const studioName = u.studioId ? (studios.find((s) => s.id === u.studioId)?.name ?? '—') : '—';
                     return (
                       <tr key={u.id}>
                         <td>{i + 1}</td>
-                        <td className={styles.cellId}><IdWithCopy id={u.id} /></td>
                         <td className={styles.cellEmphasis}>{u.email}</td>
                         <td>{u.name || '—'}</td>
                         <td><span className={u.role === 'admin' ? styles.status_confirmed : ''}>{u.role}</span></td>
+                        <td>{studioName}</td>
                         <td>{createdStr}</td>
                         <td>
-                          <button type="button" className={styles.smBtn} onClick={() => { setEditingUser(u); setUserForm({ email: u.email, name: u.name || '', password: '', role: u.role }); setShowUserForm(true); }}>Edit</button>
+                          <button type="button" className={styles.smBtn} onClick={() => { setEditingUser(u); setUserForm({ email: u.email, name: u.name || '', password: '', role: u.role, studioId: u.studioId || '' }); setShowUserForm(true); }}>Edit</button>
                           <button type="button" className={styles.smBtnDanger} onClick={() => { if (window.confirm(`Remove user ${u.email}?`)) removeUser(u.id); }}>Delete</button>
                         </td>
                       </tr>
@@ -1574,12 +1362,22 @@ export function Studio() {
           </div>
         </section>
       )}
+      </>
+      )}
 
       {showLeadForm && (
         <div className={styles.modal} role="dialog" aria-modal="true" aria-label={editingLead ? 'Edit lead' : 'Add lead'}>
           <div className={styles.modalContent}>
             <h3>{editingLead ? 'Edit lead' : 'Add lead'}</h3>
             <p className={styles.help}>Leads are potential customers. They become customers automatically when a booking is created for them. Fill at least one contact method: email or phone.</p>
+            <p className={styles.help} style={{ marginTop: '0.5rem' }}>
+              Studio:{' '}
+              <strong>
+                {studios.find((s) => s.id === effectiveStudioId)?.name
+                  || user?.studio?.name
+                  || 'Select studio from header'}
+              </strong>
+            </p>
             <form onSubmit={saveLead}>
               <label>
                 Name *
@@ -1662,8 +1460,6 @@ export function Studio() {
               return (
                 <>
                   <h4>Deposit information</h4>
-                  <p className={styles.transactionSummary}><strong>Studio deposits:</strong> {formatRupiah(studioDepositTotal)}</p>
-                  <p className={styles.transactionSummary}><strong>Artist deposits:</strong> {formatRupiah(artistDepositTotal)}</p>
                   {depositPayments.length === 0 ? (
                     <p className={styles.help}>No deposit payments yet.</p>
                   ) : (
@@ -1672,13 +1468,12 @@ export function Studio() {
                         <li key={p.id}>
                           {p.createdAt ? new Date(p.createdAt).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' }) : '—'} — {formatRupiah(p.amount)} ({ownerTypeLabel(p.receiverType)} · {paymentOwnerName(p.receiverType, p.receiverStudioId, p.receiverArtistId)} · {p.status})
                           {p.bookingId && (
-                            <> · <Link to={`/manage/bookings/${p.booking?.id}`} className={styles.cellLatest}>Booking {p.booking?.shortCode || p.booking?.date || p.bookingId.slice(0, 8)}</Link></>
+                            <> · <Link to={`/manage/bookings/${p.booking?.id}`} className={styles.cellLatest}>View booking</Link></>
                           )}
                         </li>
                       ))}
                     </ul>
                   )}
-                  <p className={styles.transactionSummary}><strong>Total paid (all completed):</strong> {formatRupiah(totalPaid)}</p>
                   {tx.length === 0 ? (
                     <p className={styles.help}>No transactions yet.</p>
                   ) : (
@@ -1692,7 +1487,7 @@ export function Studio() {
                           <span className={styles[`status_${p.status}`]}>{p.status}</span>
                           {p.bookingId ? (
                             <Link to={`/manage/bookings/${p.booking?.id}`} className={styles.cellLatest}>
-                              Booking {p.booking?.shortCode || p.booking?.date || p.bookingId.slice(0, 8)}
+                              View booking
                             </Link>
                           ) : (
                             '—'
@@ -1711,153 +1506,32 @@ export function Studio() {
         </div>
       )}
 
-      {showPaymentForm && (
-        <div className={styles.modal} role="dialog" aria-modal="true">
-          <div className={styles.modalContent}>
-            <h3>{editingPayment ? 'Edit payment' : 'New payment'}</h3>
-            <form onSubmit={savePayment}>
-              <label>
-                Booking (optional)
-                <select
-                  value={paymentForm.bookingId}
-                  onChange={(e) => setPaymentForm((f) => ({ ...f, bookingId: e.target.value, paymentDestinationId: '' }))}
-                >
-                  <option value="">—</option>
-                  {bookings.map((b) => (
-                    <option key={b.id} value={b.id}>
-                      {b.date} {b.startTime} – {b.artist?.name} {b.customer ? `(${b.customer.name})` : ''}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                Amount *
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  placeholder="e.g. 500.000"
-                  value={formatNumberWithDots(paymentForm.amount)}
-                  onChange={(e) => setPaymentForm((f) => ({ ...f, amount: parseNumberInput(e.target.value) }))}
-                  required
-                />
-              </label>
-              <label>
-                Currency
-                <input value="IDR (Rupiah)" disabled />
-              </label>
-              <label>
-                Type
-                <select
-                  value={paymentForm.type}
-                  onChange={(e) => setPaymentForm((f) => ({ ...f, type: e.target.value }))}
-                >
-                  {PAYMENT_TYPES.map((t) => (
-                    <option key={t.value} value={t.value}>{t.label}</option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                Receiver
-                <select
-                  value={paymentForm.receiverType}
-                  onChange={(e) => setPaymentForm((f) => ({
-                    ...f,
-                    receiverType: e.target.value,
-                    paymentDestinationId: '',
-                    receiverStudioId: e.target.value === 'studio' ? (selectedPaymentBooking?.studioId || f.receiverStudioId) : '',
-                    receiverArtistId: e.target.value === 'artist' ? (selectedPaymentBooking?.artistId || f.receiverArtistId) : '',
-                  }))}
-                >
-                  {OWNER_TYPE_OPTIONS.map((owner) => (
-                    <option key={owner.value} value={owner.value}>{owner.label}</option>
-                  ))}
-                </select>
-              </label>
-              {!selectedPaymentBooking && paymentForm.receiverType === 'studio' && (
-                <label>
-                  Studio
-                  <select
-                    value={paymentForm.receiverStudioId}
-                    onChange={(e) => setPaymentForm((f) => ({ ...f, receiverStudioId: e.target.value, paymentDestinationId: '' }))}
-                  >
-                    <option value="">Select studio</option>
-                    {studios.map((studio) => (
-                      <option key={studio.id} value={studio.id}>{studio.name}</option>
-                    ))}
-                  </select>
-                </label>
-              )}
-              {!selectedPaymentBooking && paymentForm.receiverType === 'artist' && (
-                <label>
-                  Artist
-                  <select
-                    value={paymentForm.receiverArtistId}
-                    onChange={(e) => setPaymentForm((f) => ({ ...f, receiverArtistId: e.target.value, paymentDestinationId: '' }))}
-                  >
-                    <option value="">Select artist</option>
-                    {artists.map((artist) => (
-                      <option key={artist.id} value={artist.id}>{artist.name}</option>
-                    ))}
-                  </select>
-                </label>
-              )}
-              <label>
-                Owned account
-                <select
-                  value={paymentForm.paymentDestinationId}
-                  onChange={(e) => setPaymentForm((f) => ({ ...f, paymentDestinationId: e.target.value }))}
-                >
-                  <option value="">Select account</option>
-                  {paymentDestinationsForForm.map((destination) => (
-                    <option key={destination.id} value={destination.id}>
-                      {paymentDestinationDisplay(destination)} · {paymentOwnerName(destination.ownerType, destination.studioId, destination.artistId)}
-                    </option>
-                  ))}
-                </select>
-                {paymentDestinationsForForm.length === 0 && (
-                  <p className={styles.help}>No active owned accounts match this payment yet.</p>
-                )}
-              </label>
-              <label>
-                Status
-                <select
-                  value={paymentForm.status}
-                  onChange={(e) => setPaymentForm((f) => ({ ...f, status: e.target.value }))}
-                >
-                  {PAYMENT_STATUSES.map((s) => (
-                    <option key={s} value={s}>{s}</option>
-                  ))}
-                </select>
-              </label>
-              <div className={styles.formActions}>
-                <button type="submit">Save</button>
-                <button type="button" onClick={() => setShowPaymentForm(false)}>Cancel</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
       {showCommissionForm && (
         <div className={styles.modal} role="dialog" aria-modal="true">
           <div className={styles.modalContent}>
             <h3>{editingCommission ? 'Edit commission' : 'Add studio commission'}</h3>
             <p className={styles.help}>Percentage of each booking total that the studio keeps (artist agrees).</p>
             <form onSubmit={saveCommission}>
-              <label>
-                Studio *
-                <select
-                  value={commissionForm.studioId}
-                  onChange={(e) => setCommissionForm((f) => ({ ...f, studioId: e.target.value }))}
-                  required
-                  disabled={!!editingCommission}
-                >
-                  <option value="">Select studio</option>
-                  {studios.map((s) => (
-                    <option key={s.id} value={s.id}>{s.name}</option>
-                  ))}
-                </select>
-              </label>
+              {isSuperAdmin ? (
+                <label>
+                  Studio *
+                  <select
+                    value={commissionForm.studioId}
+                    onChange={(e) => setCommissionForm((f) => ({ ...f, studioId: e.target.value }))}
+                    required
+                    disabled={!!editingCommission}
+                  >
+                    <option value="">Select studio</option>
+                    {studios.map((s) => (
+                      <option key={s.id} value={s.id}>{s.name}</option>
+                    ))}
+                  </select>
+                </label>
+              ) : (
+                user?.studio?.name && (
+                  <p className={styles.help}>Studio: <strong>{user.studio.name}</strong></p>
+                )
+              )}
               <label>
                 Artist *
                 <select
@@ -1890,6 +1564,20 @@ export function Studio() {
                 <button type="button" onClick={() => setShowCommissionForm(false)}>Cancel</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {showEditDisabledDialog && (
+        <div className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="edit-disabled-title">
+          <div className={styles.modalContent}>
+            <h3 id="edit-disabled-title">Edit booking unavailable</h3>
+            <p className={styles.help}>
+              This booking cannot be edited because it has been marked as completed. Completed sessions lock the booking from further changes.
+            </p>
+            <div className={styles.formActions}>
+              <button type="button" onClick={() => setShowEditDisabledDialog(false)}>Close</button>
+            </div>
           </div>
         </div>
       )}
@@ -1940,6 +1628,24 @@ export function Studio() {
                   <option value="admin">Admin</option>
                 </select>
               </label>
+              {isSuperAdmin && (
+                <label>
+                  Studio
+                  <select
+                    value={userForm.studioId || ''}
+                    onChange={(e) => setUserForm((f) => ({ ...f, studioId: e.target.value || null }))}
+                    aria-label="Assign user to studio"
+                  >
+                    <option value="">Select studio</option>
+                    {studios.map((s) => (
+                      <option key={s.id} value={s.id}>{s.name}</option>
+                    ))}
+                  </select>
+                </label>
+              )}
+              {!isSuperAdmin && user?.studio?.name && (
+                <p className={styles.help}>Studio: <strong>{user.studio.name}</strong> (user will be assigned to your studio)</p>
+              )}
               <div className={styles.formActions}>
                 <button type="submit">Save</button>
                 <button type="button" onClick={() => { setShowUserForm(false); setEditingUser(null); }}>Cancel</button>

@@ -1,18 +1,31 @@
 .wrap {
+  width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 1.5rem 3rem;
+  padding: 0 1rem 2rem;
 }
 
-/* Hero */
+@media (min-width: 600px) {
+  .wrap {
+    padding: 0 1.5rem 3rem;
+  }
+}
+
+/* Hero: mobile first */
 .hero {
   text-align: center;
-  padding: 3rem 1rem 2rem;
+  padding: 2rem 0.75rem 1.5rem;
+}
+
+@media (min-width: 600px) {
+  .hero {
+    padding: 3rem 1rem 2rem;
+  }
 }
 
 .hero h1 {
   font-family: var(--font-display);
-  font-size: 2.5rem;
+  font-size: 1.75rem;
   font-weight: 700;
   margin: 0 0 0.5rem;
   letter-spacing: -0.03em;
@@ -22,12 +35,24 @@
   background-clip: text;
 }
 
+@media (min-width: 600px) {
+  .hero h1 {
+    font-size: 2.5rem;
+  }
+}
+
 .hero p {
   color: var(--text-secondary);
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   max-width: 560px;
   margin: 0 auto;
   line-height: 1.7;
+}
+
+@media (min-width: 600px) {
+  .hero p {
+    font-size: 1.05rem;
+  }
 }
 
 /* Controls */
@@ -91,16 +116,24 @@
   color: var(--accent) !important;
 }
 
-/* Grid */
+/* Grid: mobile first single column, then multi */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: 1fr;
+  gap: 1rem;
 }
 
-@media (max-width: 480px) {
+@media (min-width: 480px) {
   .grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 1.5rem;
   }
 }
 

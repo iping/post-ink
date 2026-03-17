@@ -7,6 +7,8 @@ import {
   updateProject,
   updateSession,
   updateBooking,
+  createPayment,
+  getPaymentDestinations,
   uploadUrl,
 } from '../api';
 import { formatRupiah, formatWithConversion } from '../currency';
@@ -15,26 +17,27 @@ import layoutStyles from './Studio.module.css';
 import formStyles from './BookingForm.module.css';
 import artistStyles from './ArtistForm.module.css';
 
-function CopyIcon({ className, title }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden title={title}>
-      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-    </svg>
-  );
-}
-
 export function BookingDetail() {
   const { id } = useParams();
   const [booking, setBooking] = useState(null);
   const [commissions, setCommissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [copiedId, setCopiedId] = useState(false);
   const [lightboxUrl, setLightboxUrl] = useState(null);
   const [creatingProject, setCreatingProject] = useState(false);
   const [completingProjectId, setCompletingProjectId] = useState(null);
   const [sessionActionId, setSessionActionId] = useState(null);
+  const [completionConfirm, setCompletionConfirm] = useState(null);
+  const [paymentDestinations, setPaymentDestinations] = useState([]);
+  const [completionPaymentOption, setCompletionPaymentOption] = useState('pay_full');
+  const [completionDepositSource, setCompletionDepositSource] = useState('studio');
+  const [completionPaymentDestinationId, setCompletionPaymentDestinationId] = useState('');
+  const [completionSubmitting, setCompletionSubmitting] = useState(false);
+  const [showEditDisabledDialog, setShowEditDisabledDialog] = useState(false);
+
+  /** True if any session under any project is completed (booking is then non-editable). */
+  const isBookingCompleted = (b) =>
+    (b?.projects ?? []).some((p) => (p?.sessions ?? []).some((s) => s?.status === 'completed'));
 
   const load = async () => {
     if (!id) return;
@@ -50,6 +53,13 @@ export function BookingDetail() {
   };
 
   useEffect(() => {
+    if (!booking) return;
+    getPaymentDestinations()
+      .then((list) => setPaymentDestinations(Array.isArray(list) ? list : []))
+      .catch(() => setPaymentDestinations([]));
+  }, [booking?.id]);
+
+  useEffect(() => {
     load();
   }, [id]);
 
@@ -60,18 +70,23 @@ export function BookingDetail() {
     return () => window.removeEventListener('keydown', onKey);
   }, [lightboxUrl]);
 
+  useEffect(() => {
+    if (!completionConfirm) return;
+    const onKey = (e) => { if (e.key === 'Escape' && !completionSubmitting) closeCompletionConfirm(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [completionConfirm, completionSubmitting]);
+
+  useEffect(() => {
+    if (!showEditDisabledDialog) return;
+    const onKey = (e) => { if (e.key === 'Escape') setShowEditDisabledDialog(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [showEditDisabledDialog]);
+
   const getCommissionFor = (artistId, studioId) =>
     commissions.find((c) => c.artistId === artistId && c.studioId === studioId);
 
-
-  const copyBookingId = () => {
-    const text = booking?.shortCode || booking?.id || '';
-    if (!text) return;
-    navigator.clipboard.writeText(text).then(() => {
-      setCopiedId(true);
-      setTimeout(() => setCopiedId(false), 2000);
-    });
-  };
 
   const handleCreateProject = async () => {
     if (!booking) return;
@@ -104,41 +119,133 @@ export function BookingDetail() {
     }
   };
 
-  const handleWrapSession = async (sessionId) => {
+  /** Session value: hourly = actualHours * rate; fixed = fixedAmount / session count */
+  const getSessionAmount = (session, project) => {
+    if (!project) return 0;
+    if (project.pricingType === 'hourly') {
+      const hours = Number(session.actualHours);
+      const rate = Number(project.hourlyRate) || 0;
+      return (hours && rate) ? hours * rate : 0;
+    }
+    const fixed = Number(project.fixedAmount) || 0;
+    const count = Array.isArray(project.sessions) ? project.sessions.length : 1;
+    return count > 0 ? fixed / count : 0;
+  };
+
+  const openCompletionConfirm = (type, session, project, amount) => {
+    const availStudio = booking?.availableDepositStudio ?? 0;
+    const availArtist = booking?.availableDepositArtist ?? 0;
+    setCompletionConfirm({ type, session, project, amount });
+    setCompletionPaymentOption(amount <= 0 ? 'none' : (availStudio + availArtist >= amount ? 'deduct_only' : 'pay_full'));
+    setCompletionDepositSource(availStudio > 0 ? 'studio' : 'artist');
+    setCompletionPaymentDestinationId('');
+  };
+
+  const closeCompletionConfirm = () => {
+    setCompletionConfirm(null);
+    setCompletionSubmitting(false);
+  };
+
+  const handleWrapSessionClick = (session, project) => {
+    const amount = getSessionAmount(session, project);
+    openCompletionConfirm('session', session, project, amount);
+  };
+
+  const handleCompleteProjectClick = (project) => {
+    const amount = booking?.remainingAmount ?? 0;
+    openCompletionConfirm('project', null, project, amount);
+  };
+
+  const doCompleteAndPay = async () => {
+    if (!booking || !completionConfirm) return;
+    const { type, session, project, amount } = completionConfirm;
+    const availStudio = booking.availableDepositStudio ?? 0;
+    const availArtist = booking.availableDepositArtist ?? 0;
+    const availTotal = booking.availableDepositTotal ?? (availStudio + availArtist);
+    const useStudio = completionDepositSource === 'studio';
+    const availChosen = useStudio ? availStudio : availArtist;
+
     setError(null);
-    setSessionActionId(sessionId);
+    setCompletionSubmitting(true);
     try {
-      await updateSession(sessionId, { status: 'completed' });
+      if (amount > 0) {
+        if (completionPaymentOption === 'deduct_only') {
+          const deduct = Math.min(amount, availChosen);
+          if (deduct > 0) {
+            await createPayment({
+              bookingId: booking.id,
+              amount: deduct,
+              type: 'deposit_deduction',
+              status: 'completed',
+              receiverType: useStudio ? 'studio' : 'artist',
+              receiverStudioId: useStudio ? booking.studioId : null,
+              receiverArtistId: useStudio ? null : booking.artistId,
+            });
+          }
+        } else if (completionPaymentOption === 'combine') {
+          const deduct = Math.min(amount, availChosen);
+          const remainder = amount - deduct;
+          if (deduct > 0) {
+            await createPayment({
+              bookingId: booking.id,
+              amount: deduct,
+              type: 'deposit_deduction',
+              status: 'completed',
+              receiverType: useStudio ? 'studio' : 'artist',
+              receiverStudioId: useStudio ? booking.studioId : null,
+              receiverArtistId: useStudio ? null : booking.artistId,
+            });
+          }
+          if (remainder > 0 && completionPaymentDestinationId) {
+            const dest = paymentDestinations.find((d) => d.id === completionPaymentDestinationId);
+            await createPayment({
+              bookingId: booking.id,
+              amount: remainder,
+              type: 'final',
+              status: 'completed',
+              paymentDestinationId: completionPaymentDestinationId,
+              receiverType: dest?.ownerType || 'artist',
+              receiverStudioId: dest?.ownerType === 'studio' ? (dest.studioId || booking.studioId) : null,
+              receiverArtistId: dest?.ownerType === 'artist' ? (dest.artistId || booking.artistId) : null,
+            });
+          }
+        } else if (completionPaymentOption === 'pay_full' && completionPaymentDestinationId) {
+          const dest = paymentDestinations.find((d) => d.id === completionPaymentDestinationId);
+          await createPayment({
+            bookingId: booking.id,
+            amount,
+            type: 'final',
+            status: 'completed',
+            paymentDestinationId: completionPaymentDestinationId,
+            receiverType: dest?.ownerType || 'artist',
+            receiverStudioId: dest?.ownerType === 'studio' ? (dest.studioId || booking.studioId) : null,
+            receiverArtistId: dest?.ownerType === 'artist' ? (dest.artistId || booking.artistId) : null,
+          });
+        }
+      }
+
+      if (type === 'session' && session?.id) {
+        await updateSession(session.id, { status: 'completed' });
+      } else if (type === 'project' && project?.id) {
+        await updateProject(project.id, { status: 'completed' });
+      }
+
+      const updated = await getBooking(booking.id);
+      const rem = updated?.remainingAmount ?? 0;
+      if (updated?.id && rem <= 0 && updated.status !== 'Paid') {
+        await updateBooking(updated.id, { status: 'Paid' });
+      } else if (updated?.id && rem > 0 && updated.status !== 'Unpaid') {
+        await updateBooking(updated.id, { status: 'Unpaid' });
+      }
       await load();
+      closeCompletionConfirm();
     } catch (e) {
       setError(e.message);
     } finally {
-      setSessionActionId(null);
+      setCompletionSubmitting(false);
     }
   };
 
-  const handleCompleteProject = async (projectId) => {
-    setError(null);
-    setCompletingProjectId(projectId);
-    try {
-      // Mark project as completed; backend will recompute totals and balances.
-      await updateProject(projectId, { status: 'completed' });
-      // Adjust booking payment status based on remaining amount:
-      // - If nothing remains, mark booking as Paid
-      // - Otherwise keep as Unpaid so team knows there is balance left
-      if (remainingAmount != null && booking?.id) {
-        const nextStatus = remainingAmount <= 0 ? 'Paid' : 'Unpaid';
-        if (nextStatus !== booking.status) {
-          await updateBooking(booking.id, { status: nextStatus });
-        }
-      }
-      await load();
-    } catch (e) {
-      setError(e.message);
-    } finally {
-      setCompletingProjectId(null);
-    }
-  };
 
   if (loading) return <div className={artistStyles.page}><div className={layoutStyles.loading}>Loading…</div></div>;
   if (!booking) return <div className={artistStyles.page}><div className={artistStyles.error}>Booking not found.</div></div>;
@@ -196,7 +303,13 @@ export function BookingDetail() {
           Back to Bookings
         </Link>
         <div className={artistStyles.topBarRight}>
-          <Link to={'/manage/bookings/' + id + '/edit'} className={layoutStyles.addBtn}>Edit booking</Link>
+          {isBookingCompleted(booking) ? (
+            <button type="button" className={`${layoutStyles.addBtn} ${layoutStyles.addBtnDisabled}`} onClick={() => setShowEditDisabledDialog(true)} title="Edit is disabled for completed bookings">
+              Edit booking
+            </button>
+          ) : (
+            <Link to={'/manage/bookings/' + id + '/edit'} className={layoutStyles.addBtn}>Edit booking</Link>
+          )}
         </div>
       </div>
 
@@ -225,14 +338,6 @@ export function BookingDetail() {
                 <h2>Booking info</h2>
               </div>
               <div className={styles.bookingSummary}>
-                <p className={styles.bookingIdRow}>
-                  <strong>Booking ID:</strong>{' '}
-                  <span title={booking.id} className={styles.bookingIdCode}>{booking.shortCode || booking.id?.slice(0, 8) || '—'}</span>
-                  <button type="button" onClick={copyBookingId} className={styles.copyBtn} title="Copy booking ID" aria-label="Copy booking ID">
-                    <CopyIcon title="Copy" />
-                  </button>
-                  {copiedId && <span className={styles.copiedHint}>Copied!</span>}
-                </p>
                 <p><strong>Date:</strong> {booking.date}</p>
                 <p><strong>Time:</strong> {booking.startTime} – {booking.endTime}</p>
                 <p><strong>Artist:</strong> {booking.artist?.name || '—'}</p>
@@ -439,10 +544,10 @@ export function BookingDetail() {
                             <button
                               type="button"
                               className={styles.projectCompleteBtn}
-                              onClick={() => handleCompleteProject(p.id)}
-                              disabled={completingProjectId === p.id}
+                              onClick={() => handleCompleteProjectClick(p)}
+                              disabled={completionSubmitting}
                             >
-                              {completingProjectId === p.id ? 'Recalculating…' : 'Project completed'}
+                              {completionSubmitting && completionConfirm?.project?.id === p.id ? 'Completing…' : 'Project completed'}
                             </button>
                           </div>
                         </div>
@@ -477,10 +582,10 @@ export function BookingDetail() {
                                         <button
                                           type="button"
                                           className={styles.sessionSmBtn}
-                                          onClick={() => handleWrapSession(s.id)}
-                                          disabled={sessionActionId === s.id}
+                                          onClick={() => handleWrapSessionClick(s, p)}
+                                          disabled={completionSubmitting}
                                         >
-                                          {sessionActionId === s.id ? 'Wrapping…' : 'Mark completed'}
+                                          {completionSubmitting && completionConfirm?.session?.id === s.id ? 'Completing…' : 'Mark completed'}
                                         </button>
                                       )}
                                     </td>
@@ -511,6 +616,153 @@ export function BookingDetail() {
           </div>
         </div>
       </div>
+
+      {/* Edit disabled (booking completed) dialog */}
+      {showEditDisabledDialog && (
+        <div className={styles.completionModalBackdrop} role="dialog" aria-modal="true" aria-labelledby="edit-disabled-modal-title">
+          <div className={styles.completionModal}>
+            <h2 id="edit-disabled-modal-title" className={styles.completionModalTitle}>
+              Edit booking unavailable
+            </h2>
+            <p className={styles.completionModalSummary}>
+              This booking cannot be edited because it has been marked as completed. Completed sessions lock the booking from further changes.
+            </p>
+            <div className={styles.completionModalActions}>
+              <button type="button" onClick={() => setShowEditDisabledDialog(false)} className={styles.completionModalCancel}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Completion payment confirmation modal */}
+      {completionConfirm && (
+        <div className={styles.completionModalBackdrop} role="dialog" aria-modal="true" aria-labelledby="completion-modal-title">
+          <div className={styles.completionModal}>
+            <h2 id="completion-modal-title" className={styles.completionModalTitle}>
+              {completionConfirm.type === 'session' ? 'Mark session completed' : 'Mark project completed'}
+            </h2>
+            {completionConfirm.amount <= 0 ? (
+              <p className={styles.completionModalSummary}>
+                No payment due for this {completionConfirm.type === 'session' ? 'session' : 'project'}. Confirm completion?
+              </p>
+            ) : (
+              <>
+                <p className={styles.completionModalSummary}>
+                  Payment due: <strong>{formatRupiah(completionConfirm.amount)}</strong>
+                  {completionConfirm.type === 'session' && completionConfirm.project?.pricingType === 'hourly' && (
+                    <span className={styles.completionModalHint}>
+                      {' '}({completionConfirm.session?.actualHours ?? 0} hrs × {formatRupiah(completionConfirm.project?.hourlyRate)}/hr)
+                    </span>
+                  )}
+                </p>
+                {(booking.availableDepositTotal ?? 0) > 0 && (
+                  <p className={styles.completionModalDeposit}>
+                    Customer deposit: Studio {formatRupiah(booking.availableDepositStudio ?? 0)} · Artist {formatRupiah(booking.availableDepositArtist ?? 0)}
+                  </p>
+                )}
+                <div className={styles.completionModalOptions}>
+                  {(booking.availableDepositTotal ?? 0) >= completionConfirm.amount && (
+                    <label className={styles.completionModalOption}>
+                      <input
+                        type="radio"
+                        name="completionPaymentOption"
+                        checked={completionPaymentOption === 'deduct_only'}
+                        onChange={() => setCompletionPaymentOption('deduct_only')}
+                      />
+                      <span>Deduct from deposit only</span>
+                      {(booking.availableDepositStudio ?? 0) > 0 && (booking.availableDepositArtist ?? 0) > 0 && (
+                        <select
+                          value={completionDepositSource}
+                          onChange={(e) => setCompletionDepositSource(e.target.value)}
+                          className={styles.completionModalSelect}
+                        >
+                          <option value="studio">Use studio deposit</option>
+                          <option value="artist">Use artist deposit</option>
+                        </select>
+                      )}
+                    </label>
+                  )}
+                  {completionConfirm.amount > (booking.availableDepositTotal ?? 0) && (booking.availableDepositTotal ?? 0) > 0 && (
+                    <label className={styles.completionModalOption}>
+                      <input
+                        type="radio"
+                        name="completionPaymentOption"
+                        checked={completionPaymentOption === 'combine'}
+                        onChange={() => setCompletionPaymentOption('combine')}
+                      />
+                      <span>Combine: deduct from deposit and pay remainder</span>
+                      {(booking.availableDepositStudio ?? 0) > 0 && (booking.availableDepositArtist ?? 0) > 0 && (
+                        <select
+                          value={completionDepositSource}
+                          onChange={(e) => setCompletionDepositSource(e.target.value)}
+                          className={styles.completionModalSelect}
+                        >
+                          <option value="studio">Use studio deposit first</option>
+                          <option value="artist">Use artist deposit first</option>
+                        </select>
+                      )}
+                      <select
+                        value={completionPaymentDestinationId}
+                        onChange={(e) => setCompletionPaymentDestinationId(e.target.value)}
+                        className={styles.completionModalSelect}
+                        required={completionPaymentOption === 'combine'}
+                      >
+                        <option value="">Select account for remainder</option>
+                        {paymentDestinations
+                          .filter((d) => d.isActive && (d.studioId === booking.studioId || d.artistId === booking.artistId))
+                          .map((d) => (
+                            <option key={d.id} value={d.id}>
+                              {d.name}{d.account ? ` — ${d.account}` : ''} ({d.ownerType})
+                            </option>
+                          ))}
+                      </select>
+                    </label>
+                  )}
+                  <label className={styles.completionModalOption}>
+                    <input
+                      type="radio"
+                      name="completionPaymentOption"
+                      checked={completionPaymentOption === 'pay_full'}
+                      onChange={() => setCompletionPaymentOption('pay_full')}
+                    />
+                    <span>Pay full amount (new payment)</span>
+                    <select
+                      value={completionPaymentDestinationId}
+                      onChange={(e) => setCompletionPaymentDestinationId(e.target.value)}
+                      className={styles.completionModalSelect}
+                      required={completionPaymentOption === 'pay_full'}
+                    >
+                      <option value="">Select payment account</option>
+                      {paymentDestinations
+                        .filter((d) => d.isActive && (d.studioId === booking.studioId || d.artistId === booking.artistId))
+                        .map((d) => (
+                          <option key={d.id} value={d.id}>
+                            {d.name}{d.account ? ` — ${d.account}` : ''} ({d.ownerType})
+                          </option>
+                        ))}
+                    </select>
+                  </label>
+                </div>
+              </>
+            )}
+            <div className={styles.completionModalActions}>
+              <button type="button" onClick={closeCompletionConfirm} className={styles.completionModalCancel} disabled={completionSubmitting}>
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={doCompleteAndPay}
+                className={styles.completionModalConfirm}
+                disabled={completionSubmitting || (completionConfirm.amount > 0 && (completionPaymentOption === 'pay_full' || completionPaymentOption === 'combine') && !completionPaymentDestinationId)}
+              >
+                {completionSubmitting ? 'Completing…' : completionConfirm.amount <= 0 ? 'Confirm completion' : 'Confirm payment & complete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

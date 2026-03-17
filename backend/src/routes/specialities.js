@@ -1,12 +1,18 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { getStudioId } from '../middleware/auth.js';
 
 const prisma = new PrismaClient();
 export const specialitiesRouter = Router();
 
 specialitiesRouter.get('/', async (req, res) => {
   try {
-    const list = await prisma.speciality.findMany({ orderBy: { createdAt: 'desc' } });
+    const studioId = getStudioId(req);
+    if (!studioId) return res.status(400).json({ error: 'studioId required' });
+    const list = await prisma.speciality.findMany({
+      where: { studioId },
+      orderBy: { createdAt: 'desc' },
+    });
     res.json(list);
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -15,9 +21,11 @@ specialitiesRouter.get('/', async (req, res) => {
 
 specialitiesRouter.post('/', async (req, res) => {
   try {
+    const studioId = getStudioId(req);
+    if (!studioId) return res.status(400).json({ error: 'studioId required' });
     const { name } = req.body;
     if (!name || !name.trim()) return res.status(400).json({ error: 'Name is required' });
-    const item = await prisma.speciality.create({ data: { name: name.trim() } });
+    const item = await prisma.speciality.create({ data: { studioId, name: name.trim() } });
     res.status(201).json(item);
   } catch (e) {
     if (e.code === 'P2002') return res.status(409).json({ error: 'Speciality already exists' });
@@ -27,8 +35,12 @@ specialitiesRouter.post('/', async (req, res) => {
 
 specialitiesRouter.patch('/:id', async (req, res) => {
   try {
+    const studioId = getStudioId(req);
+    if (!studioId) return res.status(400).json({ error: 'studioId required' });
     const { name } = req.body;
     if (!name || !name.trim()) return res.status(400).json({ error: 'Name is required' });
+    const existing = await prisma.speciality.findFirst({ where: { id: req.params.id, studioId } });
+    if (!existing) return res.status(404).json({ error: 'Not found' });
     const item = await prisma.speciality.update({
       where: { id: req.params.id },
       data: { name: name.trim() },
@@ -43,6 +55,10 @@ specialitiesRouter.patch('/:id', async (req, res) => {
 
 specialitiesRouter.delete('/:id', async (req, res) => {
   try {
+    const studioId = getStudioId(req);
+    if (!studioId) return res.status(400).json({ error: 'studioId required' });
+    const existing = await prisma.speciality.findFirst({ where: { id: req.params.id, studioId } });
+    if (!existing) return res.status(404).json({ error: 'Not found' });
     await prisma.speciality.delete({ where: { id: req.params.id } });
     res.json({ ok: true });
   } catch (e) {

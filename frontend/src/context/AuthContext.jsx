@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { API } from '../api';
+import { API, setApiStudioId } from '../api';
 
 const STORAGE_KEY = 'postink_auth';
 
@@ -34,6 +34,7 @@ export function AuthProvider({ children }) {
       .then((data) => {
         setUser(data);
         localStorage.setItem(STORAGE_KEY + '_user', JSON.stringify(data));
+        setApiStudioId(data.studioId || data.studio?.id || null);
       })
       .catch(() => {
         persist(null, null);
@@ -43,9 +44,11 @@ export function AuthProvider({ children }) {
 
   const login = useCallback((newToken, newUser) => {
     persist(newToken, newUser);
+    setApiStudioId(newUser?.studioId || newUser?.studio?.id || null);
   }, [persist]);
 
   const logout = useCallback(() => {
+    setApiStudioId(null);
     persist(null, null);
   }, [persist]);
 

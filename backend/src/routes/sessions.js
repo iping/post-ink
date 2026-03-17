@@ -1,15 +1,19 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { generateNumericId } from '../utils/id.js';
+import { getStudioId } from '../middleware/auth.js';
 
 const prisma = new PrismaClient();
 export const sessionsRouter = Router();
 
-// GET /api/sessions — list (optional ?projectId= to filter)
+// GET /api/sessions — list (scoped by project's booking studio)
 sessionsRouter.get('/', async (req, res) => {
   try {
+    const effectiveStudioId = getStudioId(req);
+    if (!effectiveStudioId) return res.status(400).json({ error: 'studioId required' });
     const { projectId } = req.query;
-    const where = projectId ? { projectId } : {};
+    const where = { project: { booking: { studioId: effectiveStudioId } } };
+    if (projectId) where.projectId = projectId;
     const sessions = await prisma.session.findMany({
       where,
       include: { project: { include: { booking: { include: { artist: true, customer: true } } } } },
@@ -24,8 +28,10 @@ sessionsRouter.get('/', async (req, res) => {
 // GET /api/sessions/:id
 sessionsRouter.get('/:id', async (req, res) => {
   try {
-    const session = await prisma.session.findUnique({
-      where: { id: req.params.id },
+    const effectiveStudioId = getStudioId(req);
+    if (!effectiveStudioId) return res.status(400).json({ error: 'studioId required' });
+    const session = await prisma.session.findFirst({
+      where: { id: req.params.id, project: { booking: { studioId: effectiveStudioId } } },
       include: { project: { include: { booking: { include: { artist: true, customer: true, studio: true } } } } },
     });
     if (!session) return res.status(404).json({ error: 'Session not found' });
@@ -35,13 +41,19 @@ sessionsRouter.get('/:id', async (req, res) => {
   }
 });
 
-// POST /api/sessions — create (projectId required; every project must have at least 1 session)
+// POST /api/sessions — create (projectId required)
 sessionsRouter.post('/', async (req, res) => {
   try {
+    const effectiveStudioId = getStudioId(req);
+    if (!effectiveStudioId) return res.status(400).json({ error: 'studioId required' });
     const { projectId, date, startTime, endTime, actualHours, notes } = req.body;
     if (!projectId || !date) {
       return res.status(400).json({ error: 'projectId and date required' });
     }
+    const project = await prisma.project.findFirst({
+      where: { id: projectId, booking: { studioId: effectiveStudioId } },
+    });
+    if (!project) return res.status(400).json({ error: 'Project not found' });
     const id = await generateNumericId(prisma, 'session');
     const data = {
       id,
@@ -68,6 +80,12 @@ const SESSION_STATUSES = ['scheduled', 'in_progress', 'paused', 'completed'];
 // PATCH /api/sessions/:id — update fields and/or transition status (start/pause/stop)
 sessionsRouter.patch('/:id', async (req, res) => {
   try {
+    const effectiveStudioId = getStudioId(req);
+    if (!effectiveStudioId) return res.status(400).json({ error: 'studioId required' });
+    const existing = await prisma.session.findFirst({
+      where: { id: req.params.id, project: { booking: { studioId: effectiveStudioId } } },
+    });
+    if (!existing) return res.status(404).json({ error: 'Session not found' });
     const { date, startTime, endTime, actualHours, notes, status } = req.body;
     const data = {};
     if (date !== undefined) data.date = String(date).trim();
@@ -105,7 +123,11 @@ sessionsRouter.patch('/:id', async (req, res) => {
 // DELETE /api/sessions/:id (only if project has more than 1 session)
 sessionsRouter.delete('/:id', async (req, res) => {
   try {
-    const session = await prisma.session.findUnique({ where: { id: req.params.id } });
+    const effectiveStudioId = getStudioId(req);
+    if (!effectiveStudioId) return res.status(400).json({ error: 'studioId required' });
+    const session = await prisma.session.findFirst({
+      where: { id: req.params.id, project: { booking: { studioId: effectiveStudioId } } },
+    });
     if (!session) return res.status(404).json({ error: 'Session not found' });
     const count = await prisma.session.count({ where: { projectId: session.projectId } });
     if (count <= 1) {

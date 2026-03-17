@@ -4,7 +4,6 @@ import { getArtists, uploadUrl, updateArtistStatus } from '../api';
 import { formatRupiah } from '../currency';
 import styles from './ArtistList.module.css';
 import layoutStyles from './Studio.module.css';
-import { IdWithCopy } from '../components/IdWithCopy';
 
 const ROWS_PER_PAGE = 8;
 
@@ -89,11 +88,6 @@ export function ArtistList() {
       <div className={layoutStyles.sectionHead}>
         <div>
           <h2>Tattoo Artist</h2>
-          {artists.length > 0 ? (
-            <span className={layoutStyles.countHint}>
-              Showing {(page - 1) * ROWS_PER_PAGE + 1}–{Math.min(page * ROWS_PER_PAGE, artists.length)} of {artists.length}
-            </span>
-          ) : null}
         </div>
         <Link to="/manage/artists/new" className={layoutStyles.addBtn}>+ Add Artist</Link>
       </div>
@@ -102,7 +96,6 @@ export function ArtistList() {
             <thead>
               <tr>
                 <th>No.</th>
-                <th>ID</th>
                 <th>Photo</th>
                 <th>Name</th>
                 <th>Speciality</th>
@@ -114,7 +107,7 @@ export function ArtistList() {
             <tbody>
               {paginatedArtists.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className={styles.emptyCell}>
+                  <td colSpan={7} className={styles.emptyCell}>
                     No artists yet. <Link to="/manage/artists/new" className={layoutStyles.addBtn}>Add your first artist</Link>
                   </td>
                 </tr>
@@ -126,7 +119,6 @@ export function ArtistList() {
                   return (
                     <tr key={a.id} className={a.isActive === false ? styles.rowInactive : ''}>
                       <td className={styles.cellNum}>{rowNum}</td>
-                      <td className={layoutStyles.cellId}><IdWithCopy id={a.id} /></td>
                       <td className={styles.cellPhoto}>
                         {thumb ? (
                           <img src={uploadUrl(thumb)} alt={a.name} className={styles.photoThumb} />

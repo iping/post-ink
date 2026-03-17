@@ -1,9 +1,16 @@
 .wrap {
   min-height: 80vh;
+  min-height: 80dvh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
+  padding: 1rem;
+}
+
+@media (min-width: 600px) {
+  .wrap {
+    padding: 2rem;
+  }
 }
 
 .card {
@@ -12,8 +19,14 @@
   background: var(--surface, #fff);
   border: 1px solid var(--border, #e0e0e0);
   border-radius: var(--radius-lg, 12px);
-  padding: 2rem;
+  padding: 1.5rem;
   box-shadow: var(--shadow-md, 0 4px 12px rgba(0,0,0,0.08));
+}
+
+@media (min-width: 600px) {
+  .card {
+    padding: 2rem;
+  }
 }
 
 .title {

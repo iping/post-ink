@@ -2,42 +2,62 @@ const API_BASE = import.meta.env.VITE_API_URL || '';
 export const API = API_BASE ? `${API_BASE.replace(/\/$/, '')}/api` : '/api';
 const AUTH_TOKEN_KEY = 'postink_auth_token';
 
+let _apiStudioId = null;
+export function setApiStudioId(id) {
+  _apiStudioId = id;
+}
+export function getApiStudioId() {
+  return _apiStudioId;
+}
+
 function authHeaders() {
   const token = typeof localStorage !== 'undefined' ? localStorage.getItem(AUTH_TOKEN_KEY) : null;
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-export async function getArtists(opts = {}) {
-  const params = new URLSearchParams();
-  if (opts.activeOnly) params.set('activeOnly', 'true');
-  const qs = params.toString();
-  const url = qs ? `${API}/artists?${qs}` : `${API}/artists`;
-  const res = await fetch(url);
+function mergeStudioParams(params) {
+  const p = { ...params };
+  if (_apiStudioId) p.studioId = _apiStudioId;
+  return p;
+}
+
+async function apiFetch(url, options = {}) {
+  const headers = { ...authHeaders(), ...options.headers };
+  const res = await fetch(url, { ...options, headers });
   if (!res.ok) throw new Error(await res.text());
+  return res;
+}
+
+export async function getArtists(opts = {}) {
+  const params = mergeStudioParams(opts);
+  const q = new URLSearchParams();
+  if (params.activeOnly) q.set('activeOnly', 'true');
+  if (params.studioId) q.set('studioId', params.studioId);
+  const qs = q.toString();
+  const url = qs ? `${API}/artists?${qs}` : `${API}/artists`;
+  const res = await apiFetch(url);
   return res.json();
 }
 
 export async function getArtist(id) {
-  const res = await fetch(`${API}/artists/${id}`);
-  if (!res.ok) throw new Error(await res.text());
+  const q = _apiStudioId ? `?studioId=${_apiStudioId}` : '';
+  const res = await apiFetch(`${API}/artists/${id}${q}`);
   return res.json();
 }
 
 export async function createArtist(formData) {
-  const res = await fetch(`${API}/artists`, {
+  const res = await apiFetch(`${API}/artists`, {
     method: 'POST',
     body: formData,
   });
-  if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
 
 export async function updateArtist(id, formData) {
-  const res = await fetch(`${API}/artists/${id}`, {
+  const res = await apiFetch(`${API}/artists/${id}`, {
     method: 'PATCH',
     body: formData,
   });
-  if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
 
@@ -48,44 +68,40 @@ export async function updateArtistStatus(id, isActive) {
 }
 
 export async function deleteArtist(id) {
-  const res = await fetch(`${API}/artists/${id}`, { method: 'DELETE' });
-  if (!res.ok) throw new Error(await res.text());
+  await apiFetch(`${API}/artists/${id}`, { method: 'DELETE' });
 }
 
 export async function getAvailability(artistId, from, to) {
   const q = new URLSearchParams();
   if (from) q.set('from', from);
   if (to) q.set('to', to);
+  if (_apiStudioId) q.set('studioId', _apiStudioId);
   const url = `${API}/artists/${artistId}/availability` + (q.toString() ? `?${q}` : '');
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(await res.text());
+  const res = await apiFetch(url);
   return res.json();
 }
 
 export async function addAvailability(artistId, slotOrSlots) {
   const body = Array.isArray(slotOrSlots) ? { slots: slotOrSlots } : slotOrSlots;
-  const res = await fetch(`${API}/artists/${artistId}/availability`, {
+  const res = await apiFetch(`${API}/artists/${artistId}/availability`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
-  if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
 
 export async function updateAvailabilitySlot(artistId, slotId, data) {
-  const res = await fetch(`${API}/artists/${artistId}/availability/${slotId}`, {
+  const res = await apiFetch(`${API}/artists/${artistId}/availability/${slotId}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
 
 export async function deleteAvailabilitySlot(artistId, slotId) {
-  const res = await fetch(`${API}/artists/${artistId}/availability/${slotId}`, { method: 'DELETE' });
-  if (!res.ok) throw new Error(await res.text());
+  await apiFetch(`${API}/artists/${artistId}/availability/${slotId}`, { method: 'DELETE' });
 }
 
 export function uploadUrl(path) {
@@ -95,110 +111,101 @@ export function uploadUrl(path) {
 
 // ----- Studio: Bookings -----
 export async function getBookings(params = {}) {
-  const q = new URLSearchParams(params);
+  const p = mergeStudioParams(params);
+  const q = new URLSearchParams(p);
   const url = `${API}/bookings` + (q.toString() ? `?${q}` : '');
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(await res.text());
+  const res = await apiFetch(url);
   return res.json();
 }
 
 export async function getBooking(id) {
-  const res = await fetch(`${API}/bookings/${id}`);
-  if (!res.ok) throw new Error(await res.text());
+  const q = _apiStudioId ? `?studioId=${_apiStudioId}` : '';
+  const res = await apiFetch(`${API}/bookings/${id}${q}`);
   return res.json();
 }
 
 export async function createBooking(data) {
-  const res = await fetch(`${API}/bookings`, {
+  const res = await apiFetch(`${API}/bookings`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
 
 export async function updateBooking(id, data) {
-  const res = await fetch(`${API}/bookings/${id}`, {
+  const res = await apiFetch(`${API}/bookings/${id}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
 
 export async function deleteBooking(id) {
-  const res = await fetch(`${API}/bookings/${id}`, { method: 'DELETE' });
-  if (!res.ok) throw new Error(await res.text());
+  await apiFetch(`${API}/bookings/${id}`, { method: 'DELETE' });
 }
 
 // ----- Projects (after booking: fixed or hourly rate) -----
 export async function getProjects(params = {}) {
-  const q = new URLSearchParams(params);
+  const p = mergeStudioParams(params);
+  const q = new URLSearchParams(p);
   const url = `${API}/projects` + (q.toString() ? `?${q}` : '');
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(await res.text());
+  const res = await apiFetch(url);
   return res.json();
 }
 
 export async function createProject(data) {
-  const res = await fetch(`${API}/projects`, {
+  const res = await apiFetch(`${API}/projects`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
 
 export async function updateProject(id, data) {
-  const res = await fetch(`${API}/projects/${id}`, {
+  const res = await apiFetch(`${API}/projects/${id}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
 
 export async function deleteProject(id) {
-  const res = await fetch(`${API}/projects/${id}`, { method: 'DELETE' });
-  if (!res.ok) throw new Error(await res.text());
+  await apiFetch(`${API}/projects/${id}`, { method: 'DELETE' });
 }
 
 // ----- Sessions (each project has minimum 1 session) -----
 export async function getSessions(params = {}) {
-  const q = new URLSearchParams(params);
+  const p = mergeStudioParams(params);
+  const q = new URLSearchParams(p);
   const url = `${API}/sessions` + (q.toString() ? `?${q}` : '');
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(await res.text());
+  const res = await apiFetch(url);
   return res.json();
 }
 
 export async function createSession(data) {
-  const res = await fetch(`${API}/sessions`, {
+  const res = await apiFetch(`${API}/sessions`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
 
 export async function updateSession(id, data) {
-  const res = await fetch(`${API}/sessions/${id}`, {
+  const res = await apiFetch(`${API}/sessions/${id}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
 
 export async function deleteSession(id) {
-  const res = await fetch(`${API}/sessions/${id}`, { method: 'DELETE' });
-  if (!res.ok) throw new Error(await res.text());
+  await apiFetch(`${API}/sessions/${id}`, { method: 'DELETE' });
 }
 
 // POST /api/uploads/preference — max 3 images, 2MB each. Returns { urls: string[] }.
@@ -207,7 +214,7 @@ export async function uploadPreferenceImages(files) {
   for (let i = 0; i < files.length; i++) {
     formData.append('images', files[i]);
   }
-  const res = await fetch(`${API}/uploads/preference`, {
+  const res = await apiFetch(`${API}/uploads/preference`, {
     method: 'POST',
     body: formData,
   });
@@ -222,7 +229,7 @@ export async function uploadPreferenceImages(files) {
 export async function uploadPaymentEvidence(file) {
   const formData = new FormData();
   formData.append('evidence', file);
-  const res = await fetch(`${API}/uploads/payment-evidence`, {
+  const res = await apiFetch(`${API}/uploads/payment-evidence`, {
     method: 'POST',
     body: formData,
   });
@@ -235,123 +242,132 @@ export async function uploadPaymentEvidence(file) {
 
 // ----- Studio: Payments -----
 export async function getPayments(params = {}) {
-  const q = new URLSearchParams(params);
+  const p = mergeStudioParams(params);
+  const q = new URLSearchParams(p);
   const url = `${API}/payments` + (q.toString() ? `?${q}` : '');
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(await res.text());
+  const res = await apiFetch(url);
   return res.json();
 }
 
 export async function createPayment(data) {
-  const res = await fetch(`${API}/payments`, {
+  const res = await apiFetch(`${API}/payments`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
 
 export async function updatePayment(id, data) {
-  const res = await fetch(`${API}/payments/${id}`, {
+  const res = await apiFetch(`${API}/payments/${id}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
 
 export async function deletePayment(id) {
-  const res = await fetch(`${API}/payments/${id}`, { method: 'DELETE' });
-  if (!res.ok) throw new Error(await res.text());
+  await apiFetch(`${API}/payments/${id}`, { method: 'DELETE' });
 }
 
 // ----- Customers & Studios (for dropdowns) -----
 export async function getCustomers(params = {}) {
+  const p = mergeStudioParams(params);
   const q = new URLSearchParams();
-  Object.entries(params).forEach(([key, value]) => {
+  Object.entries(p).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== '') q.set(key, value);
   });
   const url = q.toString() ? `${API}/customers?${q}` : `${API}/customers`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(await res.text());
+  const res = await apiFetch(url);
   return res.json();
 }
 
 export async function createCustomer(data) {
-  const res = await fetch(`${API}/customers`, {
+  const res = await apiFetch(`${API}/customers`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
 
 export async function updateCustomer(id, data) {
-  const res = await fetch(`${API}/customers/${id}`, {
+  const res = await apiFetch(`${API}/customers/${id}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
 
 export async function deleteCustomer(id) {
-  const res = await fetch(`${API}/customers/${id}`, { method: 'DELETE' });
-  if (!res.ok) throw new Error(await res.text());
+  await apiFetch(`${API}/customers/${id}`, { method: 'DELETE' });
+}
+
+/** Link customer to the current studio (add to one more studio). */
+export async function addCustomerToStudio(customerId) {
+  const res = await apiFetch(`${API}/customers/${customerId}/studios`, { method: 'POST' });
+  return res.json();
 }
 
 export async function getStudios() {
-  const res = await fetch(`${API}/studios`);
-  if (!res.ok) throw new Error(await res.text());
+  const res = await apiFetch(`${API}/studios`);
   return res.json();
 }
 
 export async function createStudio(data) {
-  const res = await fetch(`${API}/studios`, {
+  const res = await apiFetch(`${API}/studios`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function getStudio(id) {
+  const res = await apiFetch(`${API}/studios/${id}`);
+  return res.json();
+}
+
+export async function updateStudio(id, data) {
+  const res = await apiFetch(`${API}/studios/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
   return res.json();
 }
 
 // ----- Studio commissions (artist–studio % agreement) -----
 export async function getCommissions(params = {}) {
-  const q = new URLSearchParams(params);
+  const p = mergeStudioParams(params);
+  const q = new URLSearchParams(p);
   const url = `${API}/commissions` + (q.toString() ? `?${q}` : '');
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(await res.text());
+  const res = await apiFetch(url);
   return res.json();
 }
 
 export async function createCommission(data) {
-  const res = await fetch(`${API}/commissions`, {
+  const res = await apiFetch(`${API}/commissions`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
 
 export async function updateCommission(id, data) {
-  const res = await fetch(`${API}/commissions/${id}`, {
+  const res = await apiFetch(`${API}/commissions/${id}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
 
 export async function deleteCommission(id) {
-  const res = await fetch(`${API}/commissions/${id}`, { method: 'DELETE' });
-  if (!res.ok) throw new Error(await res.text());
+  await apiFetch(`${API}/commissions/${id}`, { method: 'DELETE' });
 }
 
 // Parse error body: use JSON { error } if present, else raw text
@@ -364,15 +380,18 @@ async function errorMessage(res) {
   return text || res.statusText || 'Request failed';
 }
 
-// ----- Specialities (master list CMS) -----
+// ----- Specialities (per-studio CMS) -----
 export async function getSpecialities() {
-  const res = await fetch(`${API}/specialities`);
+  const p = mergeStudioParams({});
+  const q = new URLSearchParams(p);
+  const url = q.toString() ? `${API}/specialities?${q}` : `${API}/specialities`;
+  const res = await apiFetch(url);
   if (!res.ok) throw new Error(await errorMessage(res));
   return res.json();
 }
 
 export async function createSpeciality(data) {
-  const res = await fetch(`${API}/specialities`, {
+  const res = await apiFetch(`${API}/specialities`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -382,7 +401,7 @@ export async function createSpeciality(data) {
 }
 
 export async function updateSpeciality(id, data) {
-  const res = await fetch(`${API}/specialities/${id}`, {
+  const res = await apiFetch(`${API}/specialities/${id}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -392,21 +411,22 @@ export async function updateSpeciality(id, data) {
 }
 
 export async function deleteSpeciality(id) {
-  const res = await fetch(`${API}/specialities/${id}`, { method: 'DELETE' });
+  const res = await apiFetch(`${API}/specialities/${id}`, { method: 'DELETE' });
   if (!res.ok) throw new Error(await errorMessage(res));
 }
 
 // ----- Payment destinations (where booking fee can be paid) -----
 export async function getPaymentDestinations(params = {}) {
-  const q = new URLSearchParams(params);
+  const p = mergeStudioParams(params);
+  const q = new URLSearchParams(p);
   const url = `${API}/payment-destinations` + (q.toString() ? `?${q}` : '');
-  const res = await fetch(url);
+  const res = await apiFetch(url);
   if (!res.ok) throw new Error(await errorMessage(res));
   return res.json();
 }
 
 export async function createPaymentDestination(data) {
-  const res = await fetch(`${API}/payment-destinations`, {
+  const res = await apiFetch(`${API}/payment-destinations`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -416,7 +436,7 @@ export async function createPaymentDestination(data) {
 }
 
 export async function updatePaymentDestination(id, data) {
-  const res = await fetch(`${API}/payment-destinations/${id}`, {
+  const res = await apiFetch(`${API}/payment-destinations/${id}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -426,7 +446,7 @@ export async function updatePaymentDestination(id, data) {
 }
 
 export async function deletePaymentDestination(id) {
-  const res = await fetch(`${API}/payment-destinations/${id}`, { method: 'DELETE' });
+  const res = await apiFetch(`${API}/payment-destinations/${id}`, { method: 'DELETE' });
   if (!res.ok) throw new Error(await errorMessage(res));
 }
 
@@ -445,21 +465,21 @@ export async function login(email, password) {
 }
 
 export async function getUsers() {
-  const res = await fetch(`${API}/users`, { headers: authHeaders() });
+  const res = await apiFetch(`${API}/users`);
   if (!res.ok) throw new Error(await errorMessage(res));
   return res.json();
 }
 
 export async function getUser(id) {
-  const res = await fetch(`${API}/users/${id}`, { headers: authHeaders() });
+  const res = await apiFetch(`${API}/users/${id}`);
   if (!res.ok) throw new Error(await errorMessage(res));
   return res.json();
 }
 
 export async function createUser(data) {
-  const res = await fetch(`${API}/users`, {
+  const res = await apiFetch(`${API}/users`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
   if (!res.ok) throw new Error(await errorMessage(res));
@@ -467,9 +487,9 @@ export async function createUser(data) {
 }
 
 export async function updateUser(id, data) {
-  const res = await fetch(`${API}/users/${id}`, {
+  const res = await apiFetch(`${API}/users/${id}`, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
   if (!res.ok) throw new Error(await errorMessage(res));
@@ -477,6 +497,6 @@ export async function updateUser(id, data) {
 }
 
 export async function deleteUser(id) {
-  const res = await fetch(`${API}/users/${id}`, { method: 'DELETE', headers: authHeaders() });
+  const res = await apiFetch(`${API}/users/${id}`, { method: 'DELETE' });
   if (!res.ok) throw new Error(await errorMessage(res));
 }

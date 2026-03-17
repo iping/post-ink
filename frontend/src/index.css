@@ -26,6 +26,10 @@
   --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.1);
   --transition: 0.15s ease;
+  /* Mobile-first: safe area and touch */
+  --safe-top: env(safe-area-inset-top, 0);
+  --safe-bottom: env(safe-area-inset-bottom, 0);
+  --touch-min: 44px;
 }
 
 * {
@@ -34,7 +38,12 @@
 
 body {
   margin: 0;
+  padding-top: var(--safe-top);
+  padding-right: env(safe-area-inset-right, 0);
+  padding-bottom: var(--safe-bottom);
+  padding-left: env(safe-area-inset-left, 0);
   font-family: var(--font);
+  font-size: 16px;
   background: var(--bg-warm);
   color: var(--text);
   line-height: 1.6;

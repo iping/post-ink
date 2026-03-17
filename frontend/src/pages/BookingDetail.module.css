@@ -1163,3 +1163,130 @@
 .sessionFormActions button[type="button"]:hover {
   background: var(--surface-hover);
 }
+
+/* Completion payment confirmation modal */
+.completionModalBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 1rem;
+}
+
+.completionModal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem 1.75rem;
+  max-width: 420px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+}
+
+.completionModalTitle {
+  margin: 0 0 1rem;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.completionModalSummary {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+.completionModalHint {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: normal;
+}
+
+.completionModalDeposit {
+  margin: 0 0 1rem;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+}
+
+.completionModalOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.completionModalOption {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.completionModalOption input[type="radio"] {
+  margin: 0;
+}
+
+.completionModalSelect {
+  width: 100%;
+  max-width: 280px;
+  padding: 0.45rem 0.6rem;
+  margin-left: 1.5rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.85rem;
+}
+
+.completionModalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.completionModalCancel {
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.completionModalCancel:hover:not(:disabled) {
+  background: var(--surface-hover);
+}
+
+.completionModalCancel:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.completionModalConfirm {
+  padding: 0.5rem 1.25rem;
+  border-radius: var(--radius);
+  border: none;
+  background: var(--accent);
+  color: var(--surface);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.completionModalConfirm:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.completionModalConfirm:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

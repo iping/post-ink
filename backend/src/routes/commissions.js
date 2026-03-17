@@ -1,15 +1,17 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { getStudioId } from '../middleware/auth.js';
 
 const prisma = new PrismaClient();
 export const commissionsRouter = Router();
 
-// GET /api/commissions — list all (with studio, artist). Query: studioId, artistId
+// GET /api/commissions — list (scoped by studio)
 commissionsRouter.get('/', async (req, res) => {
   try {
-    const { studioId, artistId } = req.query;
-    const where = {};
-    if (studioId) where.studioId = studioId;
+    const effectiveStudioId = getStudioId(req);
+    if (!effectiveStudioId) return res.status(400).json({ error: 'studioId required' });
+    const { artistId } = req.query;
+    const where = { studioId: effectiveStudioId };
     if (artistId) where.artistId = artistId;
     const list = await prisma.studioCommission.findMany({
       where,
@@ -25,8 +27,10 @@ commissionsRouter.get('/', async (req, res) => {
 // GET /api/commissions/:id
 commissionsRouter.get('/:id', async (req, res) => {
   try {
-    const row = await prisma.studioCommission.findUnique({
-      where: { id: req.params.id },
+    const effectiveStudioId = getStudioId(req);
+    if (!effectiveStudioId) return res.status(400).json({ error: 'studioId required' });
+    const row = await prisma.studioCommission.findFirst({
+      where: { id: req.params.id, studioId: effectiveStudioId },
       include: { studio: true, artist: true },
     });
     if (!row) return res.status(404).json({ error: 'Commission not found' });
@@ -39,10 +43,12 @@ commissionsRouter.get('/:id', async (req, res) => {
 // POST /api/commissions
 commissionsRouter.post('/', async (req, res) => {
   try {
-    const { studioId, artistId, commissionPercent } = req.body;
+    const effectiveStudioId = getStudioId(req);
+    if (!effectiveStudioId) return res.status(400).json({ error: 'studioId required' });
+    const { artistId, commissionPercent } = req.body;
     const row = await prisma.studioCommission.create({
       data: {
-        studioId,
+        studioId: effectiveStudioId,
         artistId,
         commissionPercent: Number(commissionPercent),
       },
@@ -58,6 +64,10 @@ commissionsRouter.post('/', async (req, res) => {
 // PATCH /api/commissions/:id
 commissionsRouter.patch('/:id', async (req, res) => {
   try {
+    const effectiveStudioId = getStudioId(req);
+    if (!effectiveStudioId) return res.status(400).json({ error: 'studioId required' });
+    const existing = await prisma.studioCommission.findFirst({ where: { id: req.params.id, studioId: effectiveStudioId } });
+    if (!existing) return res.status(404).json({ error: 'Commission not found' });
     const { commissionPercent } = req.body;
     const row = await prisma.studioCommission.update({
       where: { id: req.params.id },
@@ -74,6 +84,10 @@ commissionsRouter.patch('/:id', async (req, res) => {
 // DELETE /api/commissions/:id
 commissionsRouter.delete('/:id', async (req, res) => {
   try {
+    const effectiveStudioId = getStudioId(req);
+    if (!effectiveStudioId) return res.status(400).json({ error: 'studioId required' });
+    const existing = await prisma.studioCommission.findFirst({ where: { id: req.params.id, studioId: effectiveStudioId } });
+    if (!existing) return res.status(404).json({ error: 'Commission not found' });
     await prisma.studioCommission.delete({ where: { id: req.params.id } });
     res.status(204).end();
   } catch (e) {

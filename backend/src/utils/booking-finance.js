@@ -25,6 +25,28 @@ export function computeCompletedPaymentTotals(payments = []) {
   );
 }
 
+/** Available deposit = completed down_payment minus completed deposit_deduction, per receiver */
+export function computeAvailableDeposit(payments = []) {
+  const deposit = { studio: 0, artist: 0 };
+  const used = { studio: 0, artist: 0 };
+  for (const p of payments) {
+    if (p.status !== 'completed') continue;
+    const amount = Number(p.amount) || 0;
+    if (p.type === 'down_payment') {
+      if (p.receiverType === 'studio') deposit.studio += amount;
+      else if (p.receiverType === 'artist') deposit.artist += amount;
+    } else if (p.type === 'deposit_deduction') {
+      if (p.receiverType === 'studio') used.studio += amount;
+      else if (p.receiverType === 'artist') used.artist += amount;
+    }
+  }
+  return {
+    studio: Math.max(0, deposit.studio - used.studio),
+    artist: Math.max(0, deposit.artist - used.artist),
+    total: Math.max(0, deposit.studio - used.studio) + Math.max(0, deposit.artist - used.artist),
+  };
+}
+
 export function decorateBookingFinancials(booking) {
   const computedTotalAmount = computeBookingTotalAmount(booking);
   const paid = computeCompletedPaymentTotals(booking?.payments || []);
@@ -33,6 +55,7 @@ export function decorateBookingFinancials(booking) {
     : null;
   const status = remainingAmount != null && remainingAmount <= 0 && paid.paidTotal > 0 ? 'Paid' : 'Unpaid';
 
+  const availableDeposit = computeAvailableDeposit(booking?.payments || []);
   return {
     ...booking,
     computedTotalAmount,
@@ -41,6 +64,9 @@ export function decorateBookingFinancials(booking) {
     paidTotal: paid.paidTotal,
     remainingAmount,
     status,
+    availableDepositStudio: availableDeposit.studio,
+    availableDepositArtist: availableDeposit.artist,
+    availableDepositTotal: availableDeposit.total,
   };
 }
 

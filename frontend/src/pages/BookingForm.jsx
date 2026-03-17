@@ -14,7 +14,9 @@ import {
   uploadPreferenceImages,
   uploadPaymentEvidence,
   uploadUrl,
+  getApiStudioId,
 } from '../api';
+import { useAuth } from '../context/AuthContext';
 import { AvailabilityCalendar } from '../components/AvailabilityCalendar';
 import { formatRupiah, formatNumberWithDots, parseNumberInput } from '../currency';
 import styles from './BookingForm.module.css';
@@ -115,6 +117,8 @@ export function BookingForm() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { user } = useAuth();
+  const isSuperAdmin = user?.role === 'super_admin';
   const isEdit = Boolean(id);
   const preselectedCustomerId = searchParams.get('customerId') || '';
 
@@ -125,7 +129,7 @@ export function BookingForm() {
   const [error, setError] = useState(null);
 
   const [bookingForm, setBookingForm] = useState({
-    studioId: '',
+    studioId: getApiStudioId() || '',
     artistId: '',
     customerId: '',
     date: '',
@@ -210,9 +214,14 @@ export function BookingForm() {
         setStudios(s);
         setPaymentDestinations(Array.isArray(pd) ? pd : []);
         setPayments(Array.isArray(pm) ? pm : []);
-        if (s.length > 0 && !bookingForm.studioId) {
-          setBookingForm((f) => ({ ...f, studioId: s[0].id }));
-          setDepositReceiverType('studio');
+        if (!bookingForm.studioId) {
+          // Use the studio active in the header (super admin's selection or current user's studio)
+          const headerStudioId = getApiStudioId();
+          const defaultStudioId = headerStudioId || (!isSuperAdmin && user?.studio?.id ? user.studio.id : (s.length > 0 ? s[0].id : ''));
+          if (defaultStudioId) {
+            setBookingForm((f) => ({ ...f, studioId: defaultStudioId }));
+            setDepositReceiverType('studio');
+          }
         }
         if (!isEdit && preselectedCustomerId) {
           const selectedCustomer = c.find((customer) => customer.id === preselectedCustomerId);
@@ -224,7 +233,7 @@ export function BookingForm() {
       })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
-  }, [isEdit, preselectedCustomerId]);
+  }, [isEdit, preselectedCustomerId, isSuperAdmin, user?.studio?.id]);
 
   useEffect(() => {
     if (!bookingForm.customerId) return;
@@ -872,20 +881,14 @@ export function BookingForm() {
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
                 <h2>Studio &amp; artist</h2>
               </div>
-              <label className={styles.label}>
-                <span className={styles.labelText}>Studio</span>
-                <select
-                  className={styles.input}
-                  value={bookingForm.studioId}
-                  onChange={(e) => handleStudioChange(e.target.value)}
-                  aria-label="Select studio"
-                >
-                  <option value="">Select studio</option>
-                  {studios.map((s) => (
-                    <option key={s.id} value={s.id}>{s.name}</option>
-                  ))}
-                </select>
-              </label>
+              <p className={styles.helper} style={{ marginBottom: '0.5rem' }}>
+                Studio:{' '}
+                <strong>
+                  {studios.find((s) => s.id === bookingForm.studioId)?.name
+                    || user?.studio?.name
+                    || 'Select studio from header'}
+                </strong>
+              </p>
               <label className={styles.label}>
                 <span className={styles.labelText}>Tattoo artist</span>
                 {bookingForm.artistId && !artists.some((a) => a.id === bookingForm.artistId) && (
