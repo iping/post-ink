@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { API, setApiStudioId } from '../api';
+import { API, setApiStudioId, getStudios } from '../api';
 
 const STORAGE_KEY = 'postink_auth';
 
@@ -34,7 +34,17 @@ export function AuthProvider({ children }) {
       .then((data) => {
         setUser(data);
         localStorage.setItem(STORAGE_KEY + '_user', JSON.stringify(data));
-        setApiStudioId(data.studioId || data.studio?.id || null);
+        const userStudioId = data.studioId || data.studio?.id || null;
+        setApiStudioId(userStudioId);
+        // Super admin has no studio; set default to first studio so studio-scoped API calls have studioId
+        if (data.role === 'super_admin' && !userStudioId) {
+          getStudios()
+            .then((list) => {
+              const arr = Array.isArray(list) ? list : [];
+              if (arr.length > 0) setApiStudioId(arr[0].id);
+            })
+            .catch(() => {});
+        }
       })
       .catch(() => {
         persist(null, null);

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { getStudioId } from '../middleware/auth.js';
+import { getStudioIdOrSendError } from '../middleware/auth.js';
 
 const prisma = new PrismaClient();
 
@@ -10,8 +10,8 @@ const availabilityRouter = Router({ mergeParams: true });
 // GET — list availability for artist (artist must belong to user's studio)
 availabilityRouter.get('/', async (req, res) => {
   try {
-    const effectiveStudioId = getStudioId(req);
-    if (!effectiveStudioId) return res.status(400).json({ error: 'studioId required' });
+    const [effectiveStudioId, sent] = getStudioIdOrSendError(req, res);
+    if (sent) return;
     const { artistId } = req.params;
     const artist = await prisma.tattooArtist.findFirst({ where: { id: artistId, studioId: effectiveStudioId } });
     if (!artist) return res.status(404).json({ error: 'Artist not found' });
@@ -36,8 +36,8 @@ availabilityRouter.get('/', async (req, res) => {
 // POST — add slot(s). Body: { date, startTime, endTime, isAvailable } or { slots: [...] }
 availabilityRouter.post('/', async (req, res) => {
   try {
-    const effectiveStudioId = getStudioId(req);
-    if (!effectiveStudioId) return res.status(400).json({ error: 'studioId required' });
+    const [effectiveStudioId, sent] = getStudioIdOrSendError(req, res);
+    if (sent) return;
     const { artistId } = req.params;
     const artist = await prisma.tattooArtist.findFirst({ where: { id: artistId, studioId: effectiveStudioId } });
     if (!artist) return res.status(404).json({ error: 'Artist not found' });
@@ -54,8 +54,8 @@ availabilityRouter.post('/', async (req, res) => {
 // PATCH /:slotId — update one slot
 availabilityRouter.patch('/:slotId', async (req, res) => {
   try {
-    const effectiveStudioId = getStudioId(req);
-    if (!effectiveStudioId) return res.status(400).json({ error: 'studioId required' });
+    const [effectiveStudioId, sent] = getStudioIdOrSendError(req, res);
+    if (sent) return;
     const { artistId, slotId } = req.params;
     const artist = await prisma.tattooArtist.findFirst({ where: { id: artistId, studioId: effectiveStudioId } });
     if (!artist) return res.status(404).json({ error: 'Artist not found' });
@@ -76,8 +76,8 @@ availabilityRouter.patch('/:slotId', async (req, res) => {
 // DELETE /:slotId
 availabilityRouter.delete('/:slotId', async (req, res) => {
   try {
-    const effectiveStudioId = getStudioId(req);
-    if (!effectiveStudioId) return res.status(400).json({ error: 'studioId required' });
+    const [effectiveStudioId, sent] = getStudioIdOrSendError(req, res);
+    if (sent) return;
     const { artistId, slotId } = req.params;
     const artist = await prisma.tattooArtist.findFirst({ where: { id: artistId, studioId: effectiveStudioId } });
     if (!artist) return res.status(404).json({ error: 'Artist not found' });

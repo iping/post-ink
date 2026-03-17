@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { RECEIVER_TYPES, syncBookingReceivableCache } from '../utils/booking-finance.js';
-import { getStudioId, isSuperAdmin } from '../middleware/auth.js';
+import { getStudioId, getStudioIdOrSendError, isSuperAdmin } from '../middleware/auth.js';
 
 const prisma = new PrismaClient();
 export const paymentsRouter = Router();
@@ -162,8 +162,8 @@ paymentsRouter.get('/', async (req, res) => {
 // GET /api/payments/:id
 paymentsRouter.get('/:id', async (req, res) => {
   try {
-    const effectiveStudioId = getStudioId(req);
-    if (!effectiveStudioId) return res.status(400).json({ error: 'studioId required' });
+    const [effectiveStudioId, sent] = getStudioIdOrSendError(req, res);
+    if (sent) return;
     const payment = await prisma.payment.findFirst({
       where: {
         id: req.params.id,
@@ -181,8 +181,8 @@ paymentsRouter.get('/:id', async (req, res) => {
 // POST /api/payments
 paymentsRouter.post('/', async (req, res) => {
   try {
-    const effectiveStudioId = getStudioId(req);
-    if (!effectiveStudioId) return res.status(400).json({ error: 'studioId required' });
+    const [effectiveStudioId, sent] = getStudioIdOrSendError(req, res);
+    if (sent) return;
     const payment = await prisma.$transaction(async (tx) => {
       const data = await buildPaymentPayload(tx, req.body);
       if (data.bookingId) {
@@ -230,8 +230,8 @@ paymentsRouter.post('/', async (req, res) => {
 // PATCH /api/payments/:id
 paymentsRouter.patch('/:id', async (req, res) => {
   try {
-    const effectiveStudioId = getStudioId(req);
-    if (!effectiveStudioId) return res.status(400).json({ error: 'studioId required' });
+    const [effectiveStudioId, sent] = getStudioIdOrSendError(req, res);
+    if (sent) return;
     const payment = await prisma.$transaction(async (tx) => {
       const existing = await tx.payment.findFirst({
         where: {
@@ -267,8 +267,8 @@ paymentsRouter.patch('/:id', async (req, res) => {
 // DELETE /api/payments/:id
 paymentsRouter.delete('/:id', async (req, res) => {
   try {
-    const effectiveStudioId = getStudioId(req);
-    if (!effectiveStudioId) return res.status(400).json({ error: 'studioId required' });
+    const [effectiveStudioId, sent] = getStudioIdOrSendError(req, res);
+    if (sent) return;
     await prisma.$transaction(async (tx) => {
       const existing = await tx.payment.findFirst({
         where: {

@@ -21,6 +21,11 @@ function mergeStudioParams(params) {
   return p;
 }
 
+/** Query string for studio scope (?studioId=xxx) for use in URLs when _apiStudioId is set. */
+function studioQuery() {
+  return _apiStudioId ? `?studioId=${_apiStudioId}` : '';
+}
+
 async function apiFetch(url, options = {}) {
   const headers = { ...authHeaders(), ...options.headers };
   const res = await fetch(url, { ...options, headers });
@@ -46,7 +51,7 @@ export async function getArtist(id) {
 }
 
 export async function createArtist(formData) {
-  const res = await apiFetch(`${API}/artists`, {
+  const res = await apiFetch(`${API}/artists${studioQuery()}`, {
     method: 'POST',
     body: formData,
   });
@@ -54,7 +59,7 @@ export async function createArtist(formData) {
 }
 
 export async function updateArtist(id, formData) {
-  const res = await apiFetch(`${API}/artists/${id}`, {
+  const res = await apiFetch(`${API}/artists/${id}${studioQuery()}`, {
     method: 'PATCH',
     body: formData,
   });
@@ -68,7 +73,7 @@ export async function updateArtistStatus(id, isActive) {
 }
 
 export async function deleteArtist(id) {
-  await apiFetch(`${API}/artists/${id}`, { method: 'DELETE' });
+  await apiFetch(`${API}/artists/${id}${studioQuery()}`, { method: 'DELETE' });
 }
 
 export async function getAvailability(artistId, from, to) {
@@ -83,7 +88,7 @@ export async function getAvailability(artistId, from, to) {
 
 export async function addAvailability(artistId, slotOrSlots) {
   const body = Array.isArray(slotOrSlots) ? { slots: slotOrSlots } : slotOrSlots;
-  const res = await apiFetch(`${API}/artists/${artistId}/availability`, {
+  const res = await apiFetch(`${API}/artists/${artistId}/availability${studioQuery()}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -92,7 +97,7 @@ export async function addAvailability(artistId, slotOrSlots) {
 }
 
 export async function updateAvailabilitySlot(artistId, slotId, data) {
-  const res = await apiFetch(`${API}/artists/${artistId}/availability/${slotId}`, {
+  const res = await apiFetch(`${API}/artists/${artistId}/availability/${slotId}${studioQuery()}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -101,7 +106,7 @@ export async function updateAvailabilitySlot(artistId, slotId, data) {
 }
 
 export async function deleteAvailabilitySlot(artistId, slotId) {
-  await apiFetch(`${API}/artists/${artistId}/availability/${slotId}`, { method: 'DELETE' });
+  await apiFetch(`${API}/artists/${artistId}/availability/${slotId}${studioQuery()}`, { method: 'DELETE' });
 }
 
 export function uploadUrl(path) {
@@ -125,7 +130,7 @@ export async function getBooking(id) {
 }
 
 export async function createBooking(data) {
-  const res = await apiFetch(`${API}/bookings`, {
+  const res = await apiFetch(`${API}/bookings${studioQuery()}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -134,7 +139,7 @@ export async function createBooking(data) {
 }
 
 export async function updateBooking(id, data) {
-  const res = await apiFetch(`${API}/bookings/${id}`, {
+  const res = await apiFetch(`${API}/bookings/${id}${studioQuery()}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -143,7 +148,7 @@ export async function updateBooking(id, data) {
 }
 
 export async function deleteBooking(id) {
-  await apiFetch(`${API}/bookings/${id}`, { method: 'DELETE' });
+  await apiFetch(`${API}/bookings/${id}${studioQuery()}`, { method: 'DELETE' });
 }
 
 // ----- Projects (after booking: fixed or hourly rate) -----
@@ -156,7 +161,7 @@ export async function getProjects(params = {}) {
 }
 
 export async function createProject(data) {
-  const res = await apiFetch(`${API}/projects`, {
+  const res = await apiFetch(`${API}/projects${studioQuery()}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -165,7 +170,7 @@ export async function createProject(data) {
 }
 
 export async function updateProject(id, data) {
-  const res = await apiFetch(`${API}/projects/${id}`, {
+  const res = await apiFetch(`${API}/projects/${id}${studioQuery()}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -174,7 +179,7 @@ export async function updateProject(id, data) {
 }
 
 export async function deleteProject(id) {
-  await apiFetch(`${API}/projects/${id}`, { method: 'DELETE' });
+  await apiFetch(`${API}/projects/${id}${studioQuery()}`, { method: 'DELETE' });
 }
 
 // ----- Sessions (each project has minimum 1 session) -----
@@ -187,7 +192,7 @@ export async function getSessions(params = {}) {
 }
 
 export async function createSession(data) {
-  const res = await apiFetch(`${API}/sessions`, {
+  const res = await apiFetch(`${API}/sessions${studioQuery()}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -196,7 +201,7 @@ export async function createSession(data) {
 }
 
 export async function updateSession(id, data) {
-  const res = await apiFetch(`${API}/sessions/${id}`, {
+  const res = await apiFetch(`${API}/sessions/${id}${studioQuery()}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -205,7 +210,7 @@ export async function updateSession(id, data) {
 }
 
 export async function deleteSession(id) {
-  await apiFetch(`${API}/sessions/${id}`, { method: 'DELETE' });
+  await apiFetch(`${API}/sessions/${id}${studioQuery()}`, { method: 'DELETE' });
 }
 
 // POST /api/uploads/preference — max 3 images, 2MB each. Returns { urls: string[] }.
@@ -250,7 +255,7 @@ export async function getPayments(params = {}) {
 }
 
 export async function createPayment(data) {
-  const res = await apiFetch(`${API}/payments`, {
+  const res = await apiFetch(`${API}/payments${studioQuery()}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -259,7 +264,7 @@ export async function createPayment(data) {
 }
 
 export async function updatePayment(id, data) {
-  const res = await apiFetch(`${API}/payments/${id}`, {
+  const res = await apiFetch(`${API}/payments/${id}${studioQuery()}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -268,7 +273,7 @@ export async function updatePayment(id, data) {
 }
 
 export async function deletePayment(id) {
-  await apiFetch(`${API}/payments/${id}`, { method: 'DELETE' });
+  await apiFetch(`${API}/payments/${id}${studioQuery()}`, { method: 'DELETE' });
 }
 
 // ----- Customers & Studios (for dropdowns) -----
@@ -284,7 +289,7 @@ export async function getCustomers(params = {}) {
 }
 
 export async function createCustomer(data) {
-  const res = await apiFetch(`${API}/customers`, {
+  const res = await apiFetch(`${API}/customers${studioQuery()}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -293,7 +298,7 @@ export async function createCustomer(data) {
 }
 
 export async function updateCustomer(id, data) {
-  const res = await apiFetch(`${API}/customers/${id}`, {
+  const res = await apiFetch(`${API}/customers/${id}${studioQuery()}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -302,12 +307,12 @@ export async function updateCustomer(id, data) {
 }
 
 export async function deleteCustomer(id) {
-  await apiFetch(`${API}/customers/${id}`, { method: 'DELETE' });
+  await apiFetch(`${API}/customers/${id}${studioQuery()}`, { method: 'DELETE' });
 }
 
 /** Link customer to the current studio (add to one more studio). */
 export async function addCustomerToStudio(customerId) {
-  const res = await apiFetch(`${API}/customers/${customerId}/studios`, { method: 'POST' });
+  const res = await apiFetch(`${API}/customers/${customerId}/studios${studioQuery()}`, { method: 'POST' });
   return res.json();
 }
 
@@ -367,7 +372,7 @@ export async function updateCommission(id, data) {
 }
 
 export async function deleteCommission(id) {
-  await apiFetch(`${API}/commissions/${id}`, { method: 'DELETE' });
+  await apiFetch(`${API}/commissions/${id}${studioQuery()}`, { method: 'DELETE' });
 }
 
 // Parse error body: use JSON { error } if present, else raw text
@@ -411,7 +416,7 @@ export async function updateSpeciality(id, data) {
 }
 
 export async function deleteSpeciality(id) {
-  const res = await apiFetch(`${API}/specialities/${id}`, { method: 'DELETE' });
+  const res = await apiFetch(`${API}/specialities/${id}${studioQuery()}`, { method: 'DELETE' });
   if (!res.ok) throw new Error(await errorMessage(res));
 }
 
@@ -446,7 +451,7 @@ export async function updatePaymentDestination(id, data) {
 }
 
 export async function deletePaymentDestination(id) {
-  const res = await apiFetch(`${API}/payment-destinations/${id}`, { method: 'DELETE' });
+  const res = await apiFetch(`${API}/payment-destinations/${id}${studioQuery()}`, { method: 'DELETE' });
   if (!res.ok) throw new Error(await errorMessage(res));
 }
 

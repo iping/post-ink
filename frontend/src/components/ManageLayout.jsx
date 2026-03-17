@@ -45,6 +45,7 @@ export function ManageLayout() {
 
   const [bookingOpen, setBookingOpen] = useState(false);
   const [customerOpen, setCustomerOpen] = useState(false);
+  const [projectOpen, setProjectOpen] = useState(false);
   const [myStudioOpen, setMyStudioOpen] = useState(false);
 
   useEffect(() => {
@@ -52,6 +53,9 @@ export function ManageLayout() {
   }, [currentTab, location.pathname]);
   useEffect(() => {
     if (currentTab === 'customers' || currentTab === 'leads') setCustomerOpen(true);
+  }, [currentTab]);
+  useEffect(() => {
+    if (currentTab === 'projects') setProjectOpen(true);
   }, [currentTab]);
   useEffect(() => {
     if (['profile', 'artists', 'payment-destinations', 'commissions', 'users', 'specialities'].includes(currentTab)) setMyStudioOpen(true);
@@ -153,6 +157,30 @@ export function ManageLayout() {
                 </Link>
                 <Link to="/manage?tab=leads" className={`${styles.sideNavLink} ${currentTab === 'leads' ? styles.sideNavActive : ''}`} data-short="L" title="Leads">
                   <span className={styles.sideNavLinkText}>Leads</span>
+                </Link>
+              </div>
+            )}
+          </div>
+
+          <div className={styles.sideNavGroup}>
+            <button
+              type="button"
+              className={styles.sideNavGroupLabelBtn}
+              data-short="Pj"
+              onClick={() => {
+                if (sidebarCollapsed) setSidebarCollapsed(false);
+                setProjectOpen((v) => !v);
+              }}
+              aria-expanded={projectOpen}
+              aria-controls="side-nav-project"
+            >
+              <span className={styles.sideNavGroupLabelText}>Project</span>
+              <span className={`${styles.sideNavGroupChevron} ${projectOpen ? styles.sideNavGroupChevronOpen : ''}`} aria-hidden>▼</span>
+            </button>
+            {projectOpen && (
+              <div id="side-nav-project" className={styles.sideNavGroupContent} role="region">
+                <Link to="/manage?tab=projects" className={`${styles.sideNavLink} ${currentTab === 'projects' ? styles.sideNavActive : ''}`} data-short="Pj" title="Projects created from bookings">
+                  <span className={styles.sideNavLinkText}>Projects</span>
                 </Link>
               </div>
             )}

@@ -29,6 +29,7 @@ import {
   createUser,
   updateUser,
   deleteUser,
+  getProjects,
 } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { formatRupiah } from '../currency';
@@ -183,6 +184,7 @@ export function Studio() {
   const [customers, setCustomers] = useState([]);
   const [studios, setStudios] = useState([]);
   const [bookings, setBookings] = useState([]);
+  const [projectsList, setProjectsList] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -403,8 +405,9 @@ export function Studio() {
       getSpecialities(),
       getPaymentDestinations(),
       getUsers(),
+      getProjects(),
     ])
-      .then(([b, p, co, a, c, s, sp, pd, u]) => {
+      .then(([b, p, co, a, c, s, sp, pd, u, proj]) => {
         setBookings(b);
         setPayments(p);
         setCommissions(co);
@@ -414,6 +417,7 @@ export function Studio() {
         setSpecialities(Array.isArray(sp) ? sp : []);
         setPaymentDestinations(Array.isArray(pd) ? pd : []);
         setUsers(Array.isArray(u) ? u : []);
+        setProjectsList(Array.isArray(proj) ? proj : []);
       })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
@@ -896,6 +900,74 @@ export function Studio() {
             </table>
           </div>
           <Pagination currentPage={bookingPage} totalPages={bookingTotalPages} onPageChange={setBookingPage} />
+        </section>
+      )}
+
+      {tab === 'projects' && (
+        <section className={styles.section}>
+          <div className={styles.sectionHead}>
+            <div>
+              <h2>Projects</h2>
+              <p className={styles.help}>Projects created from bookings via &quot;Create project from this booking&quot;. Complete remaining payment (if any) then wrap sessions to close.</p>
+            </div>
+          </div>
+          <div className={styles.tableWrap}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>No.</th>
+                  <th>Project</th>
+                  <th>Booking</th>
+                  <th>Customer</th>
+                  <th>Artist</th>
+                  <th>Sessions</th>
+                  <th>Payment</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {projectsList.length === 0 ? (
+                  <tr>
+                    <td colSpan={8}>No projects yet. Open a booking and click &quot;Create project from this booking&quot; to add one.</td>
+                  </tr>
+                ) : (
+                  projectsList.map((proj, i) => {
+                    const booking = bookings.find((b) => b.id === proj.bookingId);
+                    const sessions = Array.isArray(proj.sessions) ? proj.sessions : [];
+                    const completedSessions = sessions.filter((s) => s.status === 'completed').length;
+                    const paymentStatus = booking?.status ?? 'Unpaid';
+                    const remaining = booking?.remainingAmount ?? null;
+                    return (
+                      <tr key={proj.id}>
+                        <td>{i + 1}</td>
+                        <td className={styles.cellEmphasis}>{proj.name || '—'}</td>
+                        <td>
+                          <span className={styles.cellDate}>{proj.booking?.date || '—'}</span>
+                          {proj.booking?.shortCode && <span className={styles.cellTime}> ({proj.booking.shortCode})</span>}
+                        </td>
+                        <td>{proj.booking?.customer?.name || '—'}</td>
+                        <td>{proj.booking?.artist?.name || '—'}</td>
+                        <td>
+                          <span className={completedSessions >= sessions.length && sessions.length > 0 ? styles.status_Paid : ''}>
+                            {completedSessions}/{sessions.length || 0} completed
+                          </span>
+                        </td>
+                        <td>
+                          <span className={styles[`status_${paymentStatus}`]}>{paymentStatus}</span>
+                          {remaining != null && remaining > 0 && (
+                            <span className={styles.remainingDue}> · {formatRupiah(remaining)} due</span>
+                          )}
+                        </td>
+                        <td>
+                          <Link to={`/manage/bookings/${proj.bookingId}`} className={styles.smBtn}>Open booking</Link>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
         </section>
       )}
 

@@ -187,7 +187,12 @@ async function main() {
   // ─── Per-studio counts: artists/customers/bookings/payment accounts (each studio gets unique data) ───
   const studioCounts = [5, 7, 10];
   const leadsPerStudio = 3; // each studio gets this many leads (type=lead); the rest are customers
-  const leadSources = ['instagram', 'website', 'walkin', 'whatsapp'];
+  const leadSources = ['instagram', 'website', 'walkin', 'whatsapp', 'referral', 'facebook'];
+  const paymentMethods = ['Bank', 'Bank', 'Mandiri', 'BCA', 'Cash', 'E-Wallet'];
+  // More Unpaid variety: ~half Paid, ~half Unpaid with different payment scenarios
+  const bookingStatuses = ['Paid', 'Unpaid', 'Paid', 'Unpaid', 'Paid', 'Unpaid', 'Paid', 'Unpaid', 'Paid', 'Paid'];
+  // For Unpaid bookings, cycle through different partial-payment scenarios
+  const unpaidScenarios = ['no_payment', 'deposit_only', 'partial_final', 'pending_payment'];
   const allSpecialityNames = [
     'Fine Line', 'Botanical', 'American Traditional', 'Japanese Irezumi', 'Blackwork',
     'Neo-Traditional', 'Portrait', 'Geometric', 'Watercolor', 'Lettering',
@@ -249,6 +254,7 @@ async function main() {
   const studioArtistDests = {};
   let artistGlobalIdx = 0;
   let customerGlobalIdx = 0;
+  let unpaidScenarioIdx = 0;
 
   for (let sIdx = 0; sIdx < studios.length; sIdx++) {
     const studio = studios[sIdx];
@@ -321,6 +327,7 @@ async function main() {
     for (let i = 0; i < n; i++) {
       const cp = customerPool[customerGlobalIdx % customerPool.length];
       const isLead = i < leadsPerStudio;
+      const referredArtist = isLead && artistsForStudio[i % artistsForStudio.length] ? artistsForStudio[i % artistsForStudio.length] : null;
       const c = await prisma.customer.create({
         data: {
           id: genNumericId('customer'),
@@ -329,6 +336,7 @@ async function main() {
           phone: cp.phone.replace('1000', `${1000 + sIdx * 100 + i}`),
           type: isLead ? 'lead' : 'customer',
           leadSource: isLead ? leadSources[i % leadSources.length] : null,
+          referredArtistId: referredArtist?.id ?? null,
           studioCustomers: { create: { studioId: studio.id } },
         },
       });
@@ -339,9 +347,13 @@ async function main() {
 
     const placements = ['Forearm', 'Chest', 'Back', 'Upper arm', 'Calf', 'Thigh', 'Arm', 'Shoulder', 'Ribs', 'Wrist'];
     const amounts = [2800000, 3200000, 3500000, 4200000, 4800000, 5000000, 5500000, 3800000, 4500000, 5200000];
+    const preferences = ['Floral sleeve reference from Pinterest', 'Minimalist line work', 'Japanese koi design', 'Portrait from photo', 'Geometric mandala', 'Blackwork tribal', 'Watercolor style', 'Script quote', 'Cover-up over old tattoo', 'Custom design from sketch'];
     for (let i = 0; i < n; i++) {
       const artist = artistsForStudio[i % artistsForStudio.length];
       const customer = customersForStudio[i % customersForStudio.length];
+      const status = bookingStatuses[i % bookingStatuses.length];
+      const amount = amounts[i % amounts.length];
+      const projectName = `${shortStudioName} – ${customer.name} – ${i + 1}`;
       const booking = await prisma.booking.create({
         data: {
           shortCode: uniqueShortCode(),
@@ -349,54 +361,182 @@ async function main() {
           customerId: customer.id,
           studioId: studio.id,
           date: futureDate(i + 1),
-          startTime: '10:00',
-          endTime: '12:00',
-          status: 'Paid',
+          startTime: i % 3 === 0 ? '09:00' : '10:00',
+          endTime: i % 3 === 0 ? '11:30' : '12:00',
+          status,
           pricingType: 'fixed',
-          totalAmount: amounts[i % amounts.length],
+          totalAmount: amount,
           placement: placements[i % placements.length],
+          preference: preferences[i % preferences.length],
+          projectName,
           notes: `Booking ${i + 1} at ${studio.name}.`,
         },
       });
       const dest = i % 2 === 0 ? studioBcaDest : dests[artist.id];
-      await prisma.payment.create({
-        data: {
-          bookingId: booking.id,
-          paymentDestinationId: dest.id,
-          amount: amounts[i % amounts.length],
-          currency: 'IDR',
-          method: 'Bank',
-          type: 'final',
-          transferDestination: dest.account,
-          receiverType: i % 2 === 0 ? 'studio' : 'artist',
-          receiverStudioId: i % 2 === 0 ? studio.id : null,
-          receiverArtistId: i % 2 === 0 ? null : artist.id,
-          status: 'completed',
-        },
-      });
+      const method = paymentMethods[i % paymentMethods.length];
+      const isPaid = status === 'Paid';
+      const receiverType = i % 2 === 0 ? 'studio' : 'artist';
+      const receiverStudioId = receiverType === 'studio' ? studio.id : null;
+      const receiverArtistId = receiverType === 'artist' ? artist.id : null;
+
+      if (isPaid && dest) {
+        // Fully paid: one completed final payment covering total
+        await prisma.payment.create({
+          data: {
+            bookingId: booking.id,
+            paymentDestinationId: dest.id,
+            amount,
+            currency: 'IDR',
+            method,
+            type: 'final',
+            transferDestination: dest.account,
+            receiverType,
+            receiverStudioId,
+            receiverArtistId,
+            status: 'completed',
+            evidenceUrl: i % 4 === 0 ? 'https://images.unsplash.com/photo-1553729459-efe14ef6055d?w=400' : null,
+          },
+        });
+      } else if (!isPaid && dest) {
+        // Unpaid: create different partial-payment scenarios (rotate through all 4)
+        const scenario = unpaidScenarios[unpaidScenarioIdx % unpaidScenarios.length];
+        unpaidScenarioIdx++;
+        if (scenario === 'deposit_only') {
+          // Down payment only (30% of total) — remainder still outstanding
+          const depositAmount = Math.round(amount * 0.3);
+          await prisma.payment.create({
+            data: {
+              bookingId: booking.id,
+              paymentDestinationId: dest.id,
+              amount: depositAmount,
+              currency: 'IDR',
+              method,
+              type: 'down_payment',
+              transferDestination: dest.account,
+              receiverType,
+              receiverStudioId,
+              receiverArtistId,
+              status: 'completed',
+              evidenceUrl: 'https://images.unsplash.com/photo-1553729459-efe14ef6055d?w=400',
+            },
+          });
+        } else if (scenario === 'partial_final') {
+          // Deposit (30%) + partial final (20%) — still short of total
+          const depositAmount = Math.round(amount * 0.3);
+          const partialAmount = Math.round(amount * 0.2);
+          await prisma.payment.create({
+            data: {
+              bookingId: booking.id,
+              paymentDestinationId: dest.id,
+              amount: depositAmount,
+              currency: 'IDR',
+              method,
+              type: 'down_payment',
+              transferDestination: dest.account,
+              receiverType,
+              receiverStudioId,
+              receiverArtistId,
+              status: 'completed',
+            },
+          });
+          await prisma.payment.create({
+            data: {
+              bookingId: booking.id,
+              paymentDestinationId: dest.id,
+              amount: partialAmount,
+              currency: 'IDR',
+              method,
+              type: 'final',
+              transferDestination: dest.account,
+              receiverType,
+              receiverStudioId,
+              receiverArtistId,
+              status: 'completed',
+            },
+          });
+        } else if (scenario === 'pending_payment') {
+          // Full amount recorded but payment status is pending (not yet confirmed)
+          await prisma.payment.create({
+            data: {
+              bookingId: booking.id,
+              paymentDestinationId: dest.id,
+              amount,
+              currency: 'IDR',
+              method,
+              type: 'final',
+              transferDestination: dest.account,
+              receiverType,
+              receiverStudioId,
+              receiverArtistId,
+              status: 'pending',
+            },
+          });
+        }
+        // scenario === 'no_payment' → no payment record at all
+      }
       const project = await prisma.project.create({
         data: {
           id: genNumericId('project'),
           bookingId: booking.id,
-          name: `${artist.name} – ${customer.name}`,
+          name: projectName,
           pricingType: 'fixed',
-          fixedAmount: amounts[i % amounts.length],
+          fixedAmount: amount,
           notes: 'Session 1.',
         },
       });
+      const sessionCompleted = isPaid;
       await prisma.session.create({
         data: {
           id: genNumericId('session'),
           projectId: project.id,
           date: booking.date,
-          startTime: '10:00',
-          endTime: '12:00',
+          startTime: booking.startTime,
+          endTime: booking.endTime,
           actualHours: 2,
-          notes: 'Completed.',
-          status: 'completed',
+          notes: sessionCompleted ? 'Completed.' : 'Scheduled.',
+          status: sessionCompleted ? 'completed' : 'scheduled',
+          ...(sessionCompleted && {
+            startedAt: new Date(new Date(booking.date).toISOString().slice(0, 10) + 'T10:00:00.000Z'),
+            completedAt: new Date(new Date(booking.date).toISOString().slice(0, 10) + 'T12:00:00.000Z'),
+          }),
         },
       });
     }
+  }
+
+  // ─── 15 extra bookings: Unpaid, no project started (no payment, no project/session) ───
+  const EXTRA_UNPAID_NO_PROJECT = 15;
+  const extraPlacements = ['Forearm', 'Chest', 'Back', 'Upper arm', 'Calf', 'Thigh', 'Arm', 'Shoulder', 'Wrist', 'Ribs'];
+  const extraAmounts = [2800000, 3200000, 3500000, 4200000, 4800000, 5000000, 5500000, 3800000, 4500000, 5200000];
+  const extraPreferences = ['Minimalist line work', 'Japanese koi design', 'Portrait from photo', 'Geometric mandala', 'Floral sleeve', 'Script quote', 'Cover-up', 'Custom design'];
+  for (let i = 0; i < EXTRA_UNPAID_NO_PROJECT; i++) {
+    const sIdx = i % studios.length;
+    const studio = studios[sIdx];
+    const n = studioCounts[sIdx];
+    const shortStudioName = studio.name.replace(/\s+(Studio|Tattoo|Collective)$/i, '').trim();
+    const artist = studioArtists[sIdx][i % n];
+    const customer = studioCustomers[sIdx][i % n];
+    const amount = extraAmounts[i % extraAmounts.length];
+    const projectName = `${shortStudioName} – ${customer.name} – new ${i + 1}`;
+    await prisma.booking.create({
+      data: {
+        shortCode: uniqueShortCode(),
+        artistId: artist.id,
+        customerId: customer.id,
+        studioId: studio.id,
+        date: futureDate(i + 3),
+        startTime: i % 2 === 0 ? '09:00' : '14:00',
+        endTime: i % 2 === 0 ? '11:00' : '16:00',
+        status: 'Unpaid',
+        pricingType: 'fixed',
+        totalAmount: amount,
+        placement: extraPlacements[i % extraPlacements.length],
+        preference: extraPreferences[i % extraPreferences.length],
+        projectName,
+        notes: `New booking (Unpaid, project not started) ${i + 1}.`,
+      },
+    });
+    // No payment, no project, no session — booking is Unpaid and project not started
   }
 
   const totalSpecialities = await prisma.speciality.count();
@@ -412,7 +552,10 @@ async function main() {
   const totalUsers = await prisma.user.count();
   console.log('Seed complete — per studio: 5, 7, 10 (artists, customers, bookings, etc.)');
   console.log(`  Studios: 3 | Users: ${totalUsers} | Specialities: ${totalSpecialities} | Artists: ${totalArtists} | Customers: ${totalCustomers}`);
-  console.log(`  Bookings: ${totalBookings} | Payments: ${totalPayments} | Projects: ${totalProjects} | Sessions: ${totalSessions} | Payment destinations: ${totalPaymentAccounts} | Commissions: ${totalCommissions}`);
+  console.log(`  Bookings: ${totalBookings} (mixed Paid/Unpaid) | Payments: ${totalPayments} | Projects: ${totalProjects} | Sessions: ${totalSessions} | Payment destinations: ${totalPaymentAccounts} | Commissions: ${totalCommissions}`);
+  console.log('  Unpaid scenarios: no_payment, deposit_only (30%), partial_final (30%+20%), pending_payment.');
+  console.log(`  + ${EXTRA_UNPAID_NO_PROJECT} extra bookings: Unpaid, no project started.`);
+  console.log('  Data: preferences, projectName, lead referrals, payment evidence, session timestamps.');
   console.log('Login: superadmin@post.ink or admin@post.ink / admin123');
 }
 

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { getStudioId } from '../middleware/auth.js';
+import { getStudioIdOrSendError } from '../middleware/auth.js';
 
 const prisma = new PrismaClient();
 export const paymentDestinationsRouter = Router();
@@ -48,8 +48,8 @@ function buildPaymentDestinationPayload(body) {
 
 paymentDestinationsRouter.get('/', async (req, res) => {
   try {
-    const effectiveStudioId = getStudioId(req);
-    if (!effectiveStudioId) return res.status(400).json({ error: 'studioId required' });
+    const [effectiveStudioId, sent] = getStudioIdOrSendError(req, res);
+    if (sent) return;
     const { activeOnly, ownerType, artistId } = req.query;
     const where = {
       OR: [
@@ -73,8 +73,8 @@ paymentDestinationsRouter.get('/', async (req, res) => {
 
 paymentDestinationsRouter.get('/:id', async (req, res) => {
   try {
-    const effectiveStudioId = getStudioId(req);
-    if (!effectiveStudioId) return res.status(400).json({ error: 'studioId required' });
+    const [effectiveStudioId, sent] = getStudioIdOrSendError(req, res);
+    if (sent) return;
     const item = await prisma.paymentDestination.findFirst({
       where: {
         id: req.params.id,
@@ -94,8 +94,8 @@ paymentDestinationsRouter.get('/:id', async (req, res) => {
 
 paymentDestinationsRouter.post('/', async (req, res) => {
   try {
-    const effectiveStudioId = getStudioId(req);
-    if (!effectiveStudioId) return res.status(400).json({ error: 'studioId required' });
+    const [effectiveStudioId, sent] = getStudioIdOrSendError(req, res);
+    if (sent) return;
     const payload = buildPaymentDestinationPayload({ ...req.body, studioId: req.body.studioId || effectiveStudioId });
     const item = await prisma.paymentDestination.create({
       data: payload,
@@ -109,8 +109,8 @@ paymentDestinationsRouter.post('/', async (req, res) => {
 
 paymentDestinationsRouter.patch('/:id', async (req, res) => {
   try {
-    const effectiveStudioId = getStudioId(req);
-    if (!effectiveStudioId) return res.status(400).json({ error: 'studioId required' });
+    const [effectiveStudioId, sent] = getStudioIdOrSendError(req, res);
+    if (sent) return;
     const existing = await prisma.paymentDestination.findFirst({
       where: {
         id: req.params.id,
@@ -142,8 +142,8 @@ paymentDestinationsRouter.patch('/:id', async (req, res) => {
 
 paymentDestinationsRouter.delete('/:id', async (req, res) => {
   try {
-    const effectiveStudioId = getStudioId(req);
-    if (!effectiveStudioId) return res.status(400).json({ error: 'studioId required' });
+    const [effectiveStudioId, sent] = getStudioIdOrSendError(req, res);
+    if (sent) return;
     const existing = await prisma.paymentDestination.findFirst({
       where: {
         id: req.params.id,

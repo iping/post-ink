@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { generateNumericId } from '../utils/id.js';
-import { getStudioId } from '../middleware/auth.js';
+import { getStudioIdOrSendError } from '../middleware/auth.js';
 
 const prisma = new PrismaClient();
 export const customersRouter = Router();
@@ -53,8 +53,8 @@ const customerInclude = {
 // GET /api/customers — list customers linked to this studio (customer can be in one or more studios)
 customersRouter.get('/', async (req, res) => {
   try {
-    const studioId = getStudioId(req);
-    if (!studioId) return res.status(400).json({ error: 'studioId required' });
+    const [studioId, sent] = getStudioIdOrSendError(req, res);
+    if (sent) return;
     const { type, search } = req.query;
     const where = { studioCustomers: { some: { studioId } } };
     if (CUSTOMER_TYPES.has(type)) where.type = type;
@@ -79,8 +79,8 @@ customersRouter.get('/', async (req, res) => {
 // POST /api/customers — create and link to current studio
 customersRouter.post('/', async (req, res) => {
   try {
-    const studioId = getStudioId(req);
-    if (!studioId) return res.status(400).json({ error: 'studioId required' });
+    const [studioId, sent] = getStudioIdOrSendError(req, res);
+    if (sent) return;
     const { name, email, phone } = req.body;
     if (!name?.trim()) return res.status(400).json({ error: 'Name is required' });
     const id = await generateNumericId(prisma, 'customer');
@@ -105,8 +105,8 @@ customersRouter.post('/', async (req, res) => {
 // PATCH /api/customers/:id — update customer or lead profile (must be linked to this studio)
 customersRouter.patch('/:id', async (req, res) => {
   try {
-    const studioId = getStudioId(req);
-    if (!studioId) return res.status(400).json({ error: 'studioId required' });
+    const [studioId, sent] = getStudioIdOrSendError(req, res);
+    if (sent) return;
     const existing = await prisma.customer.findFirst({
       where: { id: req.params.id, studioCustomers: { some: { studioId } } },
       include: { _count: { select: { bookings: true } } },
@@ -143,8 +143,8 @@ customersRouter.patch('/:id', async (req, res) => {
 // DELETE /api/customers/:id — delete customer (must be linked to this studio; no bookings allowed)
 customersRouter.delete('/:id', async (req, res) => {
   try {
-    const studioId = getStudioId(req);
-    if (!studioId) return res.status(400).json({ error: 'studioId required' });
+    const [studioId, sent] = getStudioIdOrSendError(req, res);
+    if (sent) return;
     const existing = await prisma.customer.findFirst({
       where: { id: req.params.id, studioCustomers: { some: { studioId } } },
       include: { _count: { select: { bookings: true } } },
@@ -163,8 +163,8 @@ customersRouter.delete('/:id', async (req, res) => {
 // POST /api/customers/:id/studios — link this customer to the current studio (add to one more studio)
 customersRouter.post('/:id/studios', async (req, res) => {
   try {
-    const studioId = getStudioId(req);
-    if (!studioId) return res.status(400).json({ error: 'studioId required' });
+    const [studioId, sent] = getStudioIdOrSendError(req, res);
+    if (sent) return;
     const customer = await prisma.customer.findUnique({
       where: { id: req.params.id },
       include: customerInclude,

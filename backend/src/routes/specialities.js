@@ -1,14 +1,14 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { getStudioId } from '../middleware/auth.js';
+import { getStudioIdOrSendError } from '../middleware/auth.js';
 
 const prisma = new PrismaClient();
 export const specialitiesRouter = Router();
 
 specialitiesRouter.get('/', async (req, res) => {
   try {
-    const studioId = getStudioId(req);
-    if (!studioId) return res.status(400).json({ error: 'studioId required' });
+    const [studioId, sent] = getStudioIdOrSendError(req, res);
+    if (sent) return;
     const list = await prisma.speciality.findMany({
       where: { studioId },
       orderBy: { createdAt: 'desc' },
@@ -21,8 +21,8 @@ specialitiesRouter.get('/', async (req, res) => {
 
 specialitiesRouter.post('/', async (req, res) => {
   try {
-    const studioId = getStudioId(req);
-    if (!studioId) return res.status(400).json({ error: 'studioId required' });
+    const [studioId, sent] = getStudioIdOrSendError(req, res);
+    if (sent) return;
     const { name } = req.body;
     if (!name || !name.trim()) return res.status(400).json({ error: 'Name is required' });
     const item = await prisma.speciality.create({ data: { studioId, name: name.trim() } });
@@ -35,8 +35,8 @@ specialitiesRouter.post('/', async (req, res) => {
 
 specialitiesRouter.patch('/:id', async (req, res) => {
   try {
-    const studioId = getStudioId(req);
-    if (!studioId) return res.status(400).json({ error: 'studioId required' });
+    const [studioId, sent] = getStudioIdOrSendError(req, res);
+    if (sent) return;
     const { name } = req.body;
     if (!name || !name.trim()) return res.status(400).json({ error: 'Name is required' });
     const existing = await prisma.speciality.findFirst({ where: { id: req.params.id, studioId } });
@@ -55,8 +55,8 @@ specialitiesRouter.patch('/:id', async (req, res) => {
 
 specialitiesRouter.delete('/:id', async (req, res) => {
   try {
-    const studioId = getStudioId(req);
-    if (!studioId) return res.status(400).json({ error: 'studioId required' });
+    const [studioId, sent] = getStudioIdOrSendError(req, res);
+    if (sent) return;
     const existing = await prisma.speciality.findFirst({ where: { id: req.params.id, studioId } });
     if (!existing) return res.status(404).json({ error: 'Not found' });
     await prisma.speciality.delete({ where: { id: req.params.id } });

@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { generateNumericId } from '../utils/id.js';
-import { getStudioId } from '../middleware/auth.js';
+import { getStudioIdOrSendError } from '../middleware/auth.js';
 
 const prisma = new PrismaClient();
 export const sessionsRouter = Router();
@@ -9,8 +9,8 @@ export const sessionsRouter = Router();
 // GET /api/sessions — list (scoped by project's booking studio)
 sessionsRouter.get('/', async (req, res) => {
   try {
-    const effectiveStudioId = getStudioId(req);
-    if (!effectiveStudioId) return res.status(400).json({ error: 'studioId required' });
+    const [effectiveStudioId, sent] = getStudioIdOrSendError(req, res);
+    if (sent) return;
     const { projectId } = req.query;
     const where = { project: { booking: { studioId: effectiveStudioId } } };
     if (projectId) where.projectId = projectId;
@@ -28,8 +28,8 @@ sessionsRouter.get('/', async (req, res) => {
 // GET /api/sessions/:id
 sessionsRouter.get('/:id', async (req, res) => {
   try {
-    const effectiveStudioId = getStudioId(req);
-    if (!effectiveStudioId) return res.status(400).json({ error: 'studioId required' });
+    const [effectiveStudioId, sent] = getStudioIdOrSendError(req, res);
+    if (sent) return;
     const session = await prisma.session.findFirst({
       where: { id: req.params.id, project: { booking: { studioId: effectiveStudioId } } },
       include: { project: { include: { booking: { include: { artist: true, customer: true, studio: true } } } } },
@@ -44,8 +44,8 @@ sessionsRouter.get('/:id', async (req, res) => {
 // POST /api/sessions — create (projectId required)
 sessionsRouter.post('/', async (req, res) => {
   try {
-    const effectiveStudioId = getStudioId(req);
-    if (!effectiveStudioId) return res.status(400).json({ error: 'studioId required' });
+    const [effectiveStudioId, sent] = getStudioIdOrSendError(req, res);
+    if (sent) return;
     const { projectId, date, startTime, endTime, actualHours, notes } = req.body;
     if (!projectId || !date) {
       return res.status(400).json({ error: 'projectId and date required' });
@@ -80,8 +80,8 @@ const SESSION_STATUSES = ['scheduled', 'in_progress', 'paused', 'completed'];
 // PATCH /api/sessions/:id — update fields and/or transition status (start/pause/stop)
 sessionsRouter.patch('/:id', async (req, res) => {
   try {
-    const effectiveStudioId = getStudioId(req);
-    if (!effectiveStudioId) return res.status(400).json({ error: 'studioId required' });
+    const [effectiveStudioId, sent] = getStudioIdOrSendError(req, res);
+    if (sent) return;
     const existing = await prisma.session.findFirst({
       where: { id: req.params.id, project: { booking: { studioId: effectiveStudioId } } },
     });
@@ -123,8 +123,8 @@ sessionsRouter.patch('/:id', async (req, res) => {
 // DELETE /api/sessions/:id (only if project has more than 1 session)
 sessionsRouter.delete('/:id', async (req, res) => {
   try {
-    const effectiveStudioId = getStudioId(req);
-    if (!effectiveStudioId) return res.status(400).json({ error: 'studioId required' });
+    const [effectiveStudioId, sent] = getStudioIdOrSendError(req, res);
+    if (sent) return;
     const session = await prisma.session.findFirst({
       where: { id: req.params.id, project: { booking: { studioId: effectiveStudioId } } },
     });

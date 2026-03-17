@@ -145,6 +145,32 @@
   margin-bottom: 0.25rem;
 }
 
+.workflowSteps {
+  margin-bottom: 1rem;
+  padding: 0.85rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius, 8px);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.workflowStepsTitle {
+  margin: 0 0 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.workflowStepsList {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.workflowStepsList li {
+  margin-bottom: 0.35rem;
+}
+
 .stepSection {
   margin-bottom: 1.25rem;
 }

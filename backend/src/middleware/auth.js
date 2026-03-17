@@ -42,13 +42,13 @@ export function requireSuperAdmin(req, res, next) {
 
 /**
  * Effective studio scope for this request.
- * - super_admin: returns req.query.studioId (optional; when viewing one studio's data).
+ * - super_admin: returns req.query.studioId or req.body.studioId (optional; when viewing/acting on one studio).
  * - studio user (admin/staff): returns req.user.studioId (their only studio).
  * Use this to filter all studio-scoped data (bookings, artists, customers, etc.).
  */
 export function getStudioId(req) {
   if (req.user?.role === ROLES.SUPER_ADMIN) {
-    return req.query.studioId || null;
+    return req.query.studioId || req.body?.studioId || null;
   }
   return req.user?.studioId || null;
 }
@@ -56,6 +56,22 @@ export function getStudioId(req) {
 /** True if current user is super admin (can see all studios). */
 export function isSuperAdmin(req) {
   return req.user?.role === ROLES.SUPER_ADMIN;
+}
+
+/**
+ * Use in studio-scoped routes: if no studioId, either respond with empty/404 for super_admin GET
+ * or 400. Returns [studioId or null, true if response was already sent].
+ */
+export function getStudioIdOrSendError(req, res) {
+  const studioId = getStudioId(req);
+  if (studioId) return [studioId, false];
+  if (isSuperAdmin(req) && req.method === 'GET') {
+    if (req.params.id) res.status(404).json({ error: 'Not found' });
+    else res.json([]);
+    return [null, true];
+  }
+  res.status(400).json({ error: 'studioId required' });
+  return [null, true];
 }
 
 export { JWT_SECRET };

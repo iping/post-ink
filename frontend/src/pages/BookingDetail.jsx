@@ -496,6 +496,17 @@ export function BookingDetail() {
               </div>
             )}
 
+            {/* Workflow steps */}
+            <div className={styles.workflowSteps} role="region" aria-label="Booking workflow">
+              <h3 className={styles.workflowStepsTitle}>Steps</h3>
+              <ol className={styles.workflowStepsList}>
+                <li><strong>Booking</strong> — Created. Record payments below as needed.</li>
+                <li><strong>Payment</strong> — Add payments until the booking is fully paid (or use deposit + final).</li>
+                <li><strong>Project</strong> — Click &quot;Create project from this booking&quot; to start a project (it will appear in the <em>Project</em> menu).</li>
+                <li><strong>Close project</strong> — Complete remaining payment if any, then mark sessions/project completed. System runs the calculation.</li>
+              </ol>
+            </div>
+
             {/* Project & sessions card */}
             <div className={artistStyles.card}>
               <div className={artistStyles.cardHead}>
@@ -505,7 +516,7 @@ export function BookingDetail() {
               {projects.length === 0 ? (
                 <>
                   <p className={artistStyles.cardHint}>
-                    This booking does not have a project yet. Create a project to track sessions and progress.
+                    This booking does not have a project yet. Create a project to track sessions and progress. It will then appear in the <strong>Project</strong> menu.
                   </p>
                   <button
                     type="button"
