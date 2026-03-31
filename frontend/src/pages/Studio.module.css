@@ -397,6 +397,18 @@
   border-radius: 999px;
 }
 
+.sideNavBadgePaid {
+  background: var(--success, #16a34a);
+}
+
+.sideNavBadgeUnpaid {
+  background: #c49a2e;
+}
+
+.sideNavBadgeOverdue {
+  background: var(--danger, #dc2626);
+}
+
 /* Sub-link: same as main link but indented (e.g. + New booking) */
 .sideNavSubLink {
   display: flex;
@@ -1537,6 +1549,70 @@
   font-size: 0.85rem;
   color: var(--muted);
   margin: 0 0 1rem;
+}
+
+.billingAmountRow {
+  margin: 0.45rem 0 0;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.billingAmountLabel {
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.billingAmountValue {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--accent) 48%, transparent);
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+  color: var(--accent-hover);
+  font-weight: 700;
+  font-size: 0.9rem;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.subscriptionInsightGrid {
+  margin-top: 0.7rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.6rem;
+}
+
+.subscriptionInsightCard {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  padding: 0.65rem 0.75rem;
+}
+
+.subscriptionInsightLabel {
+  margin: 0;
+  font-size: 0.73rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.subscriptionInsightValue {
+  margin: 0.25rem 0 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.subscriptionInsightHelp {
+  margin: 0.3rem 0 0;
+  font-size: 0.76rem;
+  color: var(--muted);
+  line-height: 1.35;
 }
 
 .modal {

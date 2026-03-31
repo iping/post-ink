@@ -72,6 +72,16 @@ model TattooStudio {
   id         String   @id @default(cuid())
   name       String
   address    String?
+  photo      String?
+  location   String?
+  logo       String?
+  mapsUrl    String?
+  subscriptionPlan      String? // studio
+  subscriptionCycle     String? // monthly | annual
+  subscriptionUserCount Int?
+  subscriptionAmount    Float?  // computed total for selected cycle
+  subscriptionPaymentStatus String? // unpaid | paid | overdue
+  subscriptionNextBillingDate String? // YYYY-MM-DD
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   users      User[]

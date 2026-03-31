@@ -102,9 +102,66 @@ async function main() {
 
   // ─── Studios first (tenants) ───
   const studios = await Promise.all([
-    prisma.tattooStudio.create({ data: { name: 'Ink Haven Studio', address: 'Jl. Kemang Raya No. 45, Jakarta Selatan' } }),
-    prisma.tattooStudio.create({ data: { name: 'Black Lotus Tattoo', address: 'Jl. Petitenget No. 12, Seminyak, Bali' } }),
-    prisma.tattooStudio.create({ data: { name: 'Sacred Skin Collective', address: 'Jl. Braga No. 88, Bandung' } }),
+    prisma.tattooStudio.create({
+      data: {
+        name: 'Ink Haven Studio',
+        address: 'Jl. Kemang Raya No. 45, Jakarta Selatan',
+        location: 'Kemang, Jakarta Selatan',
+        photo: 'https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?w=1200&h=700&fit=crop',
+        logo: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=300&h=300&fit=crop',
+        mapsUrl: 'https://maps.google.com/?q=Jl.+Kemang+Raya+No.+45,+Jakarta+Selatan',
+        subscriptionPlan: 'studio',
+        subscriptionCycle: 'monthly',
+        subscriptionUserCount: 1,
+        subscriptionAmount: 250000,
+        subscriptionPaymentStatus: 'paid',
+        subscriptionNextBillingDate: (() => {
+          const d = new Date();
+          d.setDate(d.getDate() + 30);
+          return d.toISOString().slice(0, 10);
+        })(),
+      },
+    }),
+    prisma.tattooStudio.create({
+      data: {
+        name: 'Black Lotus Tattoo',
+        address: 'Jl. Petitenget No. 12, Seminyak, Bali',
+        location: 'Seminyak, Bali',
+        photo: 'https://images.unsplash.com/photo-1565058379802-bbe93b2f703a?w=1200&h=700&fit=crop',
+        logo: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=300&h=300&fit=crop',
+        mapsUrl: 'https://maps.google.com/?q=Jl.+Petitenget+No.+12,+Seminyak,+Bali',
+        subscriptionPlan: 'studio',
+        subscriptionCycle: 'annual',
+        subscriptionUserCount: 4,
+        subscriptionAmount: 250000 * 4 * 12 * 0.8,
+        subscriptionPaymentStatus: 'unpaid',
+        subscriptionNextBillingDate: (() => {
+          const d = new Date();
+          d.setDate(d.getDate() + 365);
+          return d.toISOString().slice(0, 10);
+        })(),
+      },
+    }),
+    prisma.tattooStudio.create({
+      data: {
+        name: 'Sacred Skin Collective',
+        address: 'Jl. Braga No. 88, Bandung',
+        location: 'Braga, Bandung',
+        photo: 'https://images.unsplash.com/photo-1475090169767-40ed8d18f67d?w=1200&h=700&fit=crop',
+        logo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&h=300&fit=crop',
+        mapsUrl: 'https://maps.google.com/?q=Jl.+Braga+No.+88,+Bandung',
+        subscriptionPlan: 'studio',
+        subscriptionCycle: 'monthly',
+        subscriptionUserCount: 3,
+        subscriptionAmount: 250000 * 3,
+        subscriptionPaymentStatus: 'overdue',
+        subscriptionNextBillingDate: (() => {
+          const d = new Date();
+          d.setDate(d.getDate() - 7);
+          return d.toISOString().slice(0, 10);
+        })(),
+      },
+    }),
   ]);
   const firstStudioId = studios[0].id;
 

@@ -16,14 +16,26 @@ export function ManageLayout() {
   const currentStudioId = getApiStudioId();
   const location = useLocation();
   const isSuperAdmin = user?.role === 'super_admin';
+  const currentStudio = studios.find((s) => s.id === currentStudioId) || studios[0] || null;
+  const rawSubscriptionStatus = String(currentStudio?.subscriptionPaymentStatus || '').toLowerCase();
+  const subscriptionStatus =
+    rawSubscriptionStatus === 'paid' || rawSubscriptionStatus === 'unpaid' || rawSubscriptionStatus === 'overdue'
+      ? rawSubscriptionStatus
+      : '';
+  const subscriptionBadgeText =
+    subscriptionStatus === 'paid' ? 'PAID' : subscriptionStatus === 'overdue' ? 'OVERDUE' : subscriptionStatus === 'unpaid' ? 'UNPAID' : '';
+  const subscriptionBadgeClass =
+    subscriptionStatus === 'paid'
+      ? styles.sideNavBadgePaid
+      : subscriptionStatus === 'overdue'
+        ? styles.sideNavBadgeOverdue
+        : styles.sideNavBadgeUnpaid;
 
   useEffect(() => {
-    if (isSuperAdmin) {
-      getStudios()
-        .then((list) => setStudios(Array.isArray(list) ? list : []))
-        .catch(() => setStudios([]));
-    }
-  }, [isSuperAdmin]);
+    getStudios()
+      .then((list) => setStudios(Array.isArray(list) ? list : []))
+      .catch(() => setStudios([]));
+  }, [isSuperAdmin, currentStudioId]);
 
   useEffect(() => {
     getBookings()
@@ -58,7 +70,7 @@ export function ManageLayout() {
     if (currentTab === 'projects') setProjectOpen(true);
   }, [currentTab]);
   useEffect(() => {
-    if (['profile', 'artists', 'payment-destinations', 'commissions', 'users', 'specialities'].includes(currentTab)) setMyStudioOpen(true);
+    if (['profile', 'payment-subscription', 'artists', 'payment-destinations', 'commissions', 'users', 'specialities'].includes(currentTab)) setMyStudioOpen(true);
   }, [currentTab]);
 
   return (
@@ -207,6 +219,14 @@ export function ManageLayout() {
               <div id="side-nav-mystudio" className={styles.sideNavGroupContent} role="region">
                 <Link to="/manage?tab=profile" className={`${styles.sideNavLink} ${currentTab === 'profile' ? styles.sideNavActive : ''}`} data-short="Pr" title="Studio profile">
                   <span className={styles.sideNavLinkText}>Studio Profile</span>
+                </Link>
+                <Link to="/manage?tab=payment-subscription" className={`${styles.sideNavLink} ${currentTab === 'payment-subscription' ? styles.sideNavActive : ''}`} data-short="Ps" title="Payment subscription">
+                  <span className={styles.sideNavLinkText}>Payment Subscription</span>
+                  {subscriptionBadgeText && (
+                    <span className={`${styles.sideNavBadge} ${subscriptionBadgeClass}`} aria-label={`Subscription ${subscriptionStatus}`}>
+                      {subscriptionBadgeText}
+                    </span>
+                  )}
                 </Link>
                 <Link to="/manage?tab=artists" className={`${styles.sideNavLink} ${currentTab === 'artists' ? styles.sideNavActive : ''}`} data-short="A" title="Tattoo artists">
                   <span className={styles.sideNavLinkText}>Tattoo Artist</span>

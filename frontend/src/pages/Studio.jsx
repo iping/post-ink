@@ -159,7 +159,7 @@ export function Studio() {
 
   useEffect(() => {
     const t = searchParams.get('tab') || 'bookings';
-    if (['profile', 'bookings', 'artists', 'commissions', 'customers', 'leads', 'specialities', 'payment-destinations', 'users'].includes(t)) {
+    if (['profile', 'payment-subscription', 'bookings', 'projects', 'artists', 'commissions', 'customers', 'leads', 'specialities', 'payment-destinations', 'users'].includes(t)) {
       setTab(t);
     }
   }, [searchParams]);
@@ -224,8 +224,23 @@ export function Studio() {
   const [customerHistoryModal, setCustomerHistoryModal] = useState(null);
 
   const [studioProfile, setStudioProfile] = useState(null);
-  const [profileForm, setProfileForm] = useState({ name: '', address: '' });
+  const [profileForm, setProfileForm] = useState({
+    name: '',
+    address: '',
+    photo: '',
+    location: '',
+    logo: '',
+    mapsUrl: '',
+  });
   const [showProfileForm, setShowProfileForm] = useState(false);
+  const [subscriptionForm, setSubscriptionForm] = useState({
+    subscriptionPlan: 'studio',
+    subscriptionCycle: 'monthly',
+    subscriptionUserCount: 1,
+    subscriptionPaymentStatus: 'unpaid',
+    subscriptionNextBillingDate: '',
+  });
+  const [showSubscriptionForm, setShowSubscriptionForm] = useState(false);
   const [profileLoading, setProfileLoading] = useState(false);
 
   const [bookingSearch, setBookingSearch] = useState('');
@@ -429,7 +444,7 @@ export function Studio() {
     if (effectiveStudioId) load();
   }, [effectiveStudioId]);
   useEffect(() => {
-    if (tab !== 'profile' || !effectiveStudioId) {
+    if (!['profile', 'payment-subscription'].includes(tab) || !effectiveStudioId) {
       setStudioProfile(null);
       return;
     }
@@ -437,7 +452,21 @@ export function Studio() {
     getStudio(effectiveStudioId)
       .then((s) => {
         setStudioProfile(s);
-        setProfileForm({ name: s?.name ?? '', address: s?.address ?? '' });
+        setProfileForm({
+          name: s?.name ?? '',
+          address: s?.address ?? '',
+          photo: s?.photo ?? '',
+          location: s?.location ?? '',
+          logo: s?.logo ?? '',
+          mapsUrl: s?.mapsUrl ?? '',
+        });
+        setSubscriptionForm({
+          subscriptionPlan: 'studio',
+          subscriptionCycle: s?.subscriptionCycle ?? 'monthly',
+          subscriptionUserCount: s?.subscriptionUserCount ?? 1,
+          subscriptionPaymentStatus: s?.subscriptionPaymentStatus ?? 'unpaid',
+          subscriptionNextBillingDate: s?.subscriptionNextBillingDate ?? '',
+        });
       })
       .catch(() => setStudioProfile(null))
       .finally(() => setProfileLoading(false));
@@ -719,7 +748,23 @@ export function Studio() {
               <h2>Studio profile</h2>
             </div>
             {studioProfile && !showProfileForm && (
-              <button type="button" className={styles.addBtn} onClick={() => { setProfileForm({ name: studioProfile.name ?? '', address: studioProfile.address ?? '' }); setShowProfileForm(true); }}>Edit</button>
+              <button
+                type="button"
+                className={styles.addBtn}
+                onClick={() => {
+                  setProfileForm({
+                    name: studioProfile.name ?? '',
+                    address: studioProfile.address ?? '',
+                    photo: studioProfile.photo ?? '',
+                    location: studioProfile.location ?? '',
+                    logo: studioProfile.logo ?? '',
+                    mapsUrl: studioProfile.mapsUrl ?? '',
+                  });
+                  setShowProfileForm(true);
+                }}
+              >
+                Edit
+              </button>
             )}
           </div>
           {!effectiveStudioId ? (
@@ -740,6 +785,10 @@ export function Studio() {
                   const updated = await updateStudio(studioProfile.id, {
                     name: (profileForm.name || '').trim() || studioProfile.name,
                     address: (profileForm.address || '').trim() || null,
+                    photo: (profileForm.photo || '').trim() || null,
+                    location: (profileForm.location || '').trim() || null,
+                    logo: (profileForm.logo || '').trim() || null,
+                    mapsUrl: (profileForm.mapsUrl || '').trim() || null,
                   });
                   setStudioProfile(updated);
                   setShowProfileForm(false);
@@ -766,6 +815,38 @@ export function Studio() {
                   placeholder="e.g. Jl. Kemang Raya No. 45"
                 />
               </label>
+              <label className={styles.destFormLabel}>
+                Photo URL
+                <input
+                  value={profileForm.photo}
+                  onChange={(e) => setProfileForm((f) => ({ ...f, photo: e.target.value }))}
+                  placeholder="https://..."
+                />
+              </label>
+              <label className={styles.destFormLabel}>
+                Location
+                <input
+                  value={profileForm.location}
+                  onChange={(e) => setProfileForm((f) => ({ ...f, location: e.target.value }))}
+                  placeholder="e.g. Kemang, Jakarta Selatan"
+                />
+              </label>
+              <label className={styles.destFormLabel}>
+                Logo URL
+                <input
+                  value={profileForm.logo}
+                  onChange={(e) => setProfileForm((f) => ({ ...f, logo: e.target.value }))}
+                  placeholder="https://..."
+                />
+              </label>
+              <label className={styles.destFormLabel}>
+                Maps URL
+                <input
+                  value={profileForm.mapsUrl}
+                  onChange={(e) => setProfileForm((f) => ({ ...f, mapsUrl: e.target.value }))}
+                  placeholder="https://maps.google.com/..."
+                />
+              </label>
               <div className={styles.formActions}>
                 <button type="submit">Save</button>
                 <button type="button" onClick={() => setShowProfileForm(false)}>Cancel</button>
@@ -784,8 +865,279 @@ export function Studio() {
                     <td>{studioProfile.address || '—'}</td>
                   </tr>
                   <tr>
+                    <th className={styles.cellEmphasis}>Photo</th>
+                    <td>{studioProfile.photo ? <a href={studioProfile.photo} target="_blank" rel="noreferrer">View photo</a> : '—'}</td>
+                  </tr>
+                  <tr>
+                    <th className={styles.cellEmphasis}>Location</th>
+                    <td>{studioProfile.location || '—'}</td>
+                  </tr>
+                  <tr>
+                    <th className={styles.cellEmphasis}>Logo</th>
+                    <td>{studioProfile.logo ? <a href={studioProfile.logo} target="_blank" rel="noreferrer">View logo</a> : '—'}</td>
+                  </tr>
+                  <tr>
+                    <th className={styles.cellEmphasis}>Maps URL</th>
+                    <td>{studioProfile.mapsUrl ? <a href={studioProfile.mapsUrl} target="_blank" rel="noreferrer">Open map</a> : '—'}</td>
+                  </tr>
+                  <tr>
                     <th className={styles.cellEmphasis}>Created</th>
                     <td>{studioProfile.createdAt ? new Date(studioProfile.createdAt).toLocaleDateString('en-GB', { dateStyle: 'medium' }) : '—'}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      )}
+
+      {tab === 'payment-subscription' && (
+        <section className={styles.section}>
+          <div className={styles.sectionHead}>
+            <div>
+              <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                Payment Subscription
+                {studioProfile?.subscriptionPaymentStatus && (
+                  <span
+                    className={`${styles.sideNavBadge} ${
+                      String(studioProfile.subscriptionPaymentStatus).toLowerCase() === 'paid'
+                        ? styles.sideNavBadgePaid
+                        : String(studioProfile.subscriptionPaymentStatus).toLowerCase() === 'overdue'
+                          ? styles.sideNavBadgeOverdue
+                          : styles.sideNavBadgeUnpaid
+                    }`}
+                  >
+                    {String(studioProfile.subscriptionPaymentStatus).toUpperCase()}
+                  </span>
+                )}
+              </h2>
+              <p className={styles.help}>Plan and billing for using this platform.</p>
+              <p className={styles.billingAmountRow}>
+                <span className={styles.billingAmountLabel}>Billing amount</span>
+                <span className={styles.billingAmountValue}>
+                  {studioProfile?.subscriptionAmount != null
+                    ? formatRupiah(studioProfile.subscriptionAmount)
+                    : '—'}
+                </span>
+              </p>
+              {studioProfile && (() => {
+                const paymentStatus = String(studioProfile.subscriptionPaymentStatus || 'unpaid').toLowerCase();
+                const nextBillingRaw = studioProfile.subscriptionNextBillingDate || '';
+                const nextBillingDate = nextBillingRaw ? new Date(`${nextBillingRaw}T00:00:00`) : null;
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const isPastBillingDate = nextBillingDate ? nextBillingDate < today : false;
+                const isExpired = paymentStatus === 'overdue' || (paymentStatus !== 'paid' && isPastBillingDate);
+                const daysLeft = nextBillingDate ? Math.ceil((nextBillingDate.getTime() - today.getTime()) / 86400000) : null;
+                const platformAccess = isExpired
+                  ? 'Expired'
+                  : paymentStatus === 'paid'
+                    ? 'Active'
+                    : 'Grace period';
+                const platformAccessHelp = !nextBillingDate
+                  ? 'Set next billing date to track platform expiry.'
+                  : isExpired
+                    ? 'Renew subscription to restore full access.'
+                    : `${daysLeft} day${daysLeft === 1 ? '' : 's'} remaining before expiry.`;
+                const paymentStatusLabel = paymentStatus.charAt(0).toUpperCase() + paymentStatus.slice(1);
+                const nextPaymentLabel = nextBillingDate
+                  ? nextBillingDate.toLocaleDateString('en-GB', { dateStyle: 'medium' })
+                  : '—';
+                return (
+                  <div className={styles.subscriptionInsightGrid}>
+                    <div className={styles.subscriptionInsightCard}>
+                      <p className={styles.subscriptionInsightLabel}>Payment</p>
+                      <p className={styles.subscriptionInsightValue}>{paymentStatusLabel}</p>
+                    </div>
+                    <div className={styles.subscriptionInsightCard}>
+                      <p className={styles.subscriptionInsightLabel}>Amount</p>
+                      <p className={styles.subscriptionInsightValue}>
+                        {studioProfile.subscriptionAmount != null ? formatRupiah(studioProfile.subscriptionAmount) : '—'}
+                      </p>
+                    </div>
+                    <div className={styles.subscriptionInsightCard}>
+                      <p className={styles.subscriptionInsightLabel}>Next payment</p>
+                      <p className={styles.subscriptionInsightValue}>{nextPaymentLabel}</p>
+                    </div>
+                    <div className={styles.subscriptionInsightCard}>
+                      <p className={styles.subscriptionInsightLabel}>Platform access</p>
+                      <p className={styles.subscriptionInsightValue}>{platformAccess}</p>
+                      <p className={styles.subscriptionInsightHelp}>{platformAccessHelp}</p>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+            {studioProfile && !showSubscriptionForm && (
+              <button
+                type="button"
+                className={styles.addBtn}
+                onClick={() => {
+                  setSubscriptionForm({
+                    subscriptionPlan: 'studio',
+                    subscriptionCycle: studioProfile.subscriptionCycle ?? 'monthly',
+                    subscriptionUserCount: studioProfile.subscriptionUserCount ?? 1,
+                    subscriptionPaymentStatus: studioProfile.subscriptionPaymentStatus ?? 'unpaid',
+                    subscriptionNextBillingDate: studioProfile.subscriptionNextBillingDate ?? '',
+                  });
+                  setShowSubscriptionForm(true);
+                }}
+              >
+                Edit
+              </button>
+            )}
+          </div>
+          {!effectiveStudioId ? (
+            <p className={styles.help}>
+              {isSuperAdmin ? 'Select a studio from the header dropdown to view and edit subscription.' : 'You are not assigned to a studio.'}
+            </p>
+          ) : profileLoading ? (
+            <p className={styles.help}>Loading subscription…</p>
+          ) : !studioProfile ? (
+            <p className={styles.help}>Could not load studio.</p>
+          ) : showSubscriptionForm ? (
+            <form
+              className={styles.destForm}
+              onSubmit={async (e) => {
+                e.preventDefault();
+                setError(null);
+                try {
+                  const updated = await updateStudio(studioProfile.id, {
+                    subscriptionPlan: subscriptionForm.subscriptionPlan,
+                    subscriptionCycle: subscriptionForm.subscriptionCycle,
+                    subscriptionUserCount: Number(subscriptionForm.subscriptionUserCount) || 1,
+                    subscriptionPaymentStatus: subscriptionForm.subscriptionPaymentStatus,
+                    subscriptionNextBillingDate: (subscriptionForm.subscriptionNextBillingDate || '').trim() || null,
+                  });
+                  setStudioProfile(updated);
+                  setShowSubscriptionForm(false);
+                  load();
+                } catch (err) {
+                  setError(err.message || 'Failed to update');
+                }
+              }}
+            >
+              <div className={styles.tableWrap} style={{ marginTop: '0.25rem' }}>
+                <table className={styles.table}>
+                  <tbody>
+                    <tr>
+                      <th className={styles.cellEmphasis}>Plan</th>
+                      <td>Studio — IDR 250.000 per user / month</td>
+                    </tr>
+                    <tr>
+                      <th className={styles.cellEmphasis}>Billing cycle</th>
+                      <td>
+                        <select
+                          value={subscriptionForm.subscriptionCycle}
+                          onChange={(e) => setSubscriptionForm((f) => ({ ...f, subscriptionCycle: e.target.value }))}
+                        >
+                          <option value="monthly">Monthly</option>
+                          <option value="annual">Annual (20% discount)</option>
+                        </select>
+                      </td>
+                    </tr>
+                    <tr>
+                      <th className={styles.cellEmphasis}>User count</th>
+                      <td>
+                        <input
+                          type="number"
+                          min={1}
+                          value={subscriptionForm.subscriptionUserCount}
+                          onChange={(e) => setSubscriptionForm((f) => ({ ...f, subscriptionUserCount: e.target.value }))}
+                        />
+                      </td>
+                    </tr>
+                    <tr>
+                      <th className={styles.cellEmphasis}>Estimated total</th>
+                      <td>
+                        {(() => {
+                          const cycle = subscriptionForm.subscriptionCycle;
+                          const users = Math.max(1, Number(subscriptionForm.subscriptionUserCount) || 1);
+                          const monthlyBase = 250000 * users;
+                          const total = cycle === 'annual' ? monthlyBase * 12 * 0.8 : monthlyBase;
+                          return formatRupiah(total);
+                        })()}
+                      </td>
+                    </tr>
+                    <tr>
+                      <th className={styles.cellEmphasis}>Payment status</th>
+                      <td>
+                        <select
+                          value={subscriptionForm.subscriptionPaymentStatus}
+                          onChange={(e) => setSubscriptionForm((f) => ({ ...f, subscriptionPaymentStatus: e.target.value }))}
+                        >
+                          <option value="unpaid">Unpaid</option>
+                          <option value="paid">Paid</option>
+                          <option value="overdue">Overdue</option>
+                        </select>
+                      </td>
+                    </tr>
+                    <tr>
+                      <th className={styles.cellEmphasis}>Next billing date</th>
+                      <td>
+                        <input
+                          type="date"
+                          value={subscriptionForm.subscriptionNextBillingDate || ''}
+                          onChange={(e) => setSubscriptionForm((f) => ({ ...f, subscriptionNextBillingDate: e.target.value }))}
+                        />
+                      </td>
+                    </tr>
+                    <tr>
+                      <th className={styles.cellEmphasis}>Current due</th>
+                      <td>
+                        {(() => {
+                          const cycle = subscriptionForm.subscriptionCycle;
+                          const users = Math.max(1, Number(subscriptionForm.subscriptionUserCount) || 1);
+                          const monthlyBase = 250000 * users;
+                          const total = cycle === 'annual' ? monthlyBase * 12 * 0.8 : monthlyBase;
+                          const due = subscriptionForm.subscriptionPaymentStatus === 'paid' ? 0 : total;
+                          return formatRupiah(due);
+                        })()}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div className={styles.formActions}>
+                <button type="submit">Save</button>
+                <button type="button" onClick={() => setShowSubscriptionForm(false)}>Cancel</button>
+              </div>
+            </form>
+          ) : (
+            <div className={styles.tableWrap}>
+              <table className={styles.table}>
+                <tbody>
+                  <tr>
+                    <th className={styles.cellEmphasis}>Payment Subscription</th>
+                    <td>
+                      {studioProfile.subscriptionPlan
+                        ? `Studio · ${studioProfile.subscriptionCycle === 'annual' ? 'Annual' : 'Monthly'}`
+                        : '—'}
+                    </td>
+                  </tr>
+                  <tr>
+                    <th className={styles.cellEmphasis}>Subscription users</th>
+                    <td>{studioProfile.subscriptionUserCount || '—'}</td>
+                  </tr>
+                  <tr>
+                    <th className={styles.cellEmphasis}>Subscription amount</th>
+                    <td>{studioProfile.subscriptionAmount != null ? formatRupiah(studioProfile.subscriptionAmount) : '—'}</td>
+                  </tr>
+                  <tr>
+                    <th className={styles.cellEmphasis}>Payment status</th>
+                    <td>{studioProfile.subscriptionPaymentStatus || '—'}</td>
+                  </tr>
+                  <tr>
+                    <th className={styles.cellEmphasis}>Next billing date</th>
+                    <td>{studioProfile.subscriptionNextBillingDate || '—'}</td>
+                  </tr>
+                  <tr>
+                    <th className={styles.cellEmphasis}>Current due</th>
+                    <td>
+                      {studioProfile.subscriptionAmount != null
+                        ? formatRupiah(studioProfile.subscriptionPaymentStatus === 'paid' ? 0 : studioProfile.subscriptionAmount)
+                        : '—'}
+                    </td>
                   </tr>
                 </tbody>
               </table>
