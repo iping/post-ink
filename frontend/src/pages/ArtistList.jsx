@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getArtists, uploadUrl, updateArtistStatus } from '../api';
+import { getArtists, getArtistSlotPurchases, getApiStudioId, uploadUrl, updateArtistStatus } from '../api';
+import { useAuth } from '../context/AuthContext';
 import { formatRupiah } from '../currency';
 import styles from './ArtistList.module.css';
 import layoutStyles from './Studio.module.css';
@@ -46,7 +47,9 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
 }
 
 export function ArtistList() {
+  const { user } = useAuth();
   const [artists, setArtists] = useState([]);
+  const [capacity, setCapacity] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [togglingId, setTogglingId] = useState(null);
@@ -54,12 +57,38 @@ export function ArtistList() {
   const [page, setPage] = useState(1);
   const [statusModalArtist, setStatusModalArtist] = useState(null);
 
-  const load = () => getArtists().then(setArtists).catch((e) => setError(e.message));
-
   useEffect(() => {
-    load()
-      .finally(() => setLoading(false));
-  }, []);
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const list = await getArtists();
+        if (!cancelled) setArtists(list);
+        const sid = user?.role === 'super_admin' ? getApiStudioId() : (user?.studio?.id || user?.studioId);
+        if (sid) {
+          try {
+            const data = await getArtistSlotPurchases(sid);
+            if (!cancelled) setCapacity(data.capacity);
+          } catch {
+            if (!cancelled) setCapacity(null);
+          }
+        } else if (!cancelled) {
+          setCapacity(null);
+        }
+      } catch (e) {
+        if (!cancelled) setError(e.message);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
+
+  const canAddArtist =
+    !capacity || (!capacity.hasPendingPayment && capacity.currentArtists < capacity.maxArtists);
 
   const totalPages = Math.max(1, Math.ceil(artists.length / ROWS_PER_PAGE));
   const paginatedArtists = artists.slice((page - 1) * ROWS_PER_PAGE, page * ROWS_PER_PAGE);
@@ -70,6 +99,11 @@ export function ArtistList() {
     try {
       await updateArtistStatus(artist.id, next);
       setArtists((prev) => prev.map((a) => (a.id === artist.id ? { ...a, isActive: next } : a)));
+      const sid = user?.role === 'super_admin' ? getApiStudioId() : (user?.studio?.id || user?.studioId);
+      if (sid) {
+        const data = await getArtistSlotPurchases(sid);
+        setCapacity(data.capacity);
+      }
       setSavedId(artist.id);
       setStatusModalArtist(null);
       setTimeout(() => setSavedId(null), 2000);
@@ -89,8 +123,35 @@ export function ArtistList() {
         <div>
           <h2>Tattoo Artist</h2>
         </div>
-        <Link to="/manage/artists/new" className={layoutStyles.addBtn}>+ Add Artist</Link>
+        {canAddArtist ? (
+          <Link to="/manage/artists/new" className={layoutStyles.addBtn}>+ Add Artist</Link>
+        ) : (
+          <span className={`${layoutStyles.addBtn} ${layoutStyles.addBtnDisabled}`} title="Cannot add artists until slot payment is resolved or capacity is increased">
+            + Add Artist
+          </span>
+        )}
       </div>
+      {capacity && (
+        <div className={styles.capacityInfo}>
+          Capacity: <strong>{capacity.currentArtists}</strong> / <strong>{capacity.maxArtists}</strong>
+          {' '}artists (subscription {capacity.subscriptionSeats} + paid extra {capacity.paidAddonSlots})
+        </div>
+      )}
+      {capacity && !canAddArtist && (
+        <div className={styles.capacityBanner}>
+          {capacity.hasPendingPayment ? (
+            <p>
+              <strong>Artist slot payment pending.</strong> You cannot add new artists until this add-on is marked paid or expires.
+              Open <Link to="/manage?tab=payment-subscription">Payment Subscription</Link> to complete it.
+            </p>
+          ) : (
+            <p>
+              <strong>Artist limit reached</strong> ({capacity.currentArtists} / {capacity.maxArtists}).
+              Request more seats under <Link to="/manage?tab=payment-subscription">Payment Subscription → Add artist slots</Link>.
+            </p>
+          )}
+        </div>
+      )}
       <div className={layoutStyles.tableWrap}>
           <table className={layoutStyles.table}>
             <thead>

@@ -93,6 +93,7 @@ async function main() {
   await prisma.studioCommission.deleteMany({});
   await prisma.artistAvailability.deleteMany({});
   await prisma.tattooArtist.deleteMany({});
+  await prisma.studioBillingHistory.deleteMany({});
   await prisma.studioCustomer.deleteMany({});
   await prisma.customer.deleteMany({});
   await prisma.tattooStudio.deleteMany({});
@@ -114,10 +115,10 @@ async function main() {
         subscriptionCycle: 'monthly',
         subscriptionUserCount: 1,
         subscriptionAmount: 250000,
-        subscriptionPaymentStatus: 'paid',
+        subscriptionPaymentStatus: 'overdue',
         subscriptionNextBillingDate: (() => {
           const d = new Date();
-          d.setDate(d.getDate() + 30);
+          d.setDate(d.getDate() - 5);
           return d.toISOString().slice(0, 10);
         })(),
       },
@@ -134,10 +135,10 @@ async function main() {
         subscriptionCycle: 'annual',
         subscriptionUserCount: 4,
         subscriptionAmount: 250000 * 4 * 12 * 0.8,
-        subscriptionPaymentStatus: 'unpaid',
+        subscriptionPaymentStatus: 'overdue',
         subscriptionNextBillingDate: (() => {
           const d = new Date();
-          d.setDate(d.getDate() + 365);
+          d.setDate(d.getDate() - 10);
           return d.toISOString().slice(0, 10);
         })(),
       },
@@ -559,6 +560,58 @@ async function main() {
         },
       });
     }
+  }
+
+  // Keep subscription seats/amount aligned with actual artists per studio.
+  // Formula: IDR 250,000 x total artists (annual gets 20% discount).
+  for (let sIdx = 0; sIdx < studios.length; sIdx++) {
+    const studio = studios[sIdx];
+    const artistCount = studioArtists[sIdx]?.length || 0;
+    const seatCount = Math.max(1, artistCount);
+    const cycle = studio.subscriptionCycle || 'monthly';
+    const monthlyBase = 250000 * seatCount;
+    const amount = cycle === 'annual' ? monthlyBase * 12 * 0.8 : monthlyBase;
+    await prisma.tattooStudio.update({
+      where: { id: studio.id },
+      data: {
+        subscriptionPlan: 'studio',
+        subscriptionUserCount: seatCount,
+        subscriptionAmount: amount,
+      },
+    });
+
+    // Seed backdated billing history for last 12 months so each studio has timeline data.
+    const historyRows = [];
+    for (let m = 12; m >= 1; m--) {
+      const d = new Date();
+      d.setDate(1);
+      d.setMonth(d.getMonth() - m + 1);
+      const billDate = d.toISOString().slice(0, 10);
+      const due = new Date(d);
+      due.setDate(due.getDate() + 7);
+      const dueDate = due.toISOString().slice(0, 10);
+      const cycle = studio.subscriptionCycle || 'monthly';
+      const monthlyBase = 250000 * seatCount;
+      const histAmount = cycle === 'annual' ? monthlyBase * 12 * 0.8 : monthlyBase;
+      const isRecent = m <= 1;
+      const status = isRecent
+        ? (studio.subscriptionPaymentStatus || 'unpaid')
+        : (m % 5 === 0 ? 'overdue' : 'paid');
+      historyRows.push({
+        studioId: studio.id,
+        billingDate: billDate,
+        dueDate,
+        cycle,
+        amount: histAmount,
+        status,
+        notes: status === 'paid'
+          ? 'Auto-seeded paid invoice.'
+          : status === 'overdue'
+            ? 'Auto-seeded overdue invoice.'
+            : 'Auto-seeded unpaid invoice.',
+      });
+    }
+    await prisma.studioBillingHistory.createMany({ data: historyRows });
   }
 
   // ─── 15 extra bookings: Unpaid, no project started (no payment, no project/session) ───

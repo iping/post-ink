@@ -29,7 +29,20 @@ function studioQuery() {
 async function apiFetch(url, options = {}) {
   const headers = { ...authHeaders(), ...options.headers };
   const res = await fetch(url, { ...options, headers });
-  if (!res.ok) throw new Error(await res.text());
+  if (!res.ok) {
+    const text = await res.text();
+    let msg = text;
+    try {
+      const j = JSON.parse(text);
+      if (j.error) msg = j.error;
+      if (j.hint) msg = `${msg}\n\n${j.hint}`;
+    } catch {
+      /* plain text body */
+    }
+    const err = new Error(msg.trim());
+    err.status = res.status;
+    throw err;
+  }
   return res;
 }
 
@@ -335,12 +348,50 @@ export async function getStudio(id) {
   return res.json();
 }
 
+export async function payStudioSubscription(studioId, notes) {
+  const res = await apiFetch(`${API}/studios/${studioId}/pay-subscription`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(notes ? { notes } : {}),
+  });
+  return res.json();
+}
+
 export async function updateStudio(id, data) {
   const res = await apiFetch(`${API}/studios/${id}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
+  return res.json();
+}
+
+/** Extra artist seats: list + capacity summary */
+export async function getArtistSlotPurchases(studioId) {
+  const res = await apiFetch(`${API}/studios/${studioId}/artist-slot-purchases`);
+  return res.json();
+}
+
+export async function createArtistSlotPurchase(studioId, slots) {
+  const res = await apiFetch(`${API}/studios/${studioId}/artist-slot-purchases`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ slots: Number(slots) }),
+  });
+  return res.json();
+}
+
+export async function updateArtistSlotPurchaseStatus(studioId, purchaseId, status) {
+  const res = await apiFetch(`${API}/studios/${studioId}/artist-slot-purchases/${purchaseId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status }),
+  });
+  return res.json();
+}
+
+export async function getStudioBillingHistories(studioId) {
+  const res = await apiFetch(`${API}/studios/${studioId}/billing-histories`);
   return res.json();
 }
 

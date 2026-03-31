@@ -558,6 +558,32 @@
   to { transform: rotate(360deg); }
 }
 
+.capacityBanner {
+  margin: 0 0 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius);
+  border: 1px solid color-mix(in srgb, var(--danger) 35%, var(--border));
+  background: color-mix(in srgb, var(--danger) 8%, var(--surface));
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: var(--text);
+}
+
+.capacityInfo {
+  margin: 0 0 0.65rem;
+  padding: 0.6rem 0.85rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+}
+
+.capacityBanner a {
+  color: var(--accent-hover);
+  font-weight: 600;
+}
+
 .error {
   color: var(--danger);
 }

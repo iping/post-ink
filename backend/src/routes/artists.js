@@ -4,6 +4,7 @@ import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { getStudioIdOrSendError } from '../middleware/auth.js';
+import { assertCanAddArtist } from '../utils/artist-slots.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const prisma = new PrismaClient();
@@ -71,6 +72,15 @@ artistsRouter.post('/', upload.fields([{ name: 'photos', maxCount: 10 }, { name:
     const existingPortfolio = parseJsonField(req.body.portfolio);
     const [studioId, sent] = getStudioIdOrSendError(req, res);
     if (sent) return;
+    const gate = await assertCanAddArtist(prisma, studioId);
+    if (!gate.ok) {
+      return res.status(gate.statusCode).json({
+        error: gate.error,
+        code: gate.code,
+        hint: gate.hint,
+        pendingPurchaseId: gate.pendingPurchaseId,
+      });
+    }
     const data = {
       studioId,
       name: req.body.name,

@@ -217,6 +217,11 @@ export function ManageLayout() {
             </button>
             {myStudioOpen && (
               <div id="side-nav-mystudio" className={styles.sideNavGroupContent} role="region">
+                {isSuperAdmin && (
+                  <Link to="/manage?tab=studios" className={`${styles.sideNavLink} ${currentTab === 'studios' ? styles.sideNavActive : ''}`} data-short="St" title="All studios on platform">
+                    <span className={styles.sideNavLinkText}>Studios</span>
+                  </Link>
+                )}
                 <Link to="/manage?tab=profile" className={`${styles.sideNavLink} ${currentTab === 'profile' ? styles.sideNavActive : ''}`} data-short="Pr" title="Studio profile">
                   <span className={styles.sideNavLinkText}>Studio Profile</span>
                 </Link>

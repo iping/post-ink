@@ -30,6 +30,11 @@ import {
   updateUser,
   deleteUser,
   getProjects,
+  getArtistSlotPurchases,
+  createArtistSlotPurchase,
+  updateArtistSlotPurchaseStatus,
+  getStudioBillingHistories,
+  payStudioSubscription,
 } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { formatRupiah } from '../currency';
@@ -137,6 +142,54 @@ function preferenceText(booking) {
   }
 }
 
+const SUBSCRIPTION_IDR_PER_ARTIST_MONTHLY = 250000;
+const SUBSCRIPTION_ANNUAL_DISCOUNT = 0.8;
+const SLOT_PRORATE_DIVISOR_DAYS = 25;
+const SUBSCRIPTION_GRACE_DAYS = 5;
+
+/** Licensed artist seats: primary field is subscriptionUserCount; amount must equal IDR 250k × seats (× 12 × 0.8 if annual). */
+function licensedArtistSeatsFromStudio(s) {
+  if (!s) return null;
+  const raw = s.subscriptionUserCount;
+  if (raw != null && Number.isFinite(Number(raw)) && Number(raw) >= 1) {
+    return Math.max(1, Math.floor(Number(raw)));
+  }
+  const amt = Number(s.subscriptionAmount);
+  const cycle = s.subscriptionCycle || 'monthly';
+  if (!Number.isFinite(amt) || amt <= 0) return null;
+  if (cycle === 'annual') {
+    return Math.max(1, Math.round(amt / (SUBSCRIPTION_IDR_PER_ARTIST_MONTHLY * 12 * SUBSCRIPTION_ANNUAL_DISCOUNT)));
+  }
+  return Math.max(1, Math.round(amt / SUBSCRIPTION_IDR_PER_ARTIST_MONTHLY));
+}
+
+function expectedSubscriptionAmountIdr(licensedSeats, cycle) {
+  const n = Math.max(1, licensedSeats);
+  const monthly = SUBSCRIPTION_IDR_PER_ARTIST_MONTHLY * n;
+  return cycle === 'annual' ? monthly * 12 * SUBSCRIPTION_ANNUAL_DISCOUNT : monthly;
+}
+
+function recurringAmountForSeats(seats, cycle) {
+  const n = Math.max(0, Math.floor(Number(seats) || 0));
+  const monthly = SUBSCRIPTION_IDR_PER_ARTIST_MONTHLY * n;
+  return cycle === 'annual' ? monthly * 12 * SUBSCRIPTION_ANNUAL_DISCOUNT : monthly;
+}
+
+function slotProrateQuote(nextBillingDate, slots, fromDate = null) {
+  const target = nextBillingDate ? new Date(`${String(nextBillingDate).slice(0, 10)}T00:00:00`) : null;
+  const today = fromDate ? new Date(fromDate) : new Date();
+  today.setHours(0, 0, 0, 0);
+  const remainingDays = target && !Number.isNaN(target.getTime())
+    ? Math.max(0, Math.floor((target.getTime() - today.getTime()) / 86400000))
+    : 0;
+  const safeSlots = Math.max(1, Math.floor(Number(slots) || 1));
+  const chargeableDays = Math.min(remainingDays, SLOT_PRORATE_DIVISOR_DAYS);
+  const dailyRate = SUBSCRIPTION_IDR_PER_ARTIST_MONTHLY / SLOT_PRORATE_DIVISOR_DAYS;
+  const amountPerSlot = dailyRate * chargeableDays;
+  const total = amountPerSlot * safeSlots;
+  return { remainingDays, chargeableDays, safeSlots, dailyRate, amountPerSlot, total };
+}
+
 /** Consistent tag color per artist id (hue 0–360, fixed saturation/lightness) */
 function artistTagColor(artistId) {
   if (!artistId) return '120, 40%, 45%';
@@ -242,6 +295,14 @@ export function Studio() {
   });
   const [showSubscriptionForm, setShowSubscriptionForm] = useState(false);
   const [profileLoading, setProfileLoading] = useState(false);
+  const [slotPurchasesData, setSlotPurchasesData] = useState(null);
+  const [slotRequestCount, setSlotRequestCount] = useState(1);
+  const [slotRequestLoading, setSlotRequestLoading] = useState(false);
+  const [showBillingHistory, setShowBillingHistory] = useState(false);
+  const [billingHistories, setBillingHistories] = useState([]);
+  const [billingHistoryLoading, setBillingHistoryLoading] = useState(false);
+  const [billingHistoryYear, setBillingHistoryYear] = useState('all');
+  const [billingHistoryStatus, setBillingHistoryStatus] = useState('all');
 
   const [bookingSearch, setBookingSearch] = useState('');
   const [showEditDisabledDialog, setShowEditDisabledDialog] = useState(false);
@@ -276,6 +337,8 @@ export function Studio() {
     }).sort((a, b) => (b.date + (b.startTime || '')).localeCompare(a.date + (a.startTime || '')));
   };
 
+  const effectiveStudioId = isSuperAdmin ? getApiStudioId() : (user?.studio?.id || user?.studioId);
+
   const filteredBookings = filterBookingsBySearch(bookings, bookingSearch);
   const leadProfiles = customers.filter((c) => c.type === 'lead');
   const bookedCustomers = customers.filter((c) => c.type !== 'lead');
@@ -288,6 +351,11 @@ export function Studio() {
 
   const destList = Array.isArray(paymentDestinations) ? paymentDestinations : [];
   const destTotalPages = Math.max(1, Math.ceil(destList.length / ROWS_PER_PAGE));
+  const subscriptionPaymentAccounts = destList.filter((d) => {
+    if (!d || d.ownerType !== 'studio' || d.isActive === false) return false;
+    if (!effectiveStudioId) return true;
+    return !d.studioId || d.studioId === effectiveStudioId;
+  });
 
   const paginatedBookings = filteredBookings.slice((bookingPage - 1) * ROWS_PER_PAGE, bookingPage * ROWS_PER_PAGE);
   const paginatedCommissions = commissions.slice((commissionPage - 1) * ROWS_PER_PAGE, commissionPage * ROWS_PER_PAGE);
@@ -306,6 +374,41 @@ export function Studio() {
   const totalCustomers = bookedCustomers.length;
   const totalLeads = leadProfiles.length;
   const totalArtists = artists.length;
+  const subscriptionArtistInfo = useMemo(() => {
+    if (!studioProfile) return null;
+    const licensed = licensedArtistSeatsFromStudio(studioProfile);
+    if (licensed == null) return null;
+    const current = artists.length;
+    const remaining = Math.max(0, licensed - current);
+    const cycle = studioProfile.subscriptionCycle || 'monthly';
+    const storedAmount = Number(studioProfile.subscriptionAmount);
+    const expected = expectedSubscriptionAmountIdr(licensed, cycle);
+    const amountAligned = !Number.isFinite(storedAmount) || Math.abs(storedAmount - expected) < 1;
+    return {
+      licensed,
+      current,
+      remaining,
+      cycle,
+      expectedAmount: expected,
+      amountAligned,
+    };
+  }, [studioProfile, artists]);
+  const billingProjection = useMemo(() => {
+    if (!studioProfile) return null;
+    const cycle = studioProfile.subscriptionCycle || 'monthly';
+    const baseSeats = Math.max(1, Math.floor(Number(studioProfile.subscriptionUserCount) || 1));
+    const paidExtraSlots = Math.max(0, Number(slotPurchasesData?.capacity?.paidAddonSlots) || 0);
+    const baseAmount = recurringAmountForSeats(baseSeats, cycle);
+    const extraAmount = recurringAmountForSeats(paidExtraSlots, cycle);
+    return {
+      cycle,
+      baseSeats,
+      paidExtraSlots,
+      baseAmount,
+      extraAmount,
+      total: baseAmount + extraAmount,
+    };
+  }, [studioProfile, slotPurchasesData]);
   const totalRevenue = payments
     .filter((p) => p.status === 'completed')
     .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
@@ -435,10 +538,99 @@ export function Studio() {
         setProjectsList(Array.isArray(proj) ? proj : []);
       })
       .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
+      .finally(() => {
+        setLoading(false);
+        if (effectiveStudioId) {
+          getArtistSlotPurchases(effectiveStudioId)
+            .then(setSlotPurchasesData)
+            .catch(() => setSlotPurchasesData(null));
+        } else {
+          setSlotPurchasesData(null);
+        }
+      });
   };
 
-  const effectiveStudioId = isSuperAdmin ? getApiStudioId() : (user?.studio?.id || user?.studioId);
+  const handleRequestArtistSlots = async () => {
+    if (!effectiveStudioId) return;
+    setSlotRequestLoading(true);
+    setError(null);
+    try {
+      await createArtistSlotPurchase(effectiveStudioId, slotRequestCount);
+      setSlotRequestCount(1);
+      load();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSlotRequestLoading(false);
+    }
+  };
+
+  const handleSlotPurchaseStatusUpdate = async (purchaseId, status) => {
+    if (!effectiveStudioId) return;
+    setError(null);
+    try {
+      await updateArtistSlotPurchaseStatus(effectiveStudioId, purchaseId, status);
+      load();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const canConfirmSlotPayment = user?.role === 'admin' || user?.role === 'super_admin';
+  const openBillingHistory = async () => {
+    if (!effectiveStudioId) return;
+    setShowBillingHistory(true);
+    setBillingHistoryLoading(true);
+    try {
+      const rows = await getStudioBillingHistories(effectiveStudioId);
+      setBillingHistories(Array.isArray(rows) ? rows : []);
+      setBillingHistoryYear('all');
+      setBillingHistoryStatus('all');
+    } catch (err) {
+      setError(err.message || 'Failed to load billing history');
+    } finally {
+      setBillingHistoryLoading(false);
+    }
+  };
+  const filteredBillingHistories = useMemo(() => {
+    if (!Array.isArray(billingHistories)) return [];
+    return billingHistories.filter((row) => {
+      if (billingHistoryYear !== 'all') {
+        const y = (row.billingDate || '').slice(0, 4);
+        if (y !== billingHistoryYear) return false;
+      }
+      if (billingHistoryStatus !== 'all') {
+        if (String(row.status || '').toLowerCase() !== billingHistoryStatus) return false;
+      }
+      return true;
+    });
+  }, [billingHistories, billingHistoryYear, billingHistoryStatus]);
+
+  const handlePaySubscription = async () => {
+    if (!effectiveStudioId || !studioProfile) return;
+    setError(null);
+    try {
+      const result = await payStudioSubscription(effectiveStudioId);
+      if (result && result.studio) {
+        setStudioProfile(result.studio);
+      } else {
+        // Fallback: reload full studio profile + billing history
+        const [updated, rows] = await Promise.all([
+          getStudio(effectiveStudioId),
+          getStudioBillingHistories(effectiveStudioId),
+        ]);
+        setStudioProfile(updated);
+        setBillingHistories(Array.isArray(rows) ? rows : []);
+      }
+      // Refresh billing histories list if currently open
+      if (showBillingHistory && effectiveStudioId) {
+        const rows = await getStudioBillingHistories(effectiveStudioId);
+        setBillingHistories(Array.isArray(rows) ? rows : []);
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to record subscription payment');
+    }
+  };
 
   useEffect(() => {
     if (effectiveStudioId) load();
@@ -733,7 +925,44 @@ export function Studio() {
 
       <div className={styles.adminCard}>
         <div className={styles.adminContent}>
-      {isSuperAdmin && !effectiveStudioId ? (
+      {isSuperAdmin && tab === 'studios' ? (
+        <section className={styles.section}>
+          <div className={styles.sectionHead}>
+            <div>
+              <h2>Studios on this platform</h2>
+              <p className={styles.help}>Overview of all studios, their subscription status, and next billing.</p>
+            </div>
+          </div>
+          {studios.length === 0 ? (
+            <p className={styles.help}>No studios found.</p>
+          ) : (
+            <div className={styles.tableWrap}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Cycle</th>
+                    <th>Seats</th>
+                    <th>Status</th>
+                    <th>Next billing date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {studios.map((s) => (
+                    <tr key={s.id}>
+                      <td>{s.name}</td>
+                      <td>{s.subscriptionCycle || '—'}</td>
+                      <td>{s.subscriptionUserCount ?? '—'}</td>
+                      <td>{s.subscriptionPaymentStatus || '—'}</td>
+                      <td>{s.subscriptionNextBillingDate || '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      ) : isSuperAdmin && !effectiveStudioId ? (
         <section className={styles.section}>
           <p className={styles.help}>
             Select a studio from the header dropdown to view its data. All lists (bookings, payments, customers, leads, artists, etc.) refer to the selected studio.
@@ -915,30 +1144,46 @@ export function Studio() {
               <p className={styles.billingAmountRow}>
                 <span className={styles.billingAmountLabel}>Billing amount</span>
                 <span className={styles.billingAmountValue}>
-                  {studioProfile?.subscriptionAmount != null
-                    ? formatRupiah(studioProfile.subscriptionAmount)
+                  {billingProjection
+                    ? formatRupiah(billingProjection.total)
                     : '—'}
                 </span>
               </p>
+              {billingProjection && (
+                <p className={styles.help} style={{ margin: '0.2rem 0 0.7rem' }}>
+                  Next billing = base {formatRupiah(billingProjection.baseAmount)} + paid extra slots {formatRupiah(billingProjection.extraAmount)}
+                  {' = '}
+                  {formatRupiah(billingProjection.total)} ({billingProjection.cycle === 'annual' ? 'annual' : 'monthly'} cycle).
+                </p>
+              )}
               {studioProfile && (() => {
                 const paymentStatus = String(studioProfile.subscriptionPaymentStatus || 'unpaid').toLowerCase();
                 const nextBillingRaw = studioProfile.subscriptionNextBillingDate || '';
                 const nextBillingDate = nextBillingRaw ? new Date(`${nextBillingRaw}T00:00:00`) : null;
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
-                const isPastBillingDate = nextBillingDate ? nextBillingDate < today : false;
-                const isExpired = paymentStatus === 'overdue' || (paymentStatus !== 'paid' && isPastBillingDate);
                 const daysLeft = nextBillingDate ? Math.ceil((nextBillingDate.getTime() - today.getTime()) / 86400000) : null;
+                const isExpired =
+                  paymentStatus === 'overdue' ||
+                  (paymentStatus !== 'paid' && daysLeft !== null && daysLeft < -SUBSCRIPTION_GRACE_DAYS);
+                const inGracePeriod =
+                  paymentStatus !== 'paid' &&
+                  !isExpired &&
+                  daysLeft !== null &&
+                  daysLeft <= 0 &&
+                  daysLeft >= -SUBSCRIPTION_GRACE_DAYS;
                 const platformAccess = isExpired
                   ? 'Expired'
-                  : paymentStatus === 'paid'
-                    ? 'Active'
-                    : 'Grace period';
+                  : inGracePeriod
+                    ? 'Grace period'
+                    : 'Active';
                 const platformAccessHelp = !nextBillingDate
                   ? 'Set next billing date to track platform expiry.'
                   : isExpired
                     ? 'Renew subscription to restore full access.'
-                    : `${daysLeft} day${daysLeft === 1 ? '' : 's'} remaining before expiry.`;
+                    : inGracePeriod
+                      ? 'Within 5-day grace period after billing date.'
+                      : `${daysLeft} day${daysLeft === 1 ? '' : 's'} remaining before billing date.`;
                 const paymentStatusLabel = paymentStatus.charAt(0).toUpperCase() + paymentStatus.slice(1);
                 const nextPaymentLabel = nextBillingDate
                   ? nextBillingDate.toLocaleDateString('en-GB', { dateStyle: 'medium' })
@@ -952,8 +1197,13 @@ export function Studio() {
                     <div className={styles.subscriptionInsightCard}>
                       <p className={styles.subscriptionInsightLabel}>Amount</p>
                       <p className={styles.subscriptionInsightValue}>
-                        {studioProfile.subscriptionAmount != null ? formatRupiah(studioProfile.subscriptionAmount) : '—'}
+                        {billingProjection ? formatRupiah(billingProjection.total) : '—'}
                       </p>
+                      {billingProjection && (
+                        <p className={styles.subscriptionInsightHelp}>
+                          Base {formatRupiah(billingProjection.baseAmount)} + extra {formatRupiah(billingProjection.extraAmount)}
+                        </p>
+                      )}
                     </div>
                     <div className={styles.subscriptionInsightCard}>
                       <p className={styles.subscriptionInsightLabel}>Next payment</p>
@@ -964,27 +1214,64 @@ export function Studio() {
                       <p className={styles.subscriptionInsightValue}>{platformAccess}</p>
                       <p className={styles.subscriptionInsightHelp}>{platformAccessHelp}</p>
                     </div>
+                    {subscriptionArtistInfo && (
+                      <div className={styles.subscriptionInsightCard}>
+                        <p className={styles.subscriptionInsightLabel}>Artists (subscription)</p>
+                        <p className={styles.subscriptionInsightValue}>
+                          {subscriptionArtistInfo.current} / {subscriptionArtistInfo.licensed} in use
+                        </p>
+                        <p className={styles.subscriptionInsightHelp}>
+                          {subscriptionArtistInfo.remaining === 0
+                            ? 'At your licensed limit. Increase artist seats in Edit to add more.'
+                            : `${subscriptionArtistInfo.remaining} seat${subscriptionArtistInfo.remaining === 1 ? '' : 's'} available for new artists.`}{' '}
+                          Billing: IDR {SUBSCRIPTION_IDR_PER_ARTIST_MONTHLY.toLocaleString('id-ID')} × {subscriptionArtistInfo.licensed} artists
+                          {subscriptionArtistInfo.cycle === 'annual'
+                            ? ` / month, billed annually (${Math.round(SUBSCRIPTION_ANNUAL_DISCOUNT * 100)}% discount).`
+                            : ' per billing period.'}
+                          {!subscriptionArtistInfo.amountAligned && ' Stored amount does not match this formula; save subscription again to align.'}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 );
               })()}
             </div>
             {studioProfile && !showSubscriptionForm && (
-              <button
-                type="button"
-                className={styles.addBtn}
-                onClick={() => {
-                  setSubscriptionForm({
-                    subscriptionPlan: 'studio',
-                    subscriptionCycle: studioProfile.subscriptionCycle ?? 'monthly',
-                    subscriptionUserCount: studioProfile.subscriptionUserCount ?? 1,
-                    subscriptionPaymentStatus: studioProfile.subscriptionPaymentStatus ?? 'unpaid',
-                    subscriptionNextBillingDate: studioProfile.subscriptionNextBillingDate ?? '',
-                  });
-                  setShowSubscriptionForm(true);
-                }}
-              >
-                Edit
-              </button>
+              <div className={styles.headerActions}>
+                <button
+                  type="button"
+                  className={styles.addBtn}
+                  disabled={String(studioProfile.subscriptionPaymentStatus || '').toLowerCase() === 'paid'}
+                  onClick={handlePaySubscription}
+                >
+                  {String(studioProfile.subscriptionPaymentStatus || '').toLowerCase() === 'paid'
+                    ? 'Subscription paid'
+                    : 'Mark subscription as paid'}
+                </button>
+                <button
+                  type="button"
+                  className={styles.addBtn}
+                  onClick={openBillingHistory}
+                >
+                  Billing histories
+                </button>
+                <button
+                  type="button"
+                  className={styles.addBtn}
+                  onClick={() => {
+                    setSubscriptionForm({
+                      subscriptionPlan: 'studio',
+                      subscriptionCycle: studioProfile.subscriptionCycle ?? 'monthly',
+                      subscriptionUserCount: studioProfile.subscriptionUserCount ?? 1,
+                      subscriptionPaymentStatus: studioProfile.subscriptionPaymentStatus ?? 'unpaid',
+                      subscriptionNextBillingDate: studioProfile.subscriptionNextBillingDate ?? '',
+                    });
+                    setShowSubscriptionForm(true);
+                  }}
+                >
+                  Edit
+                </button>
+              </div>
             )}
           </div>
           {!effectiveStudioId ? (
@@ -1037,14 +1324,19 @@ export function Studio() {
                       </td>
                     </tr>
                     <tr>
-                      <th className={styles.cellEmphasis}>User count</th>
+                      <th className={styles.cellEmphasis}>Artist seats (licensed)</th>
                       <td>
                         <input
                           type="number"
                           min={1}
                           value={subscriptionForm.subscriptionUserCount}
                           onChange={(e) => setSubscriptionForm((f) => ({ ...f, subscriptionUserCount: e.target.value }))}
+                          aria-describedby="subscription-seats-help"
                         />
+                        <p id="subscription-seats-help" className={styles.help} style={{ marginTop: '0.35rem', marginBottom: 0 }}>
+                          Each seat covers one artist. Amount = IDR {SUBSCRIPTION_IDR_PER_ARTIST_MONTHLY.toLocaleString('id-ID')} × seats
+                          {subscriptionForm.subscriptionCycle === 'annual' ? ' × 12 months × 80% (annual).' : ' per month.'}
+                        </p>
                       </td>
                     </tr>
                     <tr>
@@ -1104,6 +1396,7 @@ export function Studio() {
               </div>
             </form>
           ) : (
+            <>
             <div className={styles.tableWrap}>
               <table className={styles.table}>
                 <tbody>
@@ -1116,12 +1409,48 @@ export function Studio() {
                     </td>
                   </tr>
                   <tr>
-                    <th className={styles.cellEmphasis}>Subscription users</th>
-                    <td>{studioProfile.subscriptionUserCount || '—'}</td>
+                    <th className={styles.cellEmphasis}>Licensed artist seats (max)</th>
+                    <td>
+                      {subscriptionArtistInfo ? (
+                        <>
+                          <strong>{subscriptionArtistInfo.licensed}</strong>
+                          {' · '}
+                          {subscriptionArtistInfo.cycle === 'monthly'
+                            ? `${formatRupiah(expectedSubscriptionAmountIdr(subscriptionArtistInfo.licensed, 'monthly'))} per month (IDR ${SUBSCRIPTION_IDR_PER_ARTIST_MONTHLY.toLocaleString('id-ID')} × ${subscriptionArtistInfo.licensed})`
+                            : `${formatRupiah(expectedSubscriptionAmountIdr(subscriptionArtistInfo.licensed, 'annual'))} per year (IDR ${SUBSCRIPTION_IDR_PER_ARTIST_MONTHLY.toLocaleString('id-ID')} × ${subscriptionArtistInfo.licensed} × 12 × 80%)`}
+                        </>
+                      ) : (
+                        '—'
+                      )}
+                    </td>
                   </tr>
                   <tr>
-                    <th className={styles.cellEmphasis}>Subscription amount</th>
-                    <td>{studioProfile.subscriptionAmount != null ? formatRupiah(studioProfile.subscriptionAmount) : '—'}</td>
+                    <th className={styles.cellEmphasis}>Artists in studio (current)</th>
+                    <td>{subscriptionArtistInfo ? subscriptionArtistInfo.current : '—'}</td>
+                  </tr>
+                  <tr>
+                    <th className={styles.cellEmphasis}>Artist slots remaining</th>
+                    <td>
+                      {subscriptionArtistInfo
+                        ? `${subscriptionArtistInfo.remaining} (can add ${subscriptionArtistInfo.remaining} more artist${subscriptionArtistInfo.remaining === 1 ? '' : 's'} within subscription)`
+                        : '—'}
+                    </td>
+                  </tr>
+                  <tr>
+                    <th className={styles.cellEmphasis}>Base subscription amount</th>
+                    <td>{billingProjection ? formatRupiah(billingProjection.baseAmount) : '—'}</td>
+                  </tr>
+                  <tr>
+                    <th className={styles.cellEmphasis}>Paid extra slot amount</th>
+                    <td>
+                      {billingProjection
+                        ? `${formatRupiah(billingProjection.extraAmount)} (${billingProjection.paidExtraSlots} extra paid slot${billingProjection.paidExtraSlots === 1 ? '' : 's'})`
+                        : '—'}
+                    </td>
+                  </tr>
+                  <tr>
+                    <th className={styles.cellEmphasis}>Next billing total (projected)</th>
+                    <td>{billingProjection ? formatRupiah(billingProjection.total) : '—'}</td>
                   </tr>
                   <tr>
                     <th className={styles.cellEmphasis}>Payment status</th>
@@ -1134,14 +1463,294 @@ export function Studio() {
                   <tr>
                     <th className={styles.cellEmphasis}>Current due</th>
                     <td>
-                      {studioProfile.subscriptionAmount != null
-                        ? formatRupiah(studioProfile.subscriptionPaymentStatus === 'paid' ? 0 : studioProfile.subscriptionAmount)
+                      {billingProjection
+                        ? formatRupiah(studioProfile.subscriptionPaymentStatus === 'paid' ? 0 : billingProjection.total)
                         : '—'}
                     </td>
                   </tr>
                 </tbody>
               </table>
             </div>
+            <div className={styles.tableWrap} style={{ marginTop: '0.75rem' }}>
+              <table className={styles.table}>
+                <tbody>
+                  <tr>
+                    <th className={styles.cellEmphasis}>Where to pay subscription</th>
+                    <td>
+                      {subscriptionPaymentAccounts.length === 0 ? (
+                        <span>No studio payment account set. Configure one under Payment Account.</span>
+                      ) : (
+                        <ul style={{ margin: 0, paddingLeft: '1.1rem' }}>
+                          {subscriptionPaymentAccounts.map((dest) => (
+                            <li key={dest.id}>{paymentDestinationDisplay(dest)}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            {slotPurchasesData && (
+              <div className={styles.slotPurchaseSection}>
+                <h3 className={styles.slotPurchaseTitle}>Add artist slots</h3>
+                {slotPurchasesData.capacity && (
+                  <div className={styles.slotCapacityGrid}>
+                    <div className={styles.slotCapacityCard}>
+                      <p className={styles.slotCapacityLabel}>Subscription seats</p>
+                      <p className={styles.slotCapacityValue}>{slotPurchasesData.capacity.subscriptionSeats}</p>
+                    </div>
+                    <div className={styles.slotCapacityCard}>
+                      <p className={styles.slotCapacityLabel}>Paid extra seats</p>
+                      <p className={styles.slotCapacityValue}>{slotPurchasesData.capacity.paidAddonSlots}</p>
+                    </div>
+                    <div className={styles.slotCapacityCard}>
+                      <p className={styles.slotCapacityLabel}>Total max artists</p>
+                      <p className={styles.slotCapacityValue}>{slotPurchasesData.capacity.maxArtists}</p>
+                    </div>
+                    <div className={styles.slotCapacityCard}>
+                      <p className={styles.slotCapacityLabel}>Artists in use</p>
+                      <p className={styles.slotCapacityValue}>{slotPurchasesData.capacity.currentArtists}</p>
+                    </div>
+                  </div>
+                )}
+                <p className={styles.help}>
+                  Extra seats are billed at IDR {SUBSCRIPTION_IDR_PER_ARTIST_MONTHLY.toLocaleString('id-ID')} per slot per billing period.
+                  A request stays <strong>pending payment</strong> until you confirm payment; until then you cannot add new artists.
+                  Unpaid requests expire after 7 days (<strong>expired</strong>).
+                </p>
+                <p className={styles.slotLegend}>
+                  <span className={`${styles.sideNavBadge} ${styles.sideNavBadgeUnpaid}`}>Pending payment</span>
+                  <span className={`${styles.sideNavBadge} ${styles.sideNavBadgePaid}`}>Paid</span>
+                  <span className={`${styles.sideNavBadge} ${styles.slotBadgeExpired}`}>Expired</span>
+                </p>
+                {slotPurchasesData.capacity && (
+                <p className={styles.slotPurchaseSummary}>
+                  <strong>Capacity formula:</strong> max artists = subscription seats + paid extra seats
+                  {' = '}
+                  {slotPurchasesData.capacity.subscriptionSeats} + {slotPurchasesData.capacity.paidAddonSlots}
+                  {' = '}
+                  {slotPurchasesData.capacity.maxArtists}. Current usage: {slotPurchasesData.capacity.currentArtists} / {slotPurchasesData.capacity.maxArtists}.
+                  {billingProjection && (
+                    <>
+                      {' '}Next billing projection: {formatRupiah(billingProjection.baseAmount)} + {formatRupiah(billingProjection.extraAmount)} = <strong>{formatRupiah(billingProjection.total)}</strong>.
+                    </>
+                  )}
+                  {slotPurchasesData.capacity.hasPendingPayment && (
+                    <span className={styles.slotPurchaseWarn}> You have a pending slot purchase — complete payment before adding artists.</span>
+                  )}
+                </p>
+                )}
+                {(() => {
+                  const q = slotProrateQuote(studioProfile?.subscriptionNextBillingDate, slotRequestCount);
+                  return (
+                    <div className={styles.slotPricingBox}>
+                      <p className={styles.slotPricingTitle}>Prorated amount preview</p>
+                      <p className={styles.slotPricingLine}>
+                        Monthly per user: <strong>{formatRupiah(SUBSCRIPTION_IDR_PER_ARTIST_MONTHLY)}</strong>
+                        {' · '}
+                        Daily rate: <strong>{formatRupiah(q.dailyRate)}</strong> ({SUBSCRIPTION_IDR_PER_ARTIST_MONTHLY.toLocaleString('id-ID')} / {SLOT_PRORATE_DIVISOR_DAYS} days)
+                      </p>
+                      <p className={styles.slotPricingLine}>
+                        Remaining days until next billing: <strong>{q.remainingDays} day{q.remainingDays === 1 ? '' : 's'}</strong>
+                        {' · '}
+                        Requested slots: <strong>{q.safeSlots}</strong>
+                      </p>
+                      <p className={styles.slotPricingTotal}>
+                        Amount = (({SUBSCRIPTION_IDR_PER_ARTIST_MONTHLY.toLocaleString('id-ID')} / {SLOT_PRORATE_DIVISOR_DAYS}) × {Math.min(q.remainingDays, SLOT_PRORATE_DIVISOR_DAYS)}) × {q.safeSlots}
+                        {' = '}
+                        <strong>{formatRupiah(q.total)}</strong>
+                      </p>
+                    </div>
+                  );
+                })()}
+                <div className={styles.slotPurchaseBar}>
+                  <label htmlFor="slot-request-count" className={styles.slotPurchaseLabel}>Slots to add</label>
+                  <input
+                    id="slot-request-count"
+                    type="number"
+                    min={1}
+                    max={100}
+                    value={slotRequestCount}
+                    onChange={(e) => setSlotRequestCount(Math.max(1, Math.min(100, Number(e.target.value) || 1)))}
+                    className={styles.slotPurchaseInput}
+                  />
+                  <button
+                    type="button"
+                    className={styles.addBtn}
+                    disabled={slotRequestLoading}
+                    onClick={handleRequestArtistSlots}
+                  >
+                    {slotRequestLoading ? 'Requesting…' : 'Request additional slots'}
+                  </button>
+                </div>
+                {slotPurchasesData.purchases?.length > 0 && (
+                  <div className={styles.tableWrap} style={{ marginTop: '0.75rem' }}>
+                    <table className={styles.table}>
+                      <thead>
+                        <tr>
+                          <th>Requested</th>
+                          <th>Days</th>
+                          <th>Rate / day</th>
+                          <th>Formula</th>
+                          <th>Amount</th>
+                          <th>Status</th>
+                          <th>Pay by</th>
+                          <th />
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {slotPurchasesData.purchases.map((p) => {
+                          const st = String(p.status || '').toLowerCase();
+                          const badgeClass =
+                            st === 'paid'
+                              ? styles.sideNavBadgePaid
+                              : st === 'expired'
+                                ? styles.slotBadgeExpired
+                                : styles.sideNavBadgeUnpaid;
+                          const label =
+                            st === 'pending_payment'
+                              ? 'Pending payment'
+                              : st === 'paid'
+                                ? 'Paid'
+                                : st === 'expired'
+                                  ? 'Expired'
+                                  : p.status;
+                          const quote = slotProrateQuote(studioProfile?.subscriptionNextBillingDate, p.slots, p.createdAt);
+                          return (
+                            <tr key={p.id}>
+                              <td>{p.slots} slot(s)</td>
+                              <td>{quote.remainingDays}</td>
+                              <td>{formatRupiah(quote.dailyRate)}</td>
+                              <td className={styles.cellNotes}>
+                                ({SUBSCRIPTION_IDR_PER_ARTIST_MONTHLY.toLocaleString('id-ID')} / {SLOT_PRORATE_DIVISOR_DAYS}) x {Math.min(quote.remainingDays, SLOT_PRORATE_DIVISOR_DAYS)} x {quote.safeSlots}
+                              </td>
+                              <td>
+                                <strong>{formatRupiah(quote.total)}</strong>
+                              </td>
+                              <td>
+                                <span className={`${styles.sideNavBadge} ${badgeClass}`}>{label}</span>
+                              </td>
+                              <td>
+                                {p.expiresAt && st === 'pending_payment'
+                                  ? new Date(p.expiresAt).toLocaleDateString('en-GB', { dateStyle: 'medium' })
+                                  : '—'}
+                              </td>
+                              <td>
+                                {st === 'pending_payment' && canConfirmSlotPayment && (
+                                  <>
+                                    <button
+                                      type="button"
+                                      className={styles.slotPurchaseInlineBtn}
+                                      onClick={() => handleSlotPurchaseStatusUpdate(p.id, 'paid')}
+                                    >
+                                      Mark paid
+                                    </button>
+                                    <button
+                                      type="button"
+                                      className={styles.slotPurchaseInlineBtnMuted}
+                                      onClick={() => handleSlotPurchaseStatusUpdate(p.id, 'expired')}
+                                    >
+                                      Mark expired
+                                    </button>
+                                  </>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
+            {showBillingHistory && (
+              <div className={styles.billingHistorySection}>
+                <div className={styles.billingHistoryHeader}>
+                  <h3 className={styles.slotPurchaseTitle}>Billing histories</h3>
+                  <button type="button" className={styles.slotPurchaseInlineBtnMuted} onClick={() => setShowBillingHistory(false)}>
+                    Close
+                  </button>
+                </div>
+                <div className={styles.billingHistoryFilters}>
+                  <label>
+                    <span>Year</span>
+                    <select
+                      value={billingHistoryYear}
+                      onChange={(e) => setBillingHistoryYear(e.target.value)}
+                    >
+                      <option value="all">All</option>
+                      {Array.from(
+                        new Set(
+                          (billingHistories || [])
+                            .map((r) => (r.billingDate || '').slice(0, 4))
+                            .filter((y) => y),
+                        ),
+                      )
+                        .sort()
+                        .map((y) => (
+                          <option key={y} value={y}>{y}</option>
+                        ))}
+                    </select>
+                  </label>
+                  <label>
+                    <span>Status</span>
+                    <select
+                      value={billingHistoryStatus}
+                      onChange={(e) => setBillingHistoryStatus(e.target.value)}
+                    >
+                      <option value="all">All</option>
+                      <option value="paid">Paid</option>
+                      <option value="unpaid">Unpaid</option>
+                      <option value="overdue">Overdue</option>
+                    </select>
+                  </label>
+                </div>
+                {billingHistoryLoading ? (
+                  <p className={styles.help}>Loading billing histories…</p>
+                ) : filteredBillingHistories.length === 0 ? (
+                  <p className={styles.help}>No billing history yet.</p>
+                ) : (
+                  <div className={styles.tableWrap}>
+                    <table className={styles.table}>
+                      <thead>
+                        <tr>
+                          <th>Billing date</th>
+                          <th>Due date</th>
+                          <th>Cycle</th>
+                          <th>Amount</th>
+                          <th>Status</th>
+                          <th>Notes</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredBillingHistories.map((row) => {
+                          const st = String(row.status || '').toLowerCase();
+                          const badgeClass =
+                            st === 'paid'
+                              ? styles.sideNavBadgePaid
+                              : st === 'overdue'
+                                ? styles.sideNavBadgeOverdue
+                                : styles.sideNavBadgeUnpaid;
+                          return (
+                            <tr key={row.id}>
+                              <td>{row.billingDate || '—'}</td>
+                              <td>{row.dueDate || '—'}</td>
+                              <td>{row.cycle === 'annual' ? 'Annual' : 'Monthly'}</td>
+                              <td>{formatRupiah(row.amount)}</td>
+                              <td><span className={`${styles.sideNavBadge} ${badgeClass}`}>{String(row.status || 'unpaid').toUpperCase()}</span></td>
+                              <td className={styles.cellNotes}>{row.notes || '—'}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
+            </>
           )}
         </section>
       )}

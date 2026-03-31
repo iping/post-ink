@@ -92,6 +92,42 @@ model TattooStudio {
   paymentDestinations PaymentDestination[] @relation("StudioPaymentDestinations")
   receivedPayments Payment[] @relation("StudioReceivedPayments")
   specialities Speciality[]
+  artistSlotPurchases ArtistSlotPurchase[]
+  billingHistories StudioBillingHistory[]
+}
+
+// ----- Extra artist seats (add-on purchase; pending_payment blocks new artists until paid or expired) -----
+model ArtistSlotPurchase {
+  id        String   @id @default(cuid())
+  studioId  String
+  studio    TattooStudio @relation(fields: [studioId], references: [id], onDelete: Cascade)
+  slots     Int
+  amount    Float
+  status    String   // pending_payment | paid | expired
+  expiresAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([studioId])
+  @@index([status])
+}
+
+// ----- Billing history snapshots for studio subscription -----
+model StudioBillingHistory {
+  id          String   @id @default(cuid())
+  studioId    String
+  studio      TattooStudio @relation(fields: [studioId], references: [id], onDelete: Cascade)
+  billingDate String   // YYYY-MM-DD
+  dueDate     String?  // YYYY-MM-DD
+  cycle       String   // monthly | annual
+  amount      Float
+  status      String   // paid | unpaid | overdue
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([studioId])
+  @@index([billingDate])
 }
 
 // ----- Customer–Studio: many-to-many (customer can belong to one or more studios) -----
