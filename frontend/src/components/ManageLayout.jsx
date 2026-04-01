@@ -132,9 +132,6 @@ export function ManageLayout() {
             </button>
             {bookingOpen && (
               <div id="side-nav-booking" className={styles.sideNavGroupContent} role="region">
-                <Link to="/manage/bookings/new" className={`${styles.sideNavLink} ${onNewBookingPage ? styles.sideNavActive : ''}`} data-short="+" title="New Booking">
-                  <span className={styles.sideNavLinkText}>New Booking</span>
-                </Link>
                 <Link to="/manage?tab=bookings" className={`${styles.sideNavLink} ${currentTab === 'bookings' ? styles.sideNavActive : ''}`} data-short="O" title="Booking Orders">
                   <span className={styles.sideNavLinkText}>Booking Orders</span>
                   {pendingBookingsCount > 0 && (
