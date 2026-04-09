@@ -13,6 +13,13 @@ App for **tattoo artists**, **tattoo studios**, and **customers**.
 - **Backend**: Node.js, Express, Prisma (SQLite)
 - **Frontend**: React, Vite, React Router
 
+## Documentation & changelog
+
+- **In the app (public for now)**: open **`/docs`** after starting the frontend, or use the **Docs** link in the main header.
+- **Main doc source**: edit **`DOCUMENTATION.md`** at the repository root (user roles + database tables). It is bundled at build time via `frontend/src/pages/Docs.jsx`.
+- **Release notes (optional)**: **`CHANGELOG.md`** at the repo root for dated product/technical updates (not shown on `/docs` unless you point `Docs.jsx` at it again).
+- **Later (limited access)**: wrap the `/docs` route in `ProtectedRoute` and restrict by role (e.g. `super_admin`) in `frontend/src/App.jsx`.
+
 ## Setup
 
 ### Prerequisites

@@ -14,6 +14,7 @@ import { ArtistBooking } from './pages/ArtistBooking';
 import { BookingForm } from './pages/BookingForm';
 import { BookingDetail } from './pages/BookingDetail';
 import { Login } from './pages/Login';
+import { Docs } from './pages/Docs';
 
 function App() {
   const { user, token, logout } = useAuth();
@@ -66,6 +67,7 @@ function App() {
         </Link>
         <nav className="header-nav">
           <NavLink to="/" end>Discover</NavLink>
+          <NavLink to="/docs">Docs</NavLink>
           {token && isSuperAdmin && studios.length > 0 && (
             <div className="header-studio-wrap">
               <label htmlFor="header-studio-select" className="header-studio-label">Studio</label>
@@ -134,6 +136,7 @@ function App() {
 
           {/* Login (public) */}
           <Route path="/login" element={<Login />} />
+          <Route path="/docs" element={<Docs />} />
 
           {/* Management: single sidebar with pending bookings count; key forces re-load when studio changes */}
           <Route element={<ProtectedRoute><ManageLayout key={selectedStudioId || 'no-studio'} /></ProtectedRoute>}>
