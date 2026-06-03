@@ -21,6 +21,7 @@ model User {
   studio       TattooStudio? @relation(fields: [studioId], references: [id], onDelete: SetNull)
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
+  createdBookings Booking[]  @relation("BookingCreatedBy")
 
   @@index([studioId])
 }
@@ -184,15 +185,19 @@ model Booking {
   placement    String?       // body placement e.g. Arm, Back, Chest
   preference  String?       // customer reference / preference (style, image ref, etc.)
   projectName String?       // e.g. "Maya Chen – Andi Pratama – 1"
-  notes       String?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  payments    Payment[]
-  projects    Project[]
+  notes         String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  createdById     String?
+  createdByEmail  String?       // snapshot of login email when booking was created
+  createdBy       User?         @relation("BookingCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  payments      Payment[]
+  projects      Project[]
 
   @@index([artistId])
   @@index([customerId])
   @@index([date])
+  @@index([createdById])
 }
 
 // ----- Project (work per booking; one booking can have multiple projects; each project has sessions) -----

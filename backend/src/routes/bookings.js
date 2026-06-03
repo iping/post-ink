@@ -5,9 +5,29 @@ import {
   decorateBookingFinancials,
   syncBookingReceivableCache,
 } from '../utils/booking-finance.js';
+import {
+  attachBookingCreators,
+  findStudioDefaultCreator,
+  normalizeCreatorEmail,
+} from '../utils/booking-creator.js';
 import { getStudioIdOrSendError } from '../middleware/auth.js';
 
 export const bookingsRouter = Router();
+
+const bookingInclude = {
+  artist: true,
+  customer: true,
+  studio: true,
+  createdBy: { select: { id: true, name: true, email: true } },
+  payments: {
+    include: {
+      paymentDestination: { include: { studio: true, artist: true } },
+      receiverStudio: true,
+      receiverArtist: true,
+    },
+  },
+  projects: { include: { sessions: true } },
+};
 
 const SHORT_CODE_CHARS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 function generateShortCode() {
@@ -59,19 +79,7 @@ bookingsRouter.get('/', async (req, res) => {
       : [{ createdAt: 'desc' }];
     let bookings = await prisma.booking.findMany({
       where,
-      include: {
-        artist: true,
-        customer: true,
-        studio: true,
-        payments: {
-          include: {
-            paymentDestination: { include: { studio: true, artist: true } },
-            receiverStudio: true,
-            receiverArtist: true,
-          },
-        },
-        projects: { include: { sessions: true } },
-      },
+      include: bookingInclude,
       orderBy: orderByCreation,
     });
     for (const b of bookings) {
@@ -81,7 +89,8 @@ bookingsRouter.get('/', async (req, res) => {
         b.shortCode = code;
       }
     }
-    const withTotals = bookings.map((b) => decorateBookingFinancials(b));
+    const withCreators = await attachBookingCreators(bookings);
+    const withTotals = withCreators.map((b) => decorateBookingFinancials(b));
     res.json(withTotals);
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -95,22 +104,11 @@ bookingsRouter.get('/:id', async (req, res) => {
     if (sent) return;
     const booking = await prisma.booking.findFirst({
       where: { id: req.params.id, studioId: effectiveStudioId },
-      include: {
-        artist: true,
-        customer: true,
-        studio: true,
-        payments: {
-          include: {
-            paymentDestination: { include: { studio: true, artist: true } },
-            receiverStudio: true,
-            receiverArtist: true,
-          },
-        },
-        projects: { include: { sessions: true } },
-      },
+      include: bookingInclude,
     });
     if (!booking) return res.status(404).json({ error: 'Booking not found' });
-    res.json(decorateBookingFinancials(booking));
+    const withCreator = await attachBookingCreators(booking);
+    res.json(decorateBookingFinancials(withCreator));
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -125,11 +123,22 @@ bookingsRouter.post('/', async (req, res) => {
     const shortCode = await ensureUniqueShortCode();
     const normalizedPricingType = pricingType === 'fixed' || pricingType === 'hourly' ? pricingType : null;
     const numericTotalAmount = totalAmount != null ? Number(totalAmount) : null;
+    let createdById = req.user?.id ?? null;
+    let createdByEmail = normalizeCreatorEmail(req.user?.email);
+    if (!createdByEmail && effectiveStudioId) {
+      const fallback = await findStudioDefaultCreator(effectiveStudioId);
+      if (fallback) {
+        createdById = createdById ?? fallback.id;
+        createdByEmail = normalizeCreatorEmail(fallback.email);
+      }
+    }
     const data = {
       shortCode,
       artistId,
       customerId: customerId || null,
       studioId: effectiveStudioId,
+      createdById,
+      createdByEmail,
       date,
       startTime: startTime || '09:00',
       endTime: endTime || '17:00',
@@ -145,37 +154,16 @@ bookingsRouter.post('/', async (req, res) => {
       await promoteLeadCustomer(tx, data.customerId);
       return tx.booking.create({
         data,
-        include: {
-          artist: true,
-          customer: true,
-          studio: true,
-          payments: {
-            include: {
-              paymentDestination: { include: { studio: true, artist: true } },
-              receiverStudio: true,
-              receiverArtist: true,
-            },
-          },
-        },
+        include: bookingInclude,
       });
     });
     const withProjects = await prisma.booking.findUnique({
       where: { id: booking.id },
-      include: {
-        artist: true,
-        customer: true,
-        studio: true,
-        payments: {
-          include: {
-            paymentDestination: { include: { studio: true, artist: true } },
-            receiverStudio: true,
-            receiverArtist: true,
-          },
-        },
-        projects: { include: { sessions: true } },
-      },
+      include: bookingInclude,
     });
-    res.status(201).json(withProjects ? decorateBookingFinancials(withProjects) : decorateBookingFinancials(booking));
+    const created = withProjects || booking;
+    const withCreator = await attachBookingCreators(created);
+    res.status(201).json(decorateBookingFinancials(withCreator));
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -208,23 +196,12 @@ bookingsRouter.patch('/:id', async (req, res) => {
       await tx.booking.update({
         where: { id: req.params.id },
         data,
-        include: {
-          artist: true,
-          customer: true,
-          studio: true,
-          payments: {
-            include: {
-              paymentDestination: { include: { studio: true, artist: true } },
-              receiverStudio: true,
-              receiverArtist: true,
-            },
-          },
-          projects: { include: { sessions: true } },
-        },
+        include: bookingInclude,
       });
       return syncBookingReceivableCache(tx, req.params.id);
     });
-    res.json(decorateBookingFinancials(booking));
+    const withCreator = await attachBookingCreators(booking);
+    res.json(decorateBookingFinancials(withCreator));
   } catch (e) {
     if (e.code === 'P2025') return res.status(404).json({ error: 'Booking not found' });
     res.status(500).json({ error: e.message });

@@ -17,6 +17,17 @@ import layoutStyles from './Studio.module.css';
 import formStyles from './BookingForm.module.css';
 import artistStyles from './ArtistForm.module.css';
 
+function formatBookingCreatedAt(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' });
+}
+
+function formatCreatedBy(booking) {
+  const email = booking?.createdByEmail || booking?.createdBy?.email;
+  if (!email) return '—';
+  return email.trim().toLowerCase();
+}
+
 export function BookingDetail() {
   const { id } = useParams();
   const [booking, setBooking] = useState(null);
@@ -378,6 +389,17 @@ export function BookingDetail() {
                     <strong>Commission (studio {commission.commissionPercent}%):</strong> Studio {formatRupiah(expectedStudioShare ?? 0)} | Artist {formatRupiah(expectedArtistShare ?? 0)}
                   </div>
                 )}
+              </div>
+            </div>
+
+            <div className={artistStyles.card}>
+              <div className={artistStyles.cardHead}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4M12 8h.01" /></svg>
+                <h2>Information</h2>
+              </div>
+              <div className={styles.bookingSummary}>
+                <p><strong>Creation by:</strong> {formatCreatedBy(booking)}</p>
+                <p><strong>Creation date:</strong> {formatBookingCreatedAt(booking.createdAt)}</p>
               </div>
             </div>
 

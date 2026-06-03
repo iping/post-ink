@@ -93,6 +93,7 @@ export async function syncBookingReceivableCache(tx, bookingId) {
       artist: true,
       customer: true,
       studio: true,
+      createdBy: { select: { id: true, name: true, email: true } },
       payments: {
         include: {
           paymentDestination: { include: { studio: true, artist: true } },
