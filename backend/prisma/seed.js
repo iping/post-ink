@@ -83,7 +83,11 @@ const img = {
 };
 
 async function main() {
-  execSync('npx prisma migrate deploy', { cwd: backendDir, stdio: 'inherit' });
+  const dbUrl = process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL || '';
+  const syncCmd = dbUrl.startsWith('postgres')
+    ? 'npx prisma db push --skip-generate'
+    : 'npx prisma migrate deploy';
+  execSync(syncCmd, { cwd: backendDir, stdio: 'inherit' });
 
   // Clean in dependency order (children first, then parents)
   await prisma.payment.deleteMany({});

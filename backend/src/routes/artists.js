@@ -1,19 +1,11 @@
 import { Router } from 'express';
-import { PrismaClient } from '@prisma/client';
 import multer from 'multer';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import { prisma } from '../lib/prisma.js';
 import { getStudioIdOrSendError } from '../middleware/auth.js';
 import { assertCanAddArtist } from '../utils/artist-slots.js';
+import { saveUploadedFile, publicUploadUrl } from '../utils/file-storage.js';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const prisma = new PrismaClient();
-
-const storage = multer.diskStorage({
-  destination: (_, __, cb) => cb(null, path.join(__dirname, '../../uploads')),
-  filename: (_, file, cb) => cb(null, `${Date.now()}-${file.originalname.replace(/\s/g, '-')}`),
-});
-const upload = multer({ storage });
+const upload = multer({ storage: multer.memoryStorage() });
 
 function parseJsonField(val) {
   if (typeof val === 'string') {
@@ -24,6 +16,14 @@ function parseJsonField(val) {
     }
   }
   return Array.isArray(val) ? val : [];
+}
+
+async function urlsFromFiles(files, prefix) {
+  return Promise.all(
+    (files || []).map((f) =>
+      saveUploadedFile(f.buffer, f.originalname, prefix).then(publicUploadUrl),
+    ),
+  );
 }
 
 // GET /api/artists — list all
@@ -66,8 +66,8 @@ artistsRouter.get('/:id', async (req, res) => {
 // POST /api/artists — create (with optional photos/portfolio files)
 artistsRouter.post('/', upload.fields([{ name: 'photos', maxCount: 10 }, { name: 'portfolio', maxCount: 20 }]), async (req, res) => {
   try {
-    const photos = (req.files?.photos || []).map(f => `/uploads/${f.filename}`);
-    const portfolio = (req.files?.portfolio || []).map(f => `/uploads/${f.filename}`);
+    const photos = await urlsFromFiles(req.files?.photos, 'artist-photo');
+    const portfolio = await urlsFromFiles(req.files?.portfolio, 'artist-portfolio');
     const existingPhotos = parseJsonField(req.body.photos);
     const existingPortfolio = parseJsonField(req.body.portfolio);
     const [studioId, sent] = getStudioIdOrSendError(req, res);
@@ -106,8 +106,8 @@ artistsRouter.patch('/:id', upload.fields([{ name: 'photos', maxCount: 10 }, { n
     if (sent) return;
     const existing = await prisma.tattooArtist.findFirst({ where: { id: req.params.id, studioId } });
     if (!existing) return res.status(404).json({ error: 'Artist not found' });
-    const photos = (req.files?.photos || []).map(f => `/uploads/${f.filename}`);
-    const portfolio = (req.files?.portfolio || []).map(f => `/uploads/${f.filename}`);
+    const photos = await urlsFromFiles(req.files?.photos, 'artist-photo');
+    const portfolio = await urlsFromFiles(req.files?.portfolio, 'artist-portfolio');
     const existingPhotos = req.body.photos != null ? parseJsonField(req.body.photos) : JSON.parse(existing.photos);
     const existingPortfolio = req.body.portfolio != null ? parseJsonField(req.body.portfolio) : JSON.parse(existing.portfolio);
     const data = {
@@ -135,9 +135,8 @@ artistsRouter.delete('/:id', async (req, res) => {
     const existing = await prisma.tattooArtist.findFirst({ where: { id: req.params.id, studioId } });
     if (!existing) return res.status(404).json({ error: 'Artist not found' });
     await prisma.tattooArtist.delete({ where: { id: req.params.id } });
-    res.status(204).end();
+    res.status(204).send();
   } catch (e) {
-    if (e.code === 'P2025') return res.status(404).json({ error: 'Artist not found' });
     res.status(500).json({ error: e.message });
   }
 });

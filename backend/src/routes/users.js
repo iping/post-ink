@@ -1,9 +1,8 @@
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../lib/prisma.js';
 import { ROLES, isSuperAdmin } from '../middleware/auth.js';
 
-const prisma = new PrismaClient();
 export const usersRouter = Router();
 
 const defaultPasswordHash = async (plain) => {

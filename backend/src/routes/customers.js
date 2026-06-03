@@ -1,9 +1,8 @@
 import { Router } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../lib/prisma.js';
 import { generateNumericId } from '../utils/id.js';
 import { getStudioIdOrSendError } from '../middleware/auth.js';
 
-const prisma = new PrismaClient();
 export const customersRouter = Router();
 const CUSTOMER_TYPES = new Set(['lead', 'customer']);
 const LEAD_SOURCES = new Set(['website', 'instagram', 'tiktok', 'walkin', 'whatsapp', 'artist']);

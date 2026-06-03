@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../lib/prisma.js';
 import { isSuperAdmin, requireSuperAdmin } from '../middleware/auth.js';
 import {
   computeSlotPurchaseAmount,
@@ -9,7 +9,6 @@ import {
   SLOT_PURCHASE_STATUS,
 } from '../utils/artist-slots.js';
 
-const prisma = new PrismaClient();
 export const studiosRouter = Router();
 const SUBSCRIPTION_CYCLES = new Set(['monthly', 'annual']);
 const SUBSCRIPTION_PAYMENT_STATUSES = new Set(['unpaid', 'paid', 'overdue']);

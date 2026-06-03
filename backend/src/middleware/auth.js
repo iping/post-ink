@@ -1,7 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '../lib/prisma.js';
 const JWT_SECRET = process.env.JWT_SECRET || 'post-ink-dev-secret-change-in-production';
 
 export const ROLES = { SUPER_ADMIN: 'super_admin', ADMIN: 'admin', STAFF: 'staff' };

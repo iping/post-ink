@@ -1,8 +1,7 @@
 import { Router } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../lib/prisma.js';
 import { getStudioIdOrSendError } from '../middleware/auth.js';
 
-const prisma = new PrismaClient();
 
 // Mounted at /api/artists/:artistId/availability — req.params.artistId
 const availabilityRouter = Router({ mergeParams: true });

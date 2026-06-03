@@ -1,9 +1,8 @@
 import { Router } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../lib/prisma.js';
 import { generateNumericId } from '../utils/id.js';
 import { getStudioIdOrSendError } from '../middleware/auth.js';
 
-const prisma = new PrismaClient();
 export const sessionsRouter = Router();
 
 // GET /api/sessions — list (scoped by project's booking studio)

@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "npx prisma generate && node src/index.js",
     "start": "npx prisma generate && node src/index.js",
+    "build": "npx prisma generate",
+    "vercel-build": "npx prisma generate && npx prisma db push --skip-generate",
     "seed": "node prisma/seed.js",
     "clear-data": "node prisma/clear-data.js",
     "export-seed": "node prisma/export-seed.js"
@@ -13,6 +15,7 @@
     "seed": "node prisma/seed.js"
   },
   "dependencies": {
+    "@vercel/blob": "^0.27.3",
     "@prisma/client": "^5.22.0",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",

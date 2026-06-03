@@ -1,9 +1,8 @@
 import { Router } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../lib/prisma.js';
 import { RECEIVER_TYPES, syncBookingReceivableCache } from '../utils/booking-finance.js';
 import { getStudioId, getStudioIdOrSendError, isSuperAdmin } from '../middleware/auth.js';
 
-const prisma = new PrismaClient();
 export const paymentsRouter = Router();
 
 async function getPaymentInclude() {

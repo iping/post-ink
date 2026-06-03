@@ -1,10 +1,9 @@
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../lib/prisma.js';
 import { JWT_SECRET } from '../middleware/auth.js';
 
-const prisma = new PrismaClient();
 export const authRouter = Router();
 
 // POST /api/auth/login — email + password, returns { token, user }

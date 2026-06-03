@@ -6,3 +6,4 @@ build/
 *.db-journal
 backend/uploads/*
 !backend/uploads/.gitkeep
+.vercel

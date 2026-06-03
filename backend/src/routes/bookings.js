@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../lib/prisma.js';
 import crypto from 'crypto';
 import {
   decorateBookingFinancials,
@@ -7,7 +7,6 @@ import {
 } from '../utils/booking-finance.js';
 import { getStudioIdOrSendError } from '../middleware/auth.js';
 
-const prisma = new PrismaClient();
 export const bookingsRouter = Router();
 
 const SHORT_CODE_CHARS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';

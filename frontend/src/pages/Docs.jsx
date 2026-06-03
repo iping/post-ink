@@ -1,5 +1,5 @@
-// Repo-root DOCUMENTATION.md (one level above frontend/)
-import docSource from '../../../DOCUMENTATION.md?raw';
+// Bundled from frontend/DOCUMENTATION.md (synced from repo root via npm prebuild)
+import docSource from '../../DOCUMENTATION.md?raw';
 import { MermaidBlock } from './DocsMermaid';
 import styles from './Docs.module.css';
 
@@ -223,7 +223,7 @@ export function Docs() {
       <header className={styles.pageHeader}>
         <h1 className={styles.title}>Documentation</h1>
         <p className={styles.lead}>
-          Post.Ink roles, data model, constants, and diagrams. Source: <code>DOCUMENTATION.md</code> at the repo root.
+          Post.Ink roles, data model, constants, and diagrams. Source: <code>DOCUMENTATION.md</code> (synced from the repo root on build).
         </p>
       </header>
 
