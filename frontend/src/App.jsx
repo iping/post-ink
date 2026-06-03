@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Routes, Route, Link, NavLink, useNavigate, Navigate, Outlet } from 'react-router-dom';
 import './App.css';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { SuperAdminRoute } from './components/SuperAdminRoute';
 import { ManageLayout } from './components/ManageLayout';
 import { useAuth } from './context/AuthContext';
 import { getStudios, setApiStudioId, getApiStudioId } from './api';
@@ -67,7 +68,7 @@ function App() {
         </Link>
         <nav className="header-nav">
           <NavLink to="/" end>Discover</NavLink>
-          <NavLink to="/docs">Docs</NavLink>
+          {isSuperAdmin && <NavLink to="/docs">Docs</NavLink>}
           {token && isSuperAdmin && studios.length > 0 && (
             <div className="header-studio-wrap">
               <label htmlFor="header-studio-select" className="header-studio-label">Studio</label>
@@ -136,7 +137,14 @@ function App() {
 
           {/* Login (public) */}
           <Route path="/login" element={<Login />} />
-          <Route path="/docs" element={<Docs />} />
+          <Route
+            path="/docs"
+            element={
+              <SuperAdminRoute>
+                <Docs />
+              </SuperAdminRoute>
+            }
+          />
 
           {/* Management: single sidebar with pending bookings count; key forces re-load when studio changes */}
           <Route element={<ProtectedRoute><ManageLayout key={selectedStudioId || 'no-studio'} /></ProtectedRoute>}>
